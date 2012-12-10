@@ -1,0 +1,6 @@
+## YAML Template.
+---
+name: Settler
+main: com.mahn42.anhalter42.settler.SettlerPlugin
+version: 0.1
+depend: [MAHN42-Framework]
