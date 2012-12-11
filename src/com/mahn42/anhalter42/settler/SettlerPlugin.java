@@ -4,6 +4,8 @@
  */
 package com.mahn42.anhalter42.settler;
 
+import com.mahn42.framework.Framework;
+import com.mahn42.framework.WorldDBList;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,9 +17,8 @@ public class SettlerPlugin extends JavaPlugin {
 
     public static SettlerPlugin plugin;
     
-    /**
-     * @param args the command line arguments
-     */
+    protected WorldDBList<SettlerDB> settlerDB;
+    
     public static void main(String[] args) {
     }
     
@@ -25,6 +26,8 @@ public class SettlerPlugin extends JavaPlugin {
     public void onEnable() { 
         plugin = this;
         readSettlerConfig();
+        settlerDB = new WorldDBList<SettlerDB>(SettlerDB.class, this);
+        Framework.plugin.registerSaver(settlerDB);
     }
 
     @Override
