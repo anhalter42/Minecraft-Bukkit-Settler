@@ -4,3 +4,19 @@ name: Settler
 main: com.mahn42.anhalter42.settler.SettlerPlugin
 version: 0.1
 depend: [MAHN42-Framework]
+softdepend: [dynmap]
+commands:
+   s_list_professions:
+      description: list profesions for settlers
+      usage: /s_list_professions
+      permission: s.list_professions
+      permission-message: You don't have permission
+permissions:
+    s.*:
+        description: Gives access to all settler commands
+        children:
+            s.list_professions: true
+    s.list_professions:
+        description: Allows you to list profesions for settlers
+        default: true
+      

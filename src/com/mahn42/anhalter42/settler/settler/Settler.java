@@ -9,8 +9,10 @@ import com.mahn42.framework.BlockPosition;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -27,6 +29,7 @@ public class Settler {
         register(SettlerFisher.typeName, SettlerFisher.class);
         register(SettlerWoodcutter.typeName, SettlerWoodcutter.class);
         register(SettlerForester.typeName, SettlerForester.class);
+        register(SettlerGeologist.typeName, SettlerGeologist.class);
     }
     
     public static Class getSettlerClass(String aTypename) {
@@ -36,11 +39,20 @@ public class Settler {
     public static void register(String aTypename, Class aClass) {
         types.put(aTypename, aClass);
     }
+
+    public static Set<String> getSettlerProfessions() {
+        return types.keySet();
+    }
     
     protected String fKey;
     protected String fProfession;
     protected BlockPosition fPosition;
     protected BlockPosition fBedPosition;
+    protected String fPlayerName;
+    protected String fClanName;
+    protected String fHomeKey;
+    
+    protected World fWorld;
     
     protected ItemStack fBoots;
     protected ItemStack fLeggings;
@@ -56,6 +68,22 @@ public class Settler {
     
     public String getKey() {
         return fKey;
+    }
+    
+    public String getHomeKey() {
+        return fHomeKey;
+    }
+    
+    public void setHomeKey(String aHomeKey) {
+        fHomeKey = aHomeKey;
+    }
+    
+    public World getWorld() {
+        return fWorld;
+    }
+    
+    public void setWorld(World aWorld) {
+        fWorld = aWorld;
     }
     
     public String getProfession() {
@@ -84,11 +112,36 @@ public class Settler {
         }
     }
     
+    public String getPlayerName() {
+        return fPlayerName;
+    }
+    
+    public void setPlayerName(String aPlayerName) {
+        fPlayerName = aPlayerName;
+    }
+    
+    public String getClanName() {
+        return fClanName;
+    }
+    
+    public void setClanName(String aClanName) {
+        fClanName = aClanName;
+    }
+    
     public void serialize(SettlerDBRecord aRecord) {
         YamlConfiguration lYaml = new YamlConfiguration();
         serialize(lYaml);
+        String lKey = getKey();
+        if (lKey != null && !lKey.isEmpty()) {
+            aRecord.key = lKey;
+        } else {
+            fKey = aRecord.key;
+        }
         aRecord.blob = lYaml.saveToString();
         aRecord.profession = getProfession();
+        aRecord.playerName = getPlayerName();
+        aRecord.clanName = getClanName();
+        aRecord.homeKey = getHomeKey();
         aRecord.position = getPosition();
         aRecord.bedPosition = getBedPosition();
     }
@@ -96,8 +149,11 @@ public class Settler {
     public void deserialize(SettlerDBRecord aRecord) {
         fKey = aRecord.key;
         fProfession = aRecord.profession;
+        fPlayerName = aRecord.playerName;
+        fClanName = aRecord.clanName;
         fPosition = aRecord.position;
         fBedPosition = aRecord.bedPosition;
+        fHomeKey = aRecord.homeKey;
         YamlConfiguration lYaml = new YamlConfiguration();
         try {
             lYaml.loadFromString(aRecord.blob);

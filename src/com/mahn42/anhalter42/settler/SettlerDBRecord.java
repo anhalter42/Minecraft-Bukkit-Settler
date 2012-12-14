@@ -20,6 +20,9 @@ public class SettlerDBRecord extends DBRecordWorld {
     public String profession = "Settler";
     public BlockPosition position = new BlockPosition();
     public BlockPosition bedPosition = new BlockPosition();
+    public String playerName = "";
+    public String clanName = "";
+    public String homeKey = "";
     public String blob = "";
 
     @Override
@@ -28,6 +31,9 @@ public class SettlerDBRecord extends DBRecordWorld {
         aCols.add(profession);
         aCols.add(position.toCSV(","));
         aCols.add(bedPosition.toCSV(","));
+        aCols.add(playerName);
+        aCols.add(clanName);
+        aCols.add(homeKey);
         aCols.add(Base64.encode(blob.getBytes()));
     }
 
@@ -37,6 +43,9 @@ public class SettlerDBRecord extends DBRecordWorld {
         profession = aCols.pop();
         position.fromCSV(aCols.pop(), "\\,");
         bedPosition.fromCSV(aCols.pop(), "\\,");
+        playerName = aCols.pop();
+        clanName = aCols.pop();
+        homeKey = aCols.pop();
         try {
             blob = new String(Base64.decode(aCols.pop()));
         } catch (Base64DecodingException ex) {
