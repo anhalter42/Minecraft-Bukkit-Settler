@@ -22,6 +22,7 @@ public class SettlerDB extends DBSetWorld<SettlerDBRecord> implements IBeforeAft
 
     @Override
     public void beforeExecute(Object aObject) {
+        SettlerPlugin.plugin.getLogger().info("prepare for world " + world.getName());
         clear();
         // insert all current settlers
         ArrayList<Settler> lSettlers = SettlerPlugin.plugin.getSettlers(world);

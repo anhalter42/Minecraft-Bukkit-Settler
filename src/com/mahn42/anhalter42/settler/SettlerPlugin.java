@@ -7,10 +7,12 @@ package com.mahn42.anhalter42.settler;
 import com.mahn42.anhalter42.settler.command.CommandSettlerListProfessions;
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.anhalter42.settler.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.settler.SettlerTask;
 import com.mahn42.framework.Framework;
 import com.mahn42.framework.WorldDBList;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,6 +28,7 @@ public class SettlerPlugin extends JavaPlugin {
     protected WorldDBList<SettlerDB> settlerDB;
     protected WorldDBList<SettlerBuildingDB> settlerBuildingDB;
     protected HashMap<String, SettlerAccess> settlers = new HashMap<String, SettlerAccess>();
+    protected HashMap<String, SettlerTask> worldTasks = new HashMap<String, SettlerTask>();
     
     
     public static void main(String[] args) {
@@ -36,11 +39,19 @@ public class SettlerPlugin extends JavaPlugin {
         plugin = this;
         Settler.register();
         readSettlerConfig();
+        registerSettlerBuildings();
         getCommand("s_list_professions").setExecutor(new CommandSettlerListProfessions());
         settlerDB = new WorldDBList<SettlerDB>(SettlerDB.class, "Settler",this);
         settlerBuildingDB = new WorldDBList<SettlerBuildingDB>(SettlerBuildingDB.class, "SettlerBuilding",this);
         Framework.plugin.registerSaver(settlerDB);
         Framework.plugin.registerSaver(settlerBuildingDB);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new DynMapSettlerRenderer(), 40, 40);
+        List<World> lWorlds = getServer().getWorlds();
+        for(World lWorld : lWorlds) {
+            SettlerTask lTask = new SettlerTask(lWorld);
+            worldTasks.put(lWorld.getName(), lTask);
+            getServer().getScheduler().runTaskTimerAsynchronously(this, lTask, 20, 20); // first a little bit slower
+        }
     }
 
     @Override
@@ -71,5 +82,9 @@ public class SettlerPlugin extends JavaPlugin {
 
     public SettlerDB getSettlerDB(World aWorld) {
         return settlerDB.getDB(aWorld);
+    }
+    
+    public void registerSettlerBuildings() {
+        
     }
 }

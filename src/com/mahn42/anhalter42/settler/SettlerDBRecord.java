@@ -24,6 +24,7 @@ public class SettlerDBRecord extends DBRecordWorld {
     public String clanName = "";
     public String homeKey = "";
     public String blob = "";
+    public String settlerName = "";
 
     @Override
     protected void toCSVInternal(ArrayList aCols) {
@@ -34,6 +35,7 @@ public class SettlerDBRecord extends DBRecordWorld {
         aCols.add(playerName);
         aCols.add(clanName);
         aCols.add(homeKey);
+        aCols.add(settlerName);
         aCols.add(Base64.encode(blob.getBytes()));
     }
 
@@ -46,6 +48,7 @@ public class SettlerDBRecord extends DBRecordWorld {
         playerName = aCols.pop();
         clanName = aCols.pop();
         homeKey = aCols.pop();
+        settlerName = aCols.pop();
         try {
             blob = new String(Base64.decode(aCols.pop()));
         } catch (Base64DecodingException ex) {

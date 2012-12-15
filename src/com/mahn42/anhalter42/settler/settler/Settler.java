@@ -51,6 +51,7 @@ public class Settler {
     protected String fPlayerName;
     protected String fClanName;
     protected String fHomeKey;
+    protected String fSettlerName;
     
     protected World fWorld;
     
@@ -128,6 +129,14 @@ public class Settler {
         fClanName = aClanName;
     }
     
+    public String getSettlerName() {
+        return fSettlerName;
+    }
+    
+    public void setSettlerName(String aSettlerName) {
+        fSettlerName = aSettlerName;
+    }
+    
     public void serialize(SettlerDBRecord aRecord) {
         YamlConfiguration lYaml = new YamlConfiguration();
         serialize(lYaml);
@@ -141,6 +150,7 @@ public class Settler {
         aRecord.profession = getProfession();
         aRecord.playerName = getPlayerName();
         aRecord.clanName = getClanName();
+        aRecord.settlerName = getSettlerName();
         aRecord.homeKey = getHomeKey();
         aRecord.position = getPosition();
         aRecord.bedPosition = getBedPosition();
@@ -151,6 +161,7 @@ public class Settler {
         fProfession = aRecord.profession;
         fPlayerName = aRecord.playerName;
         fClanName = aRecord.clanName;
+        fSettlerName = aRecord.settlerName;
         fPosition = aRecord.position;
         fBedPosition = aRecord.bedPosition;
         fHomeKey = aRecord.homeKey;
@@ -218,5 +229,17 @@ public class Settler {
     }
     
     public void run() {
+    }
+
+    public String getIconName() {
+        return "default";
+    }
+
+    public String getDisplayName() {
+        String lRes = getSettlerName();
+        if (lRes == null || lRes.isEmpty()) {
+            lRes = getProfession();
+        }
+        return lRes;
     }
 }
