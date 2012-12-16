@@ -25,30 +25,43 @@ public class SettlerDBRecord extends DBRecordWorld {
     public String homeKey = "";
     public String blob = "";
     public String settlerName = "";
+    public boolean active;
 
     @Override
     protected void toCSVInternal(ArrayList aCols) {
         super.toCSVInternal(aCols);
         aCols.add(profession);
-        aCols.add(position.toCSV(","));
-        aCols.add(bedPosition.toCSV(","));
+        aCols.add(position == null ? "" : position.toCSV(","));
+        aCols.add(bedPosition == null ? "" : bedPosition.toCSV(","));
         aCols.add(playerName);
         aCols.add(clanName);
         aCols.add(homeKey);
         aCols.add(settlerName);
-        aCols.add(Base64.encode(blob.getBytes()));
+        aCols.add(active);
+        aCols.add(Base64.encode(blob.getBytes(), 0));
     }
 
     @Override
     protected void fromCSVInternal(DBRecordCSVArray aCols) {
         super.fromCSVInternal(aCols);
         profession = aCols.pop();
-        position.fromCSV(aCols.pop(), "\\,");
-        bedPosition.fromCSV(aCols.pop(), "\\,");
+        String lPop = aCols.pop();
+        if (!lPop.isEmpty()) {
+            position.fromCSV(lPop, "\\,");
+        } else {
+            position = null;
+        }
+        lPop = aCols.pop();
+        if (!lPop.isEmpty()) {
+            bedPosition.fromCSV(lPop, "\\,");
+        } else {
+            bedPosition = null;
+        }
         playerName = aCols.pop();
         clanName = aCols.pop();
         homeKey = aCols.pop();
         settlerName = aCols.pop();
+        active = Boolean.parseBoolean(aCols.pop());
         try {
             blob = new String(Base64.decode(aCols.pop()));
         } catch (Base64DecodingException ex) {

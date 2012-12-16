@@ -16,13 +16,16 @@ import org.bukkit.World;
  * @author andre
  */
 public class SettlerDB extends DBSetWorld<SettlerDBRecord> implements IBeforeAfterExecute {
+    public SettlerDB() {
+        super(SettlerDBRecord.class);
+    }
     public SettlerDB(World aWorld, File aFile) {
         super(SettlerDBRecord.class, aFile, aWorld);
     }
 
     @Override
     public void beforeExecute(Object aObject) {
-        SettlerPlugin.plugin.getLogger().info("prepare for world " + world.getName());
+        //SettlerPlugin.plugin.getLogger().info("prepare for world " + world.getName());
         clear();
         // insert all current settlers
         ArrayList<Settler> lSettlers = SettlerPlugin.plugin.getSettlers(world);

@@ -11,12 +11,21 @@ commands:
       usage: /s_list_professions
       permission: s.list_professions
       permission-message: You don't have permission
+   s_test:
+      description: only for testing
+      usage: /s_test ...
+      permission: s.test
+      permission-message: You don't have permission
 permissions:
     s.*:
         description: Gives access to all settler commands
         children:
             s.list_professions: true
+            s.test: true
     s.list_professions:
         description: Allows you to list profesions for settlers
         default: true
+    s.test:
+        description: Allows you to test something for settlers
+        default: false
       

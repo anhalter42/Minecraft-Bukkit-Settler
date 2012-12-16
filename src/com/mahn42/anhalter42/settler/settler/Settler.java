@@ -4,8 +4,12 @@
  */
 package com.mahn42.anhalter42.settler.settler;
 
+import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerDBRecord;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.framework.BlockPosition;
+import com.mahn42.framework.Framework;
+import com.mahn42.framework.npc.entity.NPCEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +19,9 @@ import java.util.logging.Logger;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 /**
  *
@@ -44,6 +50,10 @@ public class Settler {
         return types.keySet();
     }
     
+    //Runtime
+    protected int fEntityId = 0;
+            
+    //Meta
     protected String fKey;
     protected String fProfession;
     protected BlockPosition fPosition;
@@ -61,7 +71,8 @@ public class Settler {
     protected ItemStack fHelmet;
     protected ItemStack fItemInHand;
     
-    protected ItemStack[] fInventory = new ItemStack[64];
+    protected ItemStack[] fInventory = new ItemStack[36];
+    protected boolean fActive = false;
     
     public Settler(String aProfession) {
         fProfession = aProfession;
@@ -154,6 +165,7 @@ public class Settler {
         aRecord.homeKey = getHomeKey();
         aRecord.position = getPosition();
         aRecord.bedPosition = getBedPosition();
+        aRecord.active = fActive;
     }
     
     public void deserialize(SettlerDBRecord aRecord) {
@@ -165,6 +177,7 @@ public class Settler {
         fPosition = aRecord.position;
         fBedPosition = aRecord.bedPosition;
         fHomeKey = aRecord.homeKey;
+        fActive = aRecord.active;
         YamlConfiguration lYaml = new YamlConfiguration();
         try {
             lYaml.loadFromString(aRecord.blob);
@@ -174,11 +187,19 @@ public class Settler {
         deserialize(lYaml);
     }
     
+    protected void serializeItemStack(YamlConfiguration aValues, String aName, ItemStack aStack) {
+        if (aStack != null) {
+            aValues.set(aName, aStack.serialize());
+        } else {
+            aValues.set(aName, null);
+        }
+    }
+    
     protected void serialize(YamlConfiguration aValues) {
-        aValues.set("boots", fBoots.serialize());
-        aValues.set("leggings", fLeggings.serialize());
-        aValues.set("chestplate", fChestplate.serialize());
-        aValues.set("helmet", fHelmet.serialize());
+        serializeItemStack(aValues, "boots", fBoots);
+        serializeItemStack(aValues, "leggings", fLeggings);
+        serializeItemStack(aValues, "chestplate", fChestplate);
+        serializeItemStack(aValues, "helmet", fHelmet);
         ArrayList<Map> lItems = new ArrayList<Map>();
         for(ItemStack lItem : fInventory) {
             if (lItem != null) {
@@ -189,7 +210,7 @@ public class Settler {
             }
         }
         aValues.set("inventory", lItems);
-        aValues.set("iteminhand", fItemInHand.serialize());
+        serializeItemStack(aValues, "iteminhand", fItemInHand);
     }
     
     protected void deserialize(YamlConfiguration aValues) {
@@ -216,8 +237,12 @@ public class Settler {
             for(Object lItem : (ArrayList)lObj) {
                 if (lItem == null || lItem.toString().equals("null")) {
                 } else {
-                    ItemStack lIStack = ItemStack.deserialize((Map)lItem);
-                    fInventory[lIndex] = lIStack;
+                    if (lItem instanceof Map) {
+                        ItemStack lIStack = ItemStack.deserialize((Map)lItem);
+                        fInventory[lIndex] = lIStack;
+                    } else {
+                        SettlerPlugin.plugin.getLogger().info("inventory deserialize ?? '" + lItem.toString() + "' ???");
+                    }
                 }
                 lIndex++;
             } 
@@ -228,18 +253,83 @@ public class Settler {
         }
     }
     
-    public void run() {
+    public void run(SettlerAccess aAccess) {
+        checkForBecomeEntity(aAccess);
     }
 
     public String getIconName() {
-        return "default";
+        return "settler.default";
     }
 
     public String getDisplayName() {
         String lRes = getSettlerName();
         if (lRes == null || lRes.isEmpty()) {
             lRes = getProfession();
+        } else {
+            lRes = getProfession() + " " + lRes;
         }
         return lRes;
+    }
+    
+    public boolean hasEntity() {
+        return fEntityId != 0;
+    }
+    
+    public int getEntityId() {
+        return fEntityId;
+    }
+    
+    public void updateEntity(NPCEntity aEntity) {
+        Player lPlayer = aEntity.getAsPlayer();
+        lPlayer.setDisplayName(getDisplayName());
+        BlockPosition lPos;
+        lPos = getBedPosition();
+        if (lPos != null) {
+            lPlayer.setBedSpawnLocation(lPos.getLocation(fWorld));
+        }
+        PlayerInventory lInv = lPlayer.getInventory();
+        lInv.clear();
+        lInv.setContents(fInventory);
+        lInv.setBoots(fBoots);
+        lInv.setChestplate(fChestplate);
+        lInv.setHelmet(fHelmet);
+        lInv.setLeggings(fLeggings);
+        lInv.setItemInHand(fItemInHand);
+        lPos = getPosition();
+        if (lPos != null) {
+            lPlayer.teleport(lPos.getLocation(fWorld));
+        }
+        aEntity.setDataObject(this);
+        fEntityId = lPlayer.getEntityId();
+    }
+
+    public void setEntityId(int aEntityId) {
+        fEntityId = aEntityId;
+    }
+
+    protected void createEntity() {
+        NPCEntity lNPC = Framework.plugin.createNPC(fWorld, getPosition(), getDisplayName(), this);
+        updateEntity(lNPC);
+    }
+    
+    protected void checkForBecomeEntity(SettlerAccess aAccess) {
+        if (!hasEntity()) {
+            BlockPosition lPos = getPosition();
+            if (fWorld.isChunkLoaded(lPos.x >> 4, lPos.z >> 4)) {
+                createEntity();
+            }
+        }
+    }
+
+    public void activate() {
+        fActive = true;
+    }
+    
+    public void deactivate() {
+        fActive = false;
+    }
+
+    public boolean isActive() {
+        return fActive;
     }
 }

@@ -2,9 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mahn42.anhalter42.settler.settler;
+package com.mahn42.anhalter42.settler;
 
 import com.mahn42.anhalter42.settler.SettlerPlugin;
+import com.mahn42.anhalter42.settler.settler.Settler;
 import java.util.Collection;
 import org.bukkit.World;
 
@@ -32,7 +33,9 @@ public class SettlerTask implements Runnable {
         }
         Collection<? extends Settler> lSettlers = fAccess.getSettlers();
         for(Settler lSettler : lSettlers) {
-            lSettler.run();
+            if (lSettler.isActive()) {
+                lSettler.run(fAccess);
+            }
         }
     }
     
