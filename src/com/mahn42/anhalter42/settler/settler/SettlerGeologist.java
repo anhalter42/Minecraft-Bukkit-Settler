@@ -14,4 +14,8 @@ public class SettlerGeologist extends Settler {
     public SettlerGeologist() {
         super(typeName);
     }
+    
+    public String getIconName() {
+        return "settler.geologist";
+    }
 }

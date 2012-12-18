@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerAccess.EntityState;
 import com.mahn42.anhalter42.settler.SettlerDBRecord;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.framework.BlockPosition;
@@ -18,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -52,6 +54,7 @@ public class Settler {
     
     //Runtime
     protected int fEntityId = 0;
+    protected World fWorld;
             
     //Meta
     protected String fKey;
@@ -62,9 +65,9 @@ public class Settler {
     protected String fClanName;
     protected String fHomeKey;
     protected String fSettlerName;
+    protected boolean fActive = false;
     
-    protected World fWorld;
-    
+    //Meta in Blob 
     protected ItemStack fBoots;
     protected ItemStack fLeggings;
     protected ItemStack fChestplate;
@@ -72,7 +75,10 @@ public class Settler {
     protected ItemStack fItemInHand;
     
     protected ItemStack[] fInventory = new ItemStack[36];
-    protected boolean fActive = false;
+    
+    protected int fFoodLevel = 20;
+    protected int fHealth = 20;
+    protected float fSaturation = 20.0f;
     
     public Settler(String aProfession) {
         fProfession = aProfession;
@@ -148,6 +154,30 @@ public class Settler {
         fSettlerName = aSettlerName;
     }
     
+    public int getFoodLevel() {
+        return fFoodLevel;
+    }
+    
+    public void setFoodLevel(int aValue) {
+        fFoodLevel = aValue;
+    }
+    
+    public int getHealth() {
+        return fHealth;
+    }
+    
+    public void setHealth(int aValue) {
+        fHealth = aValue;
+    }
+    
+    public float getSaturation() {
+        return fSaturation;
+    }
+    
+    public void setSaturation(float aValue) {
+        fSaturation = aValue;
+    }
+    
     public void serialize(SettlerDBRecord aRecord) {
         YamlConfiguration lYaml = new YamlConfiguration();
         serialize(lYaml);
@@ -158,6 +188,7 @@ public class Settler {
             fKey = aRecord.key;
         }
         aRecord.blob = lYaml.saveToString();
+        //SettlerPlugin.plugin.getLogger().info(aRecord.blob);
         aRecord.profession = getProfession();
         aRecord.playerName = getPlayerName();
         aRecord.clanName = getClanName();
@@ -180,6 +211,7 @@ public class Settler {
         fActive = aRecord.active;
         YamlConfiguration lYaml = new YamlConfiguration();
         try {
+            //SettlerPlugin.plugin.getLogger().info(aRecord.blob);
             lYaml.loadFromString(aRecord.blob);
         } catch (InvalidConfigurationException ex) {
             Logger.getLogger(Settler.class.getName()).log(Level.SEVERE, null, ex);
@@ -211,27 +243,30 @@ public class Settler {
         }
         aValues.set("inventory", lItems);
         serializeItemStack(aValues, "iteminhand", fItemInHand);
+        aValues.set("foodlevel", getFoodLevel());
+        aValues.set("health", getHealth());
+        aValues.set("saturation", getSaturation());
+    }
+    
+    protected ItemStack deserializeItemStack(YamlConfiguration aValues, String aName) {
+        Object lObj;
+        lObj = aValues.get(aName);
+        if (lObj instanceof Map) {
+            return ItemStack.deserialize((Map<String, Object>)lObj);
+        } else if (lObj instanceof  MemorySection) {
+            return ItemStack.deserialize(((MemorySection)lObj).getValues(false));
+        } else {
+            return null;
+        }
     }
     
     protected void deserialize(YamlConfiguration aValues) {
-        Object lObj;
-        lObj = aValues.get("boots");
-        if (lObj instanceof Map) {
-            fBoots = ItemStack.deserialize((Map<String, Object>)lObj);
-        }
-        lObj = aValues.get("leggings");
-        if (lObj instanceof Map) {
-            fLeggings = ItemStack.deserialize((Map<String, Object>)lObj);
-        }
-        lObj = aValues.get("chestplate");
-        if (lObj instanceof Map) {
-            fChestplate = ItemStack.deserialize((Map<String, Object>)lObj);
-        }
-        lObj = aValues.get("helmet");
-        if (lObj instanceof Map) {
-            fHelmet = ItemStack.deserialize((Map<String, Object>)lObj);
-        }
-        lObj = aValues.get("inventory");
+        fBoots = deserializeItemStack(aValues, "boots");
+        fLeggings = deserializeItemStack(aValues, "leggings");
+        fChestplate = deserializeItemStack(aValues, "chestplate");
+        fHelmet = deserializeItemStack(aValues, "helmet");
+        fItemInHand = deserializeItemStack(aValues, "iteminhand");
+        Object lObj = aValues.get("inventory");
         if (lObj instanceof ArrayList) {
             int lIndex = 0;
             for(Object lItem : (ArrayList)lObj) {
@@ -240,6 +275,9 @@ public class Settler {
                     if (lItem instanceof Map) {
                         ItemStack lIStack = ItemStack.deserialize((Map)lItem);
                         fInventory[lIndex] = lIStack;
+                    } else if (lItem instanceof MemorySection) {
+                        ItemStack lIStack = ItemStack.deserialize(((MemorySection)lItem).getValues(false));
+                        fInventory[lIndex] = lIStack;
                     } else {
                         SettlerPlugin.plugin.getLogger().info("inventory deserialize ?? '" + lItem.toString() + "' ???");
                     }
@@ -247,14 +285,16 @@ public class Settler {
                 lIndex++;
             } 
         }
-        lObj = aValues.get("iteminhand");
-        if (lObj instanceof Map) {
-            fItemInHand = ItemStack.deserialize((Map<String, Object>)lObj);
-        }
+        fFoodLevel = aValues.getInt("foodlevel", fFoodLevel);
+        fHealth = aValues.getInt("health", fHealth);
+        fSaturation = (float) aValues.getDouble("saturation", (double)fSaturation);
     }
     
     public void run(SettlerAccess aAccess) {
         checkForBecomeEntity(aAccess);
+        if (hasEntity()) {
+            EntityState lState = aAccess.getEntityState(getEntityId());
+        }
     }
 
     public String getIconName() {
@@ -299,8 +339,19 @@ public class Settler {
         if (lPos != null) {
             lPlayer.teleport(lPos.getLocation(fWorld));
         }
+        lPlayer.setFoodLevel(getFoodLevel());
+        lPlayer.setHealth(getHealth());
+        lPlayer.setSaturation(getSaturation());
         aEntity.setDataObject(this);
         fEntityId = lPlayer.getEntityId();
+    }
+    
+    public void updateFromEntity(NPCEntity aEntity) {
+        Player lPlayer = aEntity.getAsPlayer();
+        setPosition(new BlockPosition(lPlayer.getLocation()));
+        setFoodLevel(lPlayer.getFoodLevel());
+        setHealth(lPlayer.getHealth());
+        setSaturation(lPlayer.getSaturation());
     }
 
     public void setEntityId(int aEntityId) {
@@ -332,4 +383,45 @@ public class Settler {
     public boolean isActive() {
         return fActive;
     }
+
+    public ItemStack getLeggings() {
+        return fLeggings;
+    }
+
+    public void setLeggings(ItemStack aItemStack) {
+        fLeggings = aItemStack;
+    }
+
+    public ItemStack getBoots() {
+        return fBoots;
+    }
+
+    public void setBoots(ItemStack aItemStack) {
+        fBoots = aItemStack;
+    }
+
+    public ItemStack getChestplate() {
+        return fChestplate;
+    }
+
+    public void setChestplate(ItemStack aItemStack) {
+        fChestplate = aItemStack;
+    }
+
+    public ItemStack getHelmet() {
+        return fHelmet;
+    }
+
+    public void setHelmet(ItemStack aItemStack) {
+        fHelmet = aItemStack;
+    }
+
+    public ItemStack getItemInHand() {
+        return fItemInHand;
+    }
+    
+    public void setItemInHand(ItemStack aItemStack) {
+        fItemInHand = aItemStack;
+    }
+
 }

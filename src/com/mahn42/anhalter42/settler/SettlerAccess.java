@@ -19,7 +19,9 @@ import java.util.logging.Logger;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -135,6 +137,7 @@ public class SettlerAccess {
                         if (lSettler != null) {
                             settlersByEntityId.put(lEntity.getEntityId(), lSettler);
                             lSettler.setEntityId(lEntity.getEntityId());
+                            lSettler.updateFromEntity((NPCEntity)lEntity);
                         }
                     }
                 } else {
@@ -148,11 +151,38 @@ public class SettlerAccess {
         public int id;
         public EntityType type;
         public BlockPosition pos;
+        public int health;
+        public int foodLevel;
+        public float saturation;
         
         public EntityState(Entity aEntity) {
             id = aEntity.getEntityId();
             type = aEntity.getType();
             pos = new BlockPosition(aEntity.getLocation());
+            if (aEntity instanceof LivingEntity) {
+                health = ((LivingEntity)aEntity).getHealth();
+                if (aEntity instanceof Player) {
+                    foodLevel = ((Player)aEntity).getFoodLevel();
+                    saturation = ((Player)aEntity).getSaturation();
+                }
+            }
+        }
+    }
+
+    protected class ChunkUnload {
+        public int x;
+        public int z;
+        public ChunkUnload(int aX, int aZ) {
+            x = aX;
+            z = aZ;
+        }
+    }
+    
+    protected ArrayList<ChunkUnload> chunkUnloads = new ArrayList<ChunkUnload>();
+    
+    public void addChunkUnLoad(int aX, int aZ) {
+        synchronized(chunkUnloads) {
+            chunkUnloads.add(new ChunkUnload(aX, aZ));
         }
     }
 }

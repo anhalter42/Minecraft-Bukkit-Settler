@@ -44,6 +44,7 @@ public class SettlerPlugin extends JavaPlugin {
         settlerBuildingDB = new WorldDBList<SettlerBuildingDB>(SettlerBuildingDB.class, "SettlerBuilding",this);
         Framework.plugin.registerSaver(settlerDB);
         Framework.plugin.registerSaver(settlerBuildingDB);
+        getServer().getPluginManager().registerEvents(new EventListener(), this);
         getServer().getScheduler().runTaskTimerAsynchronously(this, new DynMapSettlerRenderer(), 40, 40);
         getServer().getScheduler().runTaskTimer(this, new SettlerSynchronTask(), 10, 20); // first a little bit slower
         List<World> lWorlds = getServer().getWorlds();
