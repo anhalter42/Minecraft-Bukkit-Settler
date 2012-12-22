@@ -14,16 +14,16 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author andre
  */
-public class SettlerBuildingHandler extends BuildingHandlerBase{
-    
+public class SettlerBuildingHandler extends BuildingHandlerBase {
+
     @Override
     public JavaPlugin getPlugin() {
         return SettlerPlugin.plugin;
     }
-    
+
     @Override
     public Building insert(Building aBuilding) {
-        SettlerBuildingDB lDB = (SettlerBuildingDB)getDB(aBuilding.world);
+        SettlerBuildingDB lDB = (SettlerBuildingDB) getDB(aBuilding.world);
         SettlerBuilding lBuilding = new SettlerBuilding();
         lBuilding.cloneFrom(aBuilding);
         lDB.addRecord(lBuilding);

@@ -4,8 +4,10 @@
  */
 package com.mahn42.anhalter42.settler;
 
-import com.mahn42.anhalter42.settler.SettlerPlugin;
+import com.mahn42.anhalter42.settler.SettlerAccess.ChunkLoad;
 import com.mahn42.anhalter42.settler.settler.Settler;
+import com.mahn42.framework.BlockPosition;
+import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.World;
 
@@ -17,26 +19,73 @@ public class SettlerTask implements Runnable {
 
     protected World fWorld;
     protected SettlerAccess fAccess;
-    
+
     public SettlerTask(World aWorld) {
         fWorld = aWorld;
     }
-    
+
     public World getWorld() {
         return fWorld;
     }
-    
+    protected ArrayList<ChunkLoad> fChunkLoads;
+    protected Collection<? extends Settler> fSettlers;
+    protected SettlerSynchronTask fSyncTask;
+    protected boolean fIsRunning = false;
+
+    protected enum ChunkChangeKind {
+
+        Loaded, Unloaded, None
+    }
+
     @Override
     public void run() {
-        if (fAccess == null) {
-            fAccess = SettlerPlugin.plugin.getSettlerAccess(fWorld);
-        }
-        Collection<? extends Settler> lSettlers = fAccess.getSettlers();
-        for(Settler lSettler : lSettlers) {
-            if (lSettler.isActive()) {
-                lSettler.run(fAccess);
+        if (!fIsRunning) {
+            fIsRunning = true;
+            try {
+                if (fAccess == null) {
+                    fAccess = SettlerPlugin.plugin.getSettlerAccess(fWorld);
+                }
+                fSettlers = fAccess.getSettlers();
+                fChunkLoads = fAccess.retrieveChunkLoads();
+                fSyncTask = SettlerPlugin.plugin.getSettlerSynchronTask();
+                for (Settler lSettler : fSettlers) {
+                    if (lSettler.isActive()) {
+                        BlockPosition lPos = lSettler.getPosition();
+                        ChunkChangeKind changeKind = getChunkLoadKind(lPos.x >> 4, lPos.z >> 4);
+                        switch (changeKind) {
+                            case Loaded:
+                                if (!lSettler.hasEntity()) {
+                                    fSyncTask.addSettlerForEntity(lSettler);
+                                }
+                            case Unloaded:
+                                if (lSettler.hasEntity()) {
+                                    // entity should destroyd by minecraft
+                                    lSettler.setEntityId(0);
+                                }
+                            case None:
+                                if (!lSettler.hasEntity()) {
+                                    if (fWorld.isChunkLoaded(lPos.x >> 4, lPos.z >> 4)) {
+                                        fSyncTask.addSettlerForEntity(lSettler);
+                                    }
+                                }
+                        }
+                        lSettler.run(fAccess);
+                    }
+                }
+                fSettlers = null;
+                fChunkLoads = null;
+            } finally {
+                fIsRunning = false;
             }
         }
     }
-    
+
+    private ChunkChangeKind getChunkLoadKind(int x, int z) {
+        for (ChunkLoad lLoad : fChunkLoads) {
+            if (lLoad.x == x && lLoad.z == z) {
+                return lLoad.kind == ChunkLoad.Kind.Unloaded ? ChunkChangeKind.Unloaded : ChunkChangeKind.Loaded;
+            }
+        }
+        return ChunkChangeKind.None;
+    }
 }

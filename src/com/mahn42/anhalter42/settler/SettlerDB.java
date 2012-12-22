@@ -16,9 +16,11 @@ import org.bukkit.World;
  * @author andre
  */
 public class SettlerDB extends DBSetWorld<SettlerDBRecord> implements IBeforeAfterExecute {
+
     public SettlerDB() {
         super(SettlerDBRecord.class);
     }
+
     public SettlerDB(World aWorld, File aFile) {
         super(SettlerDBRecord.class, aFile, aWorld);
     }
@@ -29,7 +31,7 @@ public class SettlerDB extends DBSetWorld<SettlerDBRecord> implements IBeforeAft
         clear();
         // insert all current settlers
         ArrayList<Settler> lSettlers = SettlerPlugin.plugin.getSettlers(world);
-        for(Settler lSettler : lSettlers) {
+        for (Settler lSettler : lSettlers) {
             SettlerDBRecord lR = new SettlerDBRecord();
             lSettler.serialize(lR);
             addRecord(lR);

@@ -15,15 +15,14 @@ import org.bukkit.command.CommandSender;
  * @author andre
  */
 public class CommandSettlerListProfessions implements CommandExecutor {
-    
+
     //s_list_professions
     @Override
     public boolean onCommand(CommandSender aCommandSender, Command aCommand, String aString, String[] aStrings) {
         Set<String> settlerProfessions = Settler.getSettlerProfessions();
-        for(String lProfName : settlerProfessions) {
+        for (String lProfName : settlerProfessions) {
             aCommandSender.sendMessage(lProfName);
         }
         return true;
     }
-    
 }

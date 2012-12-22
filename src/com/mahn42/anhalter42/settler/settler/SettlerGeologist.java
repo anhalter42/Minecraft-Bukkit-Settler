@@ -9,13 +9,10 @@ package com.mahn42.anhalter42.settler.settler;
  * @author andre
  */
 public class SettlerGeologist extends Settler {
+
     public static final String typeName = "Geologist";
-    
+
     public SettlerGeologist() {
         super(typeName);
-    }
-    
-    public String getIconName() {
-        return "settler.geologist";
     }
 }

@@ -5,7 +5,6 @@
 package com.mahn42.anhalter42.settler;
 
 import com.mahn42.framework.BuildingDB;
-import com.mahn42.framework.IBeforeAfterExecute;
 import java.io.File;
 import org.bukkit.World;
 
@@ -14,6 +13,7 @@ import org.bukkit.World;
  * @author andre
  */
 public class SettlerBuildingDB extends BuildingDB<SettlerBuilding> {
+
     public SettlerBuildingDB() {
         super(SettlerBuilding.class);
     }

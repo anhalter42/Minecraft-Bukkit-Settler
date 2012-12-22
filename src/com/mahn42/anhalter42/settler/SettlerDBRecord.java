@@ -17,6 +17,7 @@ import java.util.logging.Logger;
  * @author andre
  */
 public class SettlerDBRecord extends DBRecordWorld {
+
     public String profession = "Settler";
     public BlockPosition position = new BlockPosition();
     public BlockPosition bedPosition = new BlockPosition();

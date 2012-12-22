@@ -12,20 +12,17 @@ import java.util.ArrayList;
  * @author andre
  */
 public class SettlerBuilding extends Building {
-    
+
     public enum Kind {
-        
     }
-    
     public String basicProfession;
-    
-    
+
     @Override
     protected void toCSVInternal(ArrayList aCols) {
         super.toCSVInternal(aCols);
         aCols.add(basicProfession);
     }
-    
+
     @Override
     protected void fromCSVInternal(DBRecordCSVArray aCols) {
         super.fromCSVInternal(aCols);
