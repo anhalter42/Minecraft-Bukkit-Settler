@@ -29,7 +29,6 @@ public class SettlerTask implements Runnable {
     }
     protected ArrayList<ChunkLoad> fChunkLoads;
     protected Collection<? extends Settler> fSettlers;
-    protected SettlerSynchronTask fSyncTask;
     protected boolean fIsRunning = false;
 
     protected enum ChunkChangeKind {
@@ -47,7 +46,6 @@ public class SettlerTask implements Runnable {
                 }
                 fSettlers = fAccess.getSettlers();
                 fChunkLoads = fAccess.retrieveChunkLoads();
-                fSyncTask = SettlerPlugin.plugin.getSettlerSynchronTask();
                 for (Settler lSettler : fSettlers) {
                     if (lSettler.isActive()) {
                         BlockPosition lPos = lSettler.getPosition();
@@ -55,7 +53,7 @@ public class SettlerTask implements Runnable {
                         switch (changeKind) {
                             case Loaded:
                                 if (!lSettler.hasEntity()) {
-                                    fSyncTask.addSettlerForEntity(lSettler);
+                                    fAccess.addSettlerForEntity(lSettler);
                                 }
                             case Unloaded:
                                 if (lSettler.hasEntity()) {
@@ -65,7 +63,7 @@ public class SettlerTask implements Runnable {
                             case None:
                                 if (!lSettler.hasEntity()) {
                                     if (fWorld.isChunkLoaded(lPos.x >> 4, lPos.z >> 4)) {
-                                        fSyncTask.addSettlerForEntity(lSettler);
+                                        fAccess.addSettlerForEntity(lSettler);
                                     }
                                 }
                         }

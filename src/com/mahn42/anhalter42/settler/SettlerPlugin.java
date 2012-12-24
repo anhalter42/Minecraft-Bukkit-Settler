@@ -11,12 +11,22 @@ import com.mahn42.framework.BuildingDescription;
 import com.mahn42.framework.BuildingDetector;
 import com.mahn42.framework.Framework;
 import com.mahn42.framework.WorldDBList;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
@@ -32,7 +42,9 @@ public class SettlerPlugin extends JavaPlugin {
     protected HashMap<String, SettlerAccess> settlers = new HashMap<String, SettlerAccess>();
     protected HashMap<String, SettlerTask> worldTasks = new HashMap<String, SettlerTask>();
     protected SettlerSynchronTask settlerSyncTask;
-
+    protected ArrayList<String> names = new ArrayList<String>();
+    protected ArrayList<SettlerProfession> professions = new ArrayList<SettlerProfession>();
+    
     public static void main(String[] args) {
     }
 
@@ -40,6 +52,7 @@ public class SettlerPlugin extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         Settler.register();
+        loadNames();
         readSettlerConfig();
         registerSettlerBuildings();
         registerSettlerCommands();
@@ -93,6 +106,19 @@ public class SettlerPlugin extends JavaPlugin {
     public SettlerSynchronTask getSettlerSynchronTask() {
         return settlerSyncTask;
     }
+    
+    public SettlerProfession getProfessionFromFrame(BuildingDescription aDesc, Material aMat) {
+        for(SettlerProfession lProf : professions) {
+            if (aMat.equals(lProf.frameMaterial)) {
+                return lProf;
+            }
+        }
+        return null;
+    }
+    
+    public void registerProfession(SettlerProfession aProfession) {
+        professions.add(aProfession);
+    }
 
     private void registerSettlerBuildings() {
         SettlerBuildingHandler lHandler = new SettlerBuildingHandler();
@@ -100,35 +126,111 @@ public class SettlerPlugin extends JavaPlugin {
         BuildingDescription lDesc;
         BuildingDescription.BlockDescription lBDesc;
         BuildingDescription.RelatedTo lRel;
-        lDesc = lDetector.newDescription("Settler.Geologist");
-        lDesc.typeName = "Geologist";
+        lDesc = lDetector.newDescription("Settler.Lodge.1");
+        BuildingDescription.BlockMaterialArray lWallMats = lDesc.newBlockMaterialArray();
+        lWallMats.add(Material.WOOD);
+        lWallMats.add(Material.LOG);
+        lWallMats.add(Material.WOODEN_DOOR);
+        BuildingDescription.BlockMaterialArray lTopMats = lDesc.newBlockMaterialArray();
+        lTopMats.add(Material.WOOD_STAIRS);
+        lTopMats.add(Material.WOOD_STEP);
+        lTopMats.add(Material.SPRUCE_WOOD_STAIRS);
+        lTopMats.add(Material.BIRCH_WOOD_STAIRS);
+        lTopMats.add(Material.JUNGLE_WOOD_STAIRS);
+        lDesc.typeName = "Lodge for one man";
         lDesc.handler = lHandler;
         lDesc.iconName = "Settler.Building.Geologist";
-        lBDesc = lDesc.newBlockDescription("base");
-        lBDesc.materials.add(Material.SMOOTH_BRICK, (byte) 3);
+        lBDesc = lDesc.newBlockDescription("corner1_bottom");
+        lBDesc.materials.add(lWallMats);
         lBDesc.detectSensible = true;
-        lRel = lBDesc.newRelatedTo(new Vector(0, 1, 0), "antenabase");
-        lRel = lBDesc.newRelatedTo("lever", BuildingDescription.RelatedPosition.Nearby, 1);
-        lRel = lBDesc.newRelatedTo("sign", BuildingDescription.RelatedPosition.Nearby, 1);
-        lBDesc = lDesc.newBlockDescription("lever");
-        lBDesc.materials.add(Material.LEVER);
-        lBDesc = lDesc.newBlockDescription("sign");
-        lBDesc.materials.add(Material.SIGN);
-        lBDesc.materials.add(Material.SIGN_POST);
-        lBDesc.materials.add(Material.WALL_SIGN);
-        lBDesc = lDesc.newBlockDescription("antenabase");
-        lBDesc.materials.add(Material.FENCE);
-        lRel = lBDesc.newRelatedTo(new Vector(0, 10, 0), "antenatop");
-        lRel.materials.add(Material.FENCE);
-        lRel.minDistance = 1;
-        lBDesc = lDesc.newBlockDescription("antenatop");
-        lBDesc.materials.add(Material.FENCE);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner1_top");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(3, 0, 0), "corner2_bottom");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 0, 3), "corner4_bottom");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(1, 0, 1), "bed");
+        lRel = lBDesc.newRelatedTo(new Vector(1, 1, -1), "frame");
+        lBDesc = lDesc.newBlockDescription("corner2_bottom");
+        lBDesc.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner2_top");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 0, 3), "corner3_bottom");
+        lRel.materials.add(lWallMats);
+        lBDesc = lDesc.newBlockDescription("corner3_bottom");
+        lBDesc.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner3_top");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(-3, 0, 0), "corner4_bottom");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(-1, 0, -1), "chest");
+        lBDesc = lDesc.newBlockDescription("corner4_bottom");
+        lBDesc.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner4_top");
+        lRel.materials.add(lWallMats);
+        lBDesc = lDesc.newBlockDescription("corner1_top");
+        lBDesc.materials.add(lTopMats);
+        lBDesc = lDesc.newBlockDescription("corner2_top");
+        lBDesc.materials.add(lTopMats);
+        lBDesc = lDesc.newBlockDescription("corner3_top");
+        lBDesc.materials.add(lTopMats);
+        lBDesc = lDesc.newBlockDescription("corner4_top");
+        lBDesc.materials.add(lTopMats);
+        lBDesc = lDesc.newBlockDescription("bed");
+        lBDesc.materials.add(Material.BED_BLOCK);
+        lBDesc = lDesc.newBlockDescription("chest");
+        lBDesc.materials.add(Material.CHEST);
+        lBDesc = lDesc.newBlockDescription("frame");
+        lBDesc.materials.add(Material.ITEM_FRAME);
         lDesc.createAndActivateXZ(true);
-
     }
 
     private void registerSettlerCommands() {
         getCommand("s_list_professions").setExecutor(new CommandSettlerListProfessions());
         getCommand("s_test").setExecutor(new CommandSettlerTest());
+    }
+
+    public SettlerProfession getProfession(String aName) {
+        for(SettlerProfession lProf : professions) {
+            if (lProf.name.equals(aName)) {
+                return lProf;
+            }
+        }
+        return null;
+    }
+
+    private void loadNames() {
+        File lFolder = getDataFolder();
+        File lNameFile = new File(lFolder.getPath() + File.separatorChar + "names.txt");
+        if (!lFolder.exists()) {
+            lFolder.mkdirs();
+        }
+        if (lNameFile.exists()) {
+            try {
+                FileReader lReader = new FileReader(lNameFile);
+                char[] lBuffer = new char[(int)lNameFile.length()];
+                try {
+                    lReader.read(lBuffer);
+                    String lContent = new String(lBuffer);
+                    String[] lLines = lContent.split("\n");
+                    names.addAll(Arrays.asList(lLines));
+                } catch (IOException ex) {
+                    Logger.getLogger(SettlerPlugin.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(SettlerPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        if (names.isEmpty()) {
+            names.add("Michael");
+            names.add("Andre");
+            names.add("Heiko");
+            names.add("Nils");
+        }
+    }
+    
+    public String getRandomSettlerName() {
+        Random lRnd = new Random();
+        return names.get(lRnd.nextInt(names.size()));
     }
 }

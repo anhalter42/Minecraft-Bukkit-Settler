@@ -117,7 +117,23 @@ public class SettlerAccess {
         return entitiyStates.get(aId);
     }
 
+    protected ArrayList<Settler> settlersForEntity = new ArrayList<Settler>();
+
+    public void addSettlerForEntity(Settler aSettler) {
+        synchronized (settlersForEntity) {
+            if (!settlersForEntity.contains(aSettler)) {
+                settlersForEntity.add(aSettler);
+            }
+        }
+    }
+
     public void runSynchron() {
+        synchronized (settlersForEntity) {
+            for (Settler lSettler : settlersForEntity) {
+                lSettler.checkForBecomeEntity();
+            }
+            settlersForEntity.clear();
+        }
         synchronized (settlers) {
             entitiyStates.clear();
             settlersByEntityId.clear();

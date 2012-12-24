@@ -7,6 +7,7 @@ package com.mahn42.anhalter42.settler.settler;
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerDBRecord;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
+import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.Framework;
 import com.mahn42.framework.npc.entity.NPCEntity;
@@ -33,10 +34,10 @@ public class Settler {
     protected static HashMap<String, Class> types = new HashMap<String, Class>();
 
     public static void register() {
-        register(SettlerFisher.typeName, SettlerFisher.class);
-        register(SettlerWoodcutter.typeName, SettlerWoodcutter.class);
-        register(SettlerForester.typeName, SettlerForester.class);
-        register(SettlerGeologist.typeName, SettlerGeologist.class);
+        SettlerFisher.register();
+        SettlerWoodcutter.register();
+        SettlerForester.register();
+        SettlerGeologist.register();
     }
 
     public static Class getSettlerClass(String aTypename) {
@@ -47,12 +48,20 @@ public class Settler {
         types.put(aTypename, aClass);
     }
 
+    public static void register(SettlerProfession aProf) {
+        SettlerPlugin.plugin.getLogger().info("profession registration: " + aProf.name);
+        register(aProf.name, aProf.settlerClass);
+        SettlerPlugin.plugin.registerProfession(aProf);
+    }
+
     public static Set<String> getSettlerProfessions() {
         return types.keySet();
     }
+
     //Runtime
     protected int fEntityId = 0;
     protected World fWorld;
+    protected SettlerProfession fProf;
     //Meta
     protected String fKey;
     protected String fProfession;
@@ -76,6 +85,7 @@ public class Settler {
 
     public Settler(String aProfession) {
         fProfession = aProfession;
+        fProf = SettlerPlugin.plugin.getProfession(fProfession);
     }
 
     public String getKey() {
@@ -196,6 +206,7 @@ public class Settler {
     public void deserialize(SettlerDBRecord aRecord) {
         fKey = aRecord.key;
         fProfession = aRecord.profession;
+        fProf = SettlerPlugin.plugin.getProfession(fProfession);
         fPlayerName = aRecord.playerName;
         fClanName = aRecord.clanName;
         fSettlerName = aRecord.settlerName;

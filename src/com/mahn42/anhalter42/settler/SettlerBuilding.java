@@ -13,19 +13,20 @@ import java.util.ArrayList;
  */
 public class SettlerBuilding extends Building {
 
-    public enum Kind {
-    }
+    public int settlerCount = 1;
     public String basicProfession;
 
     @Override
     protected void toCSVInternal(ArrayList aCols) {
         super.toCSVInternal(aCols);
         aCols.add(basicProfession);
+        aCols.add(settlerCount);
     }
 
     @Override
     protected void fromCSVInternal(DBRecordCSVArray aCols) {
         super.fromCSVInternal(aCols);
         basicProfession = aCols.pop();
+        settlerCount = Integer.parseInt(aCols.pop());
     }
 }
