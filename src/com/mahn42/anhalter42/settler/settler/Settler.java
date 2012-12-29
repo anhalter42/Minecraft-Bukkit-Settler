@@ -10,13 +10,16 @@ import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.Framework;
-import com.mahn42.framework.npc.entity.NPCEntity;
+import com.mahn42.framework.npc.entity.NPCEntityHuman;
+import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
@@ -84,6 +87,7 @@ public class Settler {
     protected float fSaturation = 20.0f;
 
     public Settler(String aProfession) {
+        fKey = UUID.randomUUID().toString();
         fProfession = aProfession;
         fProf = SettlerPlugin.plugin.getProfession(fProfession);
     }
@@ -180,6 +184,10 @@ public class Settler {
 
     public void setSaturation(float aValue) {
         fSaturation = aValue;
+    }
+    
+    public ItemStack[] getInventory() {
+        return fInventory;
     }
 
     public void serialize(SettlerDBRecord aRecord) {
@@ -326,9 +334,9 @@ public class Settler {
         return fEntityId;
     }
 
-    public void updateEntity(NPCEntity aEntity) {
+    public void updateEntity(NPCEntityPlayer aEntity) {
         Player lPlayer = aEntity.getAsPlayer();
-        lPlayer.setDisplayName(getDisplayName());
+        lPlayer.setDisplayName(getSettlerName());
         BlockPosition lPos;
         lPos = getBedPosition();
         if (lPos != null) {
@@ -349,11 +357,12 @@ public class Settler {
         lPlayer.setFoodLevel(getFoodLevel());
         lPlayer.setHealth(getHealth());
         lPlayer.setSaturation(getSaturation());
+        lPlayer.setCanPickupItems(true);
         aEntity.setDataObject(this);
         fEntityId = lPlayer.getEntityId();
     }
 
-    public void updateFromEntity(NPCEntity aEntity) {
+    public void updateFromEntity(NPCEntityPlayer aEntity) {
         Player lPlayer = aEntity.getAsPlayer();
         setPosition(new BlockPosition(lPlayer.getLocation()));
         setFoodLevel(lPlayer.getFoodLevel());
@@ -366,7 +375,7 @@ public class Settler {
     }
 
     public void createEntity() {
-        NPCEntity lNPC = Framework.plugin.createNPC(fWorld, getPosition(), getDisplayName(), this);
+        NPCEntityPlayer lNPC = Framework.plugin.createPlayerNPC(fWorld, getPosition(), getSettlerName(), this);
         Framework.plugin.log("settler", "new settler '" + getDisplayName() + "' at " + getPosition());
         updateEntity(lNPC);
     }
@@ -430,5 +439,98 @@ public class Settler {
 
     public void setItemInHand(ItemStack aItemStack) {
         fItemInHand = aItemStack;
+    }
+
+    public SettlerProfession getProf() {
+        return fProf;
+    }
+    
+    public void setArmor(ItemStack aItem) {
+        Framework.ItemType lType = Framework.plugin.getItemType(aItem.getType());
+        switch (lType) {
+            case Boots:
+                setBoots(aItem);
+                break;
+            case Chestplate:
+                setChestplate(aItem);
+                break;
+            case Helmet:
+                setHelmet(aItem);
+                break;
+            case Leggings:
+                setLeggings(aItem);
+                break;
+            case Tool:
+                setItemInHand(aItem);
+                break;
+            default:
+                setItemInHand(aItem);
+                break;
+        }
+    }
+    
+    @Override
+    public boolean equals(Object aObject) {
+        if (aObject instanceof Settler) {
+            return getKey().equals(((Settler)aObject).getKey());
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + (this.fKey != null ? this.fKey.hashCode() : 0);
+        return hash;
+    }
+
+    public void died() {
+        //dropAllArmor();
+        //dropInventory();
+        setBoots(null);
+        setLeggings(null);
+        setChestplate(null);
+        setHelmet(null);
+        ItemStack[] lInv = getInventory();
+        for(int i = 0; i<lInv.length; i++) {
+            lInv[i] = null;
+        }
+    }
+
+    private void dropAllArmor() {
+        Location lLoc = getPosition().getLocation(getWorld());
+        ItemStack lItem;
+        lItem = getBoots();
+        if (lItem != null) {
+            setBoots(null);
+            getWorld().dropItem(lLoc, lItem);
+        }
+        lItem = getLeggings();
+        if (lItem != null) {
+            setLeggings(null);
+            getWorld().dropItem(lLoc, lItem);
+        }
+        lItem = getChestplate();
+        if (lItem != null) {
+            setChestplate(null);
+            getWorld().dropItem(lLoc, lItem);
+        }
+        lItem = getHelmet();
+        if (lItem != null) {
+            setHelmet(null);
+            getWorld().dropItem(lLoc, lItem);
+        }
+    }
+
+    private void dropInventory() {
+        Location lLoc = getPosition().getLocation(getWorld());
+        ItemStack[] lInv = getInventory();
+        for(ItemStack lItem : lInv) {
+            getWorld().dropItem(lLoc, lItem);
+        }
+        for(int i = 0; i<lInv.length; i++) {
+            lInv[i] = null;
+        }
     }
 }

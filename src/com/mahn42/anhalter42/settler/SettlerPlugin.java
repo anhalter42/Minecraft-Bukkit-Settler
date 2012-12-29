@@ -122,6 +122,10 @@ public class SettlerPlugin extends JavaPlugin {
 
     private void registerSettlerBuildings() {
         SettlerBuildingHandler lHandler = new SettlerBuildingHandler();
+        registerSettlerBuildingLodge1(lHandler);
+    }
+    
+    private void registerSettlerBuildingLodge1(SettlerBuildingHandler aHandler) {
         BuildingDetector lDetector = Framework.plugin.getBuildingDetector();
         BuildingDescription lDesc;
         BuildingDescription.BlockDescription lBDesc;
@@ -138,8 +142,72 @@ public class SettlerPlugin extends JavaPlugin {
         lTopMats.add(Material.BIRCH_WOOD_STAIRS);
         lTopMats.add(Material.JUNGLE_WOOD_STAIRS);
         lDesc.typeName = "Lodge for one man";
-        lDesc.handler = lHandler;
-        lDesc.iconName = "Settler.Building.Geologist";
+        lDesc.handler = aHandler;
+        lDesc.iconName = "Settler.Building.Lodge.1";
+        lBDesc = lDesc.newBlockDescription("corner1_bottom");
+        lBDesc.materials.add(lWallMats);
+        lBDesc.detectSensible = true;
+        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner1_top");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(3, 0, 0), "corner2_bottom");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 0, 3), "corner4_bottom");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(1, 0, 1), "bed");
+        lRel = lBDesc.newRelatedTo(new Vector(1, 1, -1), "frame");
+        lBDesc = lDesc.newBlockDescription("corner2_bottom");
+        lBDesc.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner2_top");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 0, 3), "corner3_bottom");
+        lRel.materials.add(lWallMats);
+        lBDesc = lDesc.newBlockDescription("corner3_bottom");
+        lBDesc.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner3_top");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(-3, 0, 0), "corner4_bottom");
+        lRel.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(-1, 0, -1), "chest");
+        lBDesc = lDesc.newBlockDescription("corner4_bottom");
+        lBDesc.materials.add(lWallMats);
+        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner4_top");
+        lRel.materials.add(lWallMats);
+        lBDesc = lDesc.newBlockDescription("corner1_top");
+        lBDesc.materials.add(lTopMats);
+        lBDesc = lDesc.newBlockDescription("corner2_top");
+        lBDesc.materials.add(lTopMats);
+        lBDesc = lDesc.newBlockDescription("corner3_top");
+        lBDesc.materials.add(lTopMats);
+        lBDesc = lDesc.newBlockDescription("corner4_top");
+        lBDesc.materials.add(lTopMats);
+        lBDesc = lDesc.newBlockDescription("bed");
+        lBDesc.materials.add(Material.BED_BLOCK);
+        lBDesc = lDesc.newBlockDescription("chest");
+        lBDesc.materials.add(Material.CHEST);
+        lBDesc = lDesc.newBlockDescription("frame");
+        lBDesc.materials.add(Material.ITEM_FRAME);
+        lDesc.createAndActivateXZ(true);
+    }
+
+    private void registerSettlerBuildingLodge2(SettlerBuildingHandler aHandler) {
+        BuildingDetector lDetector = Framework.plugin.getBuildingDetector();
+        BuildingDescription lDesc;
+        BuildingDescription.BlockDescription lBDesc;
+        BuildingDescription.RelatedTo lRel;
+        lDesc = lDetector.newDescription("Settler.Lodge.2");
+        BuildingDescription.BlockMaterialArray lWallMats = lDesc.newBlockMaterialArray();
+        lWallMats.add(Material.WOOD);
+        lWallMats.add(Material.LOG);
+        lWallMats.add(Material.WOODEN_DOOR);
+        BuildingDescription.BlockMaterialArray lTopMats = lDesc.newBlockMaterialArray();
+        lTopMats.add(Material.WOOD_STAIRS);
+        lTopMats.add(Material.WOOD_STEP);
+        lTopMats.add(Material.SPRUCE_WOOD_STAIRS);
+        lTopMats.add(Material.BIRCH_WOOD_STAIRS);
+        lTopMats.add(Material.JUNGLE_WOOD_STAIRS);
+        lDesc.typeName = "Lodge for two men";
+        lDesc.handler = aHandler;
+        lDesc.iconName = "Settler.Building.Lodge.2";
         lBDesc = lDesc.newBlockDescription("corner1_bottom");
         lBDesc.materials.add(lWallMats);
         lBDesc.detectSensible = true;

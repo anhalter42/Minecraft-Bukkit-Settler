@@ -9,7 +9,8 @@ import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityControl;
 import com.mahn42.framework.EntityControlPathItemDestination;
 import com.mahn42.framework.Framework;
-import com.mahn42.framework.npc.entity.NPCEntity;
+import com.mahn42.framework.npc.entity.NPCEntityHuman;
+import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
@@ -123,10 +124,10 @@ public class EventListener implements Listener {
     public void onPlayerDeath(PlayerDeathEvent aEvent) {
         SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + aEvent.getClass().getName());
         Player lEntity = aEvent.getEntity();
-        if (lEntity instanceof NPCEntity && ((NPCEntity) lEntity).getDataObject() instanceof Settler) {
+        if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
             //TODO inform over SettlerAccess
             SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(aEvent.getEntity().getWorld());
-            lAccess.addSettlerDied((Settler) ((NPCEntity) lEntity).getDataObject());
+            lAccess.addSettlerDied((Settler) ((NPCEntityPlayer) lEntity).getDataObject());
             aEvent.getEntity().remove();
         }
     }
@@ -134,17 +135,20 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent aEvent) {
         SettlerPlugin.plugin.getLogger().info(aEvent.getPlayer().getDisplayName() + aEvent.getRightClicked().toString() + aEvent.getClass().getName());
-        if (aEvent.getRightClicked() instanceof NPCEntity) {
-            NPCEntity lNPC = (NPCEntity) aEvent.getRightClicked();
+        if (aEvent.getRightClicked() instanceof NPCEntityPlayer) {
+            NPCEntityPlayer lNPC = (NPCEntityPlayer) aEvent.getRightClicked();
             Player lPlayer = lNPC.getAsPlayer();
             //lPlayer.setItemInHand(new ItemStack(Material.IRON_AXE));
-            lPlayer.setSneaking(!lPlayer.isSneaking());
+            //lPlayer.setSneaking(!lPlayer.isSneaking());
             lNPC.swingArm();
+            lNPC.setMot(0.5f,0,0.5f);
+            lPlayer.setCanPickupItems(true);
             SettlerPlugin.plugin.getLogger().info(lPlayer.getDisplayName() + ": food=" + lPlayer.getFoodLevel() + " health=" + lPlayer.getHealth() + "/" + lPlayer.getMaxHealth());
             EntityControl lEC = new EntityControl(lPlayer);
             BlockPosition lPos = new BlockPosition(lPlayer.getLocation());
             lPos.add(10, 0, 10);
-            lPos.y = lPlayer.getWorld().getHighestBlockYAt(lPos.x, lPos.z);
+            lPos.y = lPlayer.getWorld().getHighestBlockYAt(lPos.x, lPos.z) - 1;
+            SettlerPlugin.plugin.getLogger().info("send settler to " + lPos);
             lEC.path.add(new EntityControlPathItemDestination(lPos, 0.7f));
             Framework.plugin.getEntityController().add(lEC);
             //lNPC.goSleep();

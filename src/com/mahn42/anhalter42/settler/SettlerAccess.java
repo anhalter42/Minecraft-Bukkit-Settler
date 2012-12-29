@@ -6,7 +6,8 @@ package com.mahn42.anhalter42.settler;
 
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
-import com.mahn42.framework.npc.entity.NPCEntity;
+import com.mahn42.framework.npc.entity.NPCEntityHuman;
+import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -143,11 +144,11 @@ public class SettlerAccess {
                 entitiyStates.put(lEntity.getEntityId(), lState);
                 if (lEntity instanceof LivingEntity) {
                     //TODO
-                    if (lEntity instanceof NPCEntity && ((NPCEntity) lEntity).getDataObject() instanceof Settler) {
-                        Settler lSettler = (Settler) ((NPCEntity) lEntity).getDataObject();
+                    if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
+                        Settler lSettler = (Settler) ((NPCEntityPlayer) lEntity).getDataObject();
                         settlersByEntityId.put(lEntity.getEntityId(), lSettler);
                         lSettler.setEntityId(lEntity.getEntityId());
-                        lSettler.updateFromEntity((NPCEntity) lEntity);
+                        lSettler.updateFromEntity((NPCEntityPlayer) lEntity);
                     }
                 } else {
                     //TODO
@@ -240,5 +241,14 @@ public class SettlerAccess {
             chunkLoads.clear();
         }
         return lLoads;
+    }
+
+    public ArrayList<Settler> retrieveDiedSettlers() {
+        ArrayList<Settler> lSettlers = new ArrayList<Settler>();
+        synchronized (diedSettler) {
+            lSettlers.addAll(diedSettler);
+            chunkLoads.clear();
+        }
+        return lSettlers;
     }
 }

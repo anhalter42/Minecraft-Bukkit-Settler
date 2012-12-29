@@ -31,7 +31,7 @@ public class CommandSettlerTest implements CommandExecutor {
                     SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lPlayer.getWorld());
                     Settler lSettler = lAccess.createSettler(aStrings[1], null);
                     if (lSettler != null) {
-                        lSettler.setSettlerName("Nils");
+                        //lSettler.setSettlerName("Nils");
                         BlockPosition lPos = new BlockPosition(lPlayer.getLocation());
                         lPos.add(1, 0, 1);
                         lSettler.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));

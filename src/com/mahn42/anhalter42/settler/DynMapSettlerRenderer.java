@@ -77,16 +77,18 @@ public class DynMapSettlerRenderer implements Runnable {
             ArrayList<Settler> lSettlers = SettlerPlugin.plugin.getSettlers(lWorld);
             //SettlerPlugin.plugin.getLogger().info("world " + lWorld.getName() + " has " + lSettlers.size() + " settlers.");
             for (Settler lSettler : lSettlers) {
-                String lIconName = lSettler.getIconName();
-                MarkerIcon lIcon = lMarkerAPI.getMarkerIcon(lIconName);
-                if (lIcon == null) {
-                    SettlerPlugin.plugin.getLogger().info("icon '" + lIconName + "' not found.. using default!");
-                    lIcon = lMarkerAPI.getMarkerIcon("default");
+                if (lSettler.isActive()) {
+                    String lIconName = lSettler.getIconName();
+                    MarkerIcon lIcon = lMarkerAPI.getMarkerIcon(lIconName);
+                    if (lIcon == null) {
+                        SettlerPlugin.plugin.getLogger().info("icon '" + lIconName + "' not found.. using default!");
+                        lIcon = lMarkerAPI.getMarkerIcon("default");
+                    }
+                    Marker lIconMark;
+                    BlockPosition lPos = lSettler.getPosition();
+                    lIconMark = lMarkerSet.createMarker(lSettler.getKey(), lSettler.getSettlerName(), lWorld.getName(), lPos.x, lPos.y, lPos.z, lIcon, false);
+                    lIconMark.setDescription(lSettler.getDisplayName());
                 }
-                Marker lIconMark;
-                BlockPosition lPos = lSettler.getPosition();
-                lIconMark = lMarkerSet.createMarker(lSettler.getKey(), lSettler.getSettlerName(), lWorld.getName(), lPos.x, lPos.y, lPos.z, lIcon, false);
-                lIconMark.setDescription(lSettler.getDisplayName());
             }
         }
     }

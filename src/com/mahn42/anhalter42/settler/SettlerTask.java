@@ -29,10 +29,10 @@ public class SettlerTask implements Runnable {
     }
     protected ArrayList<ChunkLoad> fChunkLoads;
     protected Collection<? extends Settler> fSettlers;
+    protected ArrayList<Settler> fDiedSettlers;
     protected boolean fIsRunning = false;
 
     protected enum ChunkChangeKind {
-
         Loaded, Unloaded, None
     }
 
@@ -46,7 +46,11 @@ public class SettlerTask implements Runnable {
                 }
                 fSettlers = fAccess.getSettlers();
                 fChunkLoads = fAccess.retrieveChunkLoads();
+                fDiedSettlers = fAccess.retrieveDiedSettlers();
                 for (Settler lSettler : fSettlers) {
+                    if (fDiedSettlers.contains(lSettler)) {
+                        lSettler.died();
+                    }
                     if (lSettler.isActive()) {
                         BlockPosition lPos = lSettler.getPosition();
                         ChunkChangeKind changeKind = getChunkLoadKind(lPos.x >> 4, lPos.z >> 4);
