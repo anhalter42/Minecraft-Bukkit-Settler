@@ -7,8 +7,10 @@ package com.mahn42.anhalter42.settler.command;
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.settler.Settler;
+import com.mahn42.anhalter42.settler.settler.SettlerActivityWalkToTarget;
 import com.mahn42.framework.BlockPosition;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,6 +26,10 @@ public class CommandSettlerTest implements CommandExecutor {
     //s_test newsettler
     @Override
     public boolean onCommand(CommandSender aCommandSender, Command aCommand, String aString, String[] aStrings) {
+        World lWorld = SettlerPlugin.plugin.getServer().getWorld("world");
+        if (aCommandSender instanceof Player) {
+            lWorld = ((Player) aCommandSender).getWorld();
+        }
         if (aStrings.length > 0) {
             if (aStrings[0].equalsIgnoreCase("new")) {
                 if (aCommandSender instanceof Player) {
@@ -31,7 +37,7 @@ public class CommandSettlerTest implements CommandExecutor {
                     SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lPlayer.getWorld());
                     Settler lSettler = lAccess.createSettler(aStrings[1], null);
                     if (lSettler != null) {
-                        //lSettler.setSettlerName("Nils");
+                        lSettler.setSettlerName(SettlerPlugin.plugin.getRandomSettlerName());
                         BlockPosition lPos = new BlockPosition(lPlayer.getLocation());
                         lPos.add(1, 0, 1);
                         lSettler.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
@@ -40,6 +46,34 @@ public class CommandSettlerTest implements CommandExecutor {
                         lSettler.activate();
                         lPlayer.sendMessage("settler created.");
                     }
+                }
+            } else if (aStrings[0].equalsIgnoreCase("move")) {
+                if (aCommandSender instanceof Player) {
+                    Player lPlayer = (Player) aCommandSender;
+                    SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lPlayer.getWorld());
+                    Settler lSettler = lAccess.getSettlerById(Integer.parseInt(aStrings[1]));
+                    if (lSettler != null) {
+                        if (aStrings[2].equalsIgnoreCase("later")) {
+                            lSettler.addActivityForLater(new SettlerActivityWalkToTarget(new BlockPosition(lPlayer.getLocation())));
+                        } else if (aStrings[2].equalsIgnoreCase("next")) {
+                            lSettler.addActivityForNext(new SettlerActivityWalkToTarget(new BlockPosition(lPlayer.getLocation())));
+                        } else {
+                            lSettler.addActivityForNow(new SettlerActivityWalkToTarget(new BlockPosition(lPlayer.getLocation())));
+                        }
+                        //lSettler.setTargetPosition(new BlockPosition(lPlayer.getLocation()));
+                        //lSettler.setActivityState(Settler.ACTSTATE_START);
+                        //lSettler.setActivity(Settler.ACT_WALK_TO_TARGET);
+                    } else {
+                        lPlayer.sendMessage("Settler with Id " + aStrings[1] + " not found!");
+                    }
+                }
+            } else if (aStrings[0].equalsIgnoreCase("dump")) {
+                SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                Settler lSettler = lAccess.getSettlerById(Integer.parseInt(aStrings[1]));
+                if (lSettler != null) {
+                    lSettler.dump();
+                } else {
+                    aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
                 }
             } else {
                 aCommandSender.sendMessage("whats " + aStrings[0] + "?");

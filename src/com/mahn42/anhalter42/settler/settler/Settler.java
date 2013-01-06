@@ -9,11 +9,13 @@ import com.mahn42.anhalter42.settler.SettlerDBRecord;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.framework.BlockPosition;
+import com.mahn42.framework.EntityControl;
+import com.mahn42.framework.EntityControlPathItemDestination;
 import com.mahn42.framework.Framework;
-import com.mahn42.framework.npc.entity.NPCEntityHuman;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -60,11 +62,11 @@ public class Settler {
     public static Set<String> getSettlerProfessions() {
         return types.keySet();
     }
-
     //Runtime
     protected int fEntityId = 0;
     protected World fWorld;
     protected SettlerProfession fProf;
+    protected NPCEntityPlayer fEntity = null;
     //Meta
     protected String fKey;
     protected String fProfession;
@@ -85,6 +87,12 @@ public class Settler {
     protected int fFoodLevel = 20;
     protected int fHealth = 20;
     protected float fSaturation = 20.0f;
+    protected String fFather;
+    protected String fMother;
+    protected SettlerActivityList fActivityList = new SettlerActivityList(this);
+//    protected String fActivity;
+//    protected String fActivityState;
+//    protected BlockPosition fTargetPosition = null;
 
     public Settler(String aProfession) {
         fKey = UUID.randomUUID().toString();
@@ -185,11 +193,36 @@ public class Settler {
     public void setSaturation(float aValue) {
         fSaturation = aValue;
     }
-    
+
     public ItemStack[] getInventory() {
         return fInventory;
     }
 
+    /*
+     public String getActivity() {
+     return fActivity;
+     }
+    
+     public void setActivity(String aValue) {
+     fActivity = aValue;
+     }
+
+     public String getActivityState() {
+     return fActivityState;
+     }
+
+     public void setActivityState(String aValue) {
+     fActivityState = aValue;
+     }
+    
+     public BlockPosition getTargetPosition() {
+     return fTargetPosition == null ? null : fTargetPosition.clone();
+     }
+    
+     public void setTargetPosition(BlockPosition aPos) {
+     fTargetPosition = aPos == null ? null : aPos.clone();
+     }
+     */
     public void serialize(SettlerDBRecord aRecord) {
         YamlConfiguration lYaml = new YamlConfiguration();
         serialize(lYaml);
@@ -259,6 +292,14 @@ public class Settler {
         aValues.set("foodlevel", getFoodLevel());
         aValues.set("health", getHealth());
         aValues.set("saturation", getSaturation());
+        aValues.set("father", fFather == null ? "" : fFather);
+        aValues.set("mother", fMother == null ? "" : fMother);
+        /*
+         aValues.set("activity", fActivity == null ? "" : fActivity);
+         aValues.set("activityState", fActivityState == null ? "" : fActivityState);
+         aValues.set("targetPosition", fTargetPosition == null ? "" : fTargetPosition.toCSV(","));
+         */
+        fActivityList.serialize(aValues, "activityList");
     }
 
     protected ItemStack deserializeItemStack(YamlConfiguration aValues, String aName) {
@@ -301,15 +342,37 @@ public class Settler {
         fFoodLevel = aValues.getInt("foodlevel", fFoodLevel);
         fHealth = aValues.getInt("health", fHealth);
         fSaturation = (float) aValues.getDouble("saturation", (double) fSaturation);
-    }
-
-    public void run(SettlerAccess aAccess) {
+        fFather = aValues.getString("father");
+        fMother = aValues.getString("mother");
         /*
-         checkForBecomeEntity(aAccess);
-         if (hasEntity()) {
-         EntityState lState = aAccess.getEntityState(getEntityId());
+         fActivity = aValues.getString("activity");
+         fActivityState = aValues.getString("activityState");
+         lObj = aValues.get("targetPosition");
+         if (lObj != null && lObj instanceof String && !((String)lObj).isEmpty()) {
+         fTargetPosition = new BlockPosition();
+         fTargetPosition.fromCSV((String)lObj, "\\,");
+         } else {
+         fTargetPosition = null;
          }
          */
+        fActivityList.deserialize(aValues, "activityList");
+    }
+
+    /*
+     public static final String ACT_WALK_TO_TARGET = "WALK_TO_TARGET";
+     public static final String ACTSTATE_START = "START";
+     public static final String ACTSTATE_STARTED = "STARTED";
+     */
+    public void run(SettlerAccess aAccess) {
+        SettlerActivity lAct = getCurrentActivity();
+        if (lAct != null) {
+            boolean lRemove = lAct.run(aAccess, this);
+            lAct.runningTicks++;
+            if (lRemove || lAct.runningTicks > lAct.maxTicks) {
+                fActivityList.remove(lAct);
+                Framework.plugin.log("settler", "settler activity poped " + lAct);
+            }
+        }
     }
 
     public String getIconName() {
@@ -317,6 +380,9 @@ public class Settler {
     }
 
     public String getDisplayName() {
+        if (Framework.plugin.isDebugSet("settler")) {
+            return hasEntity() ? "" + fEntityId : getKey();
+        }
         String lRes = getSettlerName();
         if (lRes == null || lRes.isEmpty()) {
             lRes = getProfession();
@@ -336,6 +402,15 @@ public class Settler {
 
     public void updateEntity(NPCEntityPlayer aEntity) {
         Player lPlayer = aEntity.getAsPlayer();
+        updateToEntity(aEntity);
+        BlockPosition lPos = getPosition();
+        if (lPos != null) {
+            lPlayer.teleport(lPos.getLocation(fWorld));
+        }
+    }
+
+    public void updateToEntity(NPCEntityPlayer aEntity) {
+        Player lPlayer = aEntity.getAsPlayer();
         lPlayer.setDisplayName(getSettlerName());
         BlockPosition lPos;
         lPos = getBedPosition();
@@ -350,10 +425,12 @@ public class Settler {
         lInv.setHelmet(fHelmet);
         lInv.setLeggings(fLeggings);
         lInv.setItemInHand(fItemInHand);
-        lPos = getPosition();
-        if (lPos != null) {
-            lPlayer.teleport(lPos.getLocation(fWorld));
-        }
+        /*
+         ItemStack[] lItems = getInventory();
+         for(int i = 0; i<lItems.length; i++) {
+         lInv.setItem(i, lItems[i]);
+         }
+         */
         lPlayer.setFoodLevel(getFoodLevel());
         lPlayer.setHealth(getHealth());
         lPlayer.setSaturation(getSaturation());
@@ -363,11 +440,21 @@ public class Settler {
     }
 
     public void updateFromEntity(NPCEntityPlayer aEntity) {
+        fEntity = aEntity;
         Player lPlayer = aEntity.getAsPlayer();
         setPosition(new BlockPosition(lPlayer.getLocation()));
         setFoodLevel(lPlayer.getFoodLevel());
         setHealth(lPlayer.getHealth());
         setSaturation(lPlayer.getSaturation());
+    }
+
+    public void updateInventoryFromEntity(NPCEntityPlayer aEntity) {
+        Player lPlayer = aEntity.getAsPlayer();
+        PlayerInventory lInv = lPlayer.getInventory();
+        ItemStack[] lItems = lInv.getContents();
+        for (int i = 0; i < fInventory.length; i++) {
+            fInventory[i] = lItems[i];
+        }
     }
 
     public void setEntityId(int aEntityId) {
@@ -444,7 +531,7 @@ public class Settler {
     public SettlerProfession getProf() {
         return fProf;
     }
-    
+
     public void setArmor(ItemStack aItem) {
         Framework.ItemType lType = Framework.plugin.getItemType(aItem.getType());
         switch (lType) {
@@ -468,11 +555,11 @@ public class Settler {
                 break;
         }
     }
-    
+
     @Override
     public boolean equals(Object aObject) {
         if (aObject instanceof Settler) {
-            return getKey().equals(((Settler)aObject).getKey());
+            return getKey().equals(((Settler) aObject).getKey());
         } else {
             return false;
         }
@@ -493,7 +580,7 @@ public class Settler {
         setChestplate(null);
         setHelmet(null);
         ItemStack[] lInv = getInventory();
-        for(int i = 0; i<lInv.length; i++) {
+        for (int i = 0; i < lInv.length; i++) {
             lInv[i] = null;
         }
     }
@@ -526,11 +613,82 @@ public class Settler {
     private void dropInventory() {
         Location lLoc = getPosition().getLocation(getWorld());
         ItemStack[] lInv = getInventory();
-        for(ItemStack lItem : lInv) {
+        for (ItemStack lItem : lInv) {
             getWorld().dropItem(lLoc, lItem);
         }
-        for(int i = 0; i<lInv.length; i++) {
+        for (int i = 0; i < lInv.length; i++) {
             lInv[i] = null;
+        }
+    }
+
+    public void targetReached(SettlerAccess aAccess) {
+        /*
+         if (getActivity() == ACT_WALK_TO_TARGET) {
+         setActivity(null);
+         setActivityState(null);
+         }
+         setTargetPosition(null);
+         */
+        SettlerActivity lAct = getCurrentActivity();
+        if (lAct != null) {
+            lAct.targetReached(aAccess, this);
+        }
+    }
+
+    public void dump() {
+        Logger l = SettlerPlugin.plugin.getLogger();
+        l.info("Key:" + fKey);
+        l.info("SettlerName:" + fSettlerName);
+        l.info("Profession:" + fProfession);
+        l.info("PlayerName:" + fPlayerName);
+        l.info("Position:" + fPosition);
+        l.info("Activity:" + getCurrentActivity());
+        l.info("Boots:" + fBoots);
+        l.info("Leggings:" + fLeggings);
+        l.info("Chestplate:" + fChestplate);
+        l.info("Helmet:" + fHelmet);
+        l.info("ItemInHand:" + fItemInHand);
+        for (ItemStack i : fInventory) {
+            if (i != null) {
+                l.info("Inv:" + i);
+            }
+        }
+        fActivityList.dump(l);
+    }
+
+    public SettlerActivity getCurrentActivity() {
+        return fActivityList.peek();
+    }
+
+    public void addActivityForNow(SettlerActivity... aActivities) {
+        for (int i = aActivities.length - 1; i >= 0; i--) {
+            SettlerActivity lAct = aActivities[i];
+            fActivityList.push(lAct);
+            Framework.plugin.log("settler", "settler activity pushed now " + lAct);
+        }
+    }
+
+    public void addActivityForLater(SettlerActivity... aActivities) {
+        for (int i = aActivities.length - 1; i >= 0; i--) {
+            SettlerActivity lAct = aActivities[i];
+            fActivityList.add(lAct);
+            Framework.plugin.log("settler", "settler activity pushed later " + lAct);
+        }
+    }
+
+    public void addActivityForNext(SettlerActivity... aActivities) {
+        for (int i = aActivities.length - 1; i >= 0; i--) {
+            SettlerActivity lAct = aActivities[i];
+            fActivityList.addAsNext(lAct);
+            Framework.plugin.log("settler", "settler activity pushed next " + lAct);
+        }
+    }
+
+    public boolean canWalkTo(BlockPosition aDest) {
+        if (hasEntity()) {
+            return EntityControl.existsPath(fEntity.getAsPlayer(), aDest);
+        } else {
+            return false; //TODO
         }
     }
 }

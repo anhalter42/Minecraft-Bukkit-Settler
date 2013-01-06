@@ -7,6 +7,10 @@ package com.mahn42.anhalter42.settler;
 import com.mahn42.anhalter42.settler.command.CommandSettlerListProfessions;
 import com.mahn42.anhalter42.settler.command.CommandSettlerTest;
 import com.mahn42.anhalter42.settler.settler.Settler;
+import com.mahn42.anhalter42.settler.settler.SettlerActivity;
+import com.mahn42.anhalter42.settler.settler.SettlerActivityList;
+import com.mahn42.anhalter42.settler.settler.SettlerActivityWalkToTarget;
+import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.BuildingDescription;
 import com.mahn42.framework.BuildingDetector;
 import com.mahn42.framework.Framework;
@@ -26,6 +30,7 @@ import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -46,12 +51,22 @@ public class SettlerPlugin extends JavaPlugin {
     protected ArrayList<SettlerProfession> professions = new ArrayList<SettlerProfession>();
     
     public static void main(String[] args) {
+        SettlerActivity.register();
+        SettlerActivityList lList = new SettlerActivityList(null);
+        lList.add(new SettlerActivityWalkToTarget(new BlockPosition(1, 2, 3)));
+        YamlConfiguration lConf = new YamlConfiguration();
+        lList.serialize(lConf, "activityList");
+        String lSave = lConf.saveToString();
+        Logger.getLogger("xxx").info(lSave);
+        lList.deserialize(lConf, "activityList");
+        lList.dump(Logger.getLogger("xxx"));
     }
 
     @Override
     public void onEnable() {
         plugin = this;
         Settler.register();
+        SettlerActivity.register();
         loadNames();
         readSettlerConfig();
         registerSettlerBuildings();
@@ -63,12 +78,12 @@ public class SettlerPlugin extends JavaPlugin {
         Framework.plugin.registerSaver(settlerBuildingDB);
         getServer().getPluginManager().registerEvents(new EventListener(), this);
         getServer().getScheduler().runTaskTimerAsynchronously(this, new DynMapSettlerRenderer(), 40, 40);
-        getServer().getScheduler().runTaskTimer(this, settlerSyncTask, 10, 20); // first a little bit slower
+        getServer().getScheduler().runTaskTimer(this, settlerSyncTask, 10, 10); // first a little bit slower
         List<World> lWorlds = getServer().getWorlds();
         for (World lWorld : lWorlds) {
             SettlerTask lTask = new SettlerTask(lWorld);
             worldTasks.put(lWorld.getName(), lTask);
-            getServer().getScheduler().runTaskTimerAsynchronously(this, lTask, 20, 20); // first a little bit slower
+            getServer().getScheduler().runTaskTimerAsynchronously(this, lTask, 20, 10); // first a little bit slower
         }
     }
 

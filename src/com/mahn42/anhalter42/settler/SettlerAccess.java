@@ -165,6 +165,25 @@ public class SettlerAccess {
         aSettler.deactivate();
         aSettler.setEntityId(0);
     }
+    
+    public Settler getSettlerById(int lEntityId) {
+        Settler lSettler = null;
+        synchronized(settlersByEntityId) {
+            lSettler = settlersByEntityId.get(lEntityId);
+        }
+        return lSettler;
+    }
+
+    protected ArrayList<Settler> reachedTargetSettler = new ArrayList<Settler>();
+
+    public void addEntityReachedTarget(Entity lEntity) {
+        Settler lSettler = getSettlerById(lEntity.getEntityId());
+        if (lSettler != null) {
+            synchronized (reachedTargetSettler) {
+                reachedTargetSettler.add(lSettler);
+            }
+        }
+    }
 
     public class EntityState {
 
@@ -247,7 +266,16 @@ public class SettlerAccess {
         ArrayList<Settler> lSettlers = new ArrayList<Settler>();
         synchronized (diedSettler) {
             lSettlers.addAll(diedSettler);
-            chunkLoads.clear();
+            diedSettler.clear();
+        }
+        return lSettlers;
+    }
+
+    public ArrayList<Settler> retrieveReachedTargetSettlers() {
+        ArrayList<Settler> lSettlers = new ArrayList<Settler>();
+        synchronized (reachedTargetSettler) {
+            lSettlers.addAll(reachedTargetSettler);
+            reachedTargetSettler.clear();
         }
         return lSettlers;
     }

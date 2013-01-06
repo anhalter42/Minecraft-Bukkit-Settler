@@ -30,6 +30,7 @@ public class SettlerTask implements Runnable {
     protected ArrayList<ChunkLoad> fChunkLoads;
     protected Collection<? extends Settler> fSettlers;
     protected ArrayList<Settler> fDiedSettlers;
+    protected ArrayList<Settler> fReachedTargetSettlers;
     protected boolean fIsRunning = false;
 
     protected enum ChunkChangeKind {
@@ -47,9 +48,13 @@ public class SettlerTask implements Runnable {
                 fSettlers = fAccess.getSettlers();
                 fChunkLoads = fAccess.retrieveChunkLoads();
                 fDiedSettlers = fAccess.retrieveDiedSettlers();
+                fReachedTargetSettlers = fAccess.retrieveReachedTargetSettlers();
                 for (Settler lSettler : fSettlers) {
                     if (fDiedSettlers.contains(lSettler)) {
                         lSettler.died();
+                    }
+                    if (fReachedTargetSettlers.contains(lSettler)) {
+                        lSettler.targetReached(fAccess);
                     }
                     if (lSettler.isActive()) {
                         BlockPosition lPos = lSettler.getPosition();
