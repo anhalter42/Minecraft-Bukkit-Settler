@@ -5,10 +5,13 @@
 package com.mahn42.anhalter42.settler;
 
 import com.mahn42.anhalter42.settler.settler.Settler;
+import com.mahn42.anhalter42.settler.settler.SettlerActivityAwake;
+import com.mahn42.anhalter42.settler.settler.SettlerActivitySleep;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.BuildingBlock;
 import com.mahn42.framework.Framework;
 import com.mahn42.framework.Framework.ItemType;
+import java.util.Collection;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -22,7 +25,8 @@ public class SettlerBuildingTask implements Runnable {
     public enum Kind {
         Initialize,
         Check,
-        SettlerDied
+        SettlerDied,
+        Destroy
     }
     public Kind kind = Kind.Initialize;
     public SettlerBuilding building;
@@ -46,6 +50,9 @@ public class SettlerBuildingTask implements Runnable {
                 break;
             case SettlerDied:
                 rebornSettler();
+                break;
+            case Destroy:
+                destroyBuilding();
                 break;
         }
     }
@@ -80,6 +87,7 @@ public class SettlerBuildingTask implements Runnable {
     private void rebornSettler() {
         Chest lChest = (Chest) building.getBlock("chest").position.getBlock(building.world).getState();
         Inventory lChestInv = lChest.getInventory();
+        settler.setPosition(settler.getBedPosition());
         bearSettler(lChestInv, settler);
     }
     
@@ -94,8 +102,16 @@ public class SettlerBuildingTask implements Runnable {
                 aSettler.setArmor(lItem.item);
             }
         }
+        aSettler.addActivityForNow(new SettlerActivitySleep(40), new SettlerActivityAwake());
         aSettler.activate();
         building.sendToPlayer("Settler %s was born.", aSettler.getDisplayName());
+    }
+
+    private void destroyBuilding() {
+        Collection<? extends Settler> lSettlers = fAccess.getSettlersForHomeKey(building.key);
+        for(Settler lSettler : lSettlers) {
+            fAccess.removeSettler(lSettler);
+        }
     }
 
 }

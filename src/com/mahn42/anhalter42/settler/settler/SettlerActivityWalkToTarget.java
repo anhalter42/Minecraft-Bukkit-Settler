@@ -5,7 +5,6 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
-import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityControl;
 import com.mahn42.framework.EntityControlPathItemDestination;
@@ -56,13 +55,13 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
         if (!started && !reached && target != null && aSettler.hasEntity()) {
             final EntityControl lEC = new EntityControl(aSettler.fEntity.getAsPlayer());
             lEC.path.add(new EntityControlPathItemDestination(target));
-            SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, new Runnable() {
+            runTaskLater(new Runnable() {
                 @Override
                 public void run() {
                     Framework.plugin.getEntityController().add(lEC);
                     started = true;
                 }
-            }, 1);
+            });
         }
         return reached;
     }

@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
@@ -380,14 +381,14 @@ public class Settler {
     }
 
     public String getDisplayName() {
-        if (Framework.plugin.isDebugSet("settler")) {
-            return hasEntity() ? "" + fEntityId : getKey();
-        }
         String lRes = getSettlerName();
         if (lRes == null || lRes.isEmpty()) {
             lRes = getProfession();
         } else {
             lRes = getProfession() + " " + lRes;
+        }
+        if (Framework.plugin.isDebugSet("settler")) {
+            return hasEntity() ? "" + fEntityId : lRes;
         }
         return lRes;
     }
@@ -690,5 +691,41 @@ public class Settler {
         } else {
             return false; //TODO
         }
+    }
+    
+    public boolean hasAtleastItems(Material aMat, int aCount) {
+        boolean lFound = false;
+        for(ItemStack lItem : getInventory()) {
+            if (lItem != null && lItem.getType().equals(aMat)) {
+                aCount -= lItem.getAmount();
+                if (aCount <= 0) {
+                    lFound = true;
+                    break;
+                }
+            }
+        }
+        return lFound;
+    }
+
+    public int removeItems(Material aMat, int aCount) {
+        int aO = aCount;
+        int i = -1;
+        for(ItemStack lItem : getInventory()) {
+            i++;
+            if (lItem != null && lItem.getType().equals(aMat)) {
+                if (lItem.getAmount() > aCount) {
+                    lItem.setAmount(lItem.getAmount() - aCount);
+                    aCount = 0;
+                    break;
+                } else {
+                    aCount -= lItem.getAmount();
+                    fInventory[i] = null;
+                    if (aCount == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return aO - aCount;
     }
 }

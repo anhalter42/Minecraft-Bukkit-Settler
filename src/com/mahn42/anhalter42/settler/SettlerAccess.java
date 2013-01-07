@@ -46,6 +46,19 @@ public class SettlerAccess {
         return lResult;
     }
 
+    public Collection<? extends Settler> getSettlersForHomeKey(String aHomeKey) {
+        ArrayList<Settler> lResult = new ArrayList<Settler>();
+        initialize();
+        synchronized (settlers) {
+            for (Settler lSettler : settlers) {
+                if (lSettler.getHomeKey() == aHomeKey) {
+                    lResult.add(lSettler);
+                }
+            }
+        }
+        return lResult;
+    }
+
     protected void initialize() {
         if (!finit) {
             synchronized (settlers) {
@@ -79,6 +92,11 @@ public class SettlerAccess {
         settlersByEntityId.remove(aSettler.getEntityId());
     }
 
+    public void removeSettler(Settler aSettler) {
+        synchronized (settlers) {
+            removeSettlerInternal(aSettler);
+        }
+    }
     public Settler addSettler(Settler aSettler) {
         synchronized (settlers) {
             addSettlerInternal(aSettler);
@@ -117,7 +135,6 @@ public class SettlerAccess {
     public EntityState getEntityState(int aId) {
         return entitiyStates.get(aId);
     }
-
     protected ArrayList<Settler> settlersForEntity = new ArrayList<Settler>();
 
     public void addSettlerForEntity(Settler aSettler) {
@@ -165,15 +182,14 @@ public class SettlerAccess {
         aSettler.deactivate();
         aSettler.setEntityId(0);
     }
-    
+
     public Settler getSettlerById(int lEntityId) {
         Settler lSettler = null;
-        synchronized(settlersByEntityId) {
+        synchronized (settlersByEntityId) {
             lSettler = settlersByEntityId.get(lEntityId);
         }
         return lSettler;
     }
-
     protected ArrayList<Settler> reachedTargetSettler = new ArrayList<Settler>();
 
     public void addEntityReachedTarget(Entity lEntity) {

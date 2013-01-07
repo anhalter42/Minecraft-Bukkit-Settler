@@ -11,11 +11,11 @@ import com.mahn42.framework.npc.entity.NPCEntityPlayer;
  *
  * @author andre
  */
-public class SettlerActivityStandUp extends SettlerActivity {
+public class SettlerActivityAwake extends SettlerActivity {
 
-    public static final String TYPE = "StandUp";
+    public static final String TYPE = "Awake";
 
-    public SettlerActivityStandUp() {
+    public SettlerActivityAwake() {
         type = TYPE;
     }
 
@@ -26,7 +26,7 @@ public class SettlerActivityStandUp extends SettlerActivity {
             runTaskLater(new Runnable() {
                 @Override
                 public void run() {
-                    lPlayer.standUp();
+                    lPlayer.awake();
                 }
             });
         }

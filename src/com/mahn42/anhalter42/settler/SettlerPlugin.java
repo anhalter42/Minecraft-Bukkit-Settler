@@ -118,6 +118,10 @@ public class SettlerPlugin extends JavaPlugin {
         return settlerDB.getDB(aWorld);
     }
 
+    public SettlerBuildingDB getSettlerBuildingDB(World aWorld) {
+        return settlerBuildingDB.getDB(aWorld);
+    }
+
     public SettlerSynchronTask getSettlerSynchronTask() {
         return settlerSyncTask;
     }

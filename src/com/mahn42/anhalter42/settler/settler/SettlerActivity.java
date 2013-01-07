@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -15,27 +16,31 @@ import java.util.logging.Logger;
  * @author andre
  */
 public abstract class SettlerActivity {
-    
+
     public static HashMap<String, Class> activityTypes = new HashMap<String, Class>();
-    
+
     public static void register() {
         registerActivity(SettlerActivityWalkToTarget.TYPE, SettlerActivityWalkToTarget.class);
         registerActivity(SettlerActivitySwingArm.TYPE, SettlerActivitySwingArm.class);
         registerActivity(SettlerActivitySitDown.TYPE, SettlerActivitySitDown.class);
         registerActivity(SettlerActivityStandUp.TYPE, SettlerActivityStandUp.class);
-        
+        registerActivity(SettlerActivityAwake.TYPE, SettlerActivityAwake.class);
+        registerActivity(SettlerActivitySleep.TYPE, SettlerActivitySleep.class);
+        registerActivity(SettlerActivityJump.TYPE, SettlerActivityJump.class);
+        registerActivity(SettlerActivityStartSneaking.TYPE, SettlerActivityStartSneaking.class);
+        registerActivity(SettlerActivityStopSneaking.TYPE, SettlerActivityStopSneaking.class);
     }
-    
+
     public static void registerActivity(String aName, Class aClass) {
         activityTypes.put(aName, aClass);
     }
-    
+
     public static SettlerActivity newInstance(String aTypename) {
         Class lClass = activityTypes.get(aTypename);
         if (lClass != null) {
             SettlerActivity lAct = null;
             try {
-                lAct = (SettlerActivity)lClass.newInstance();
+                lAct = (SettlerActivity) lClass.newInstance();
             } catch (InstantiationException ex) {
                 Logger.getLogger(SettlerActivity.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
@@ -47,18 +52,17 @@ public abstract class SettlerActivity {
             return null;
         }
     }
-    
     //META
     public String type;
     public int maxTicks = 20 * 60; // 1min
     public int runningTicks = 0;
-    
+
     public void serialize(Map<String, Object> aMap) {
         aMap.put("type", type);
         aMap.put("maxTicks", maxTicks);
         aMap.put("runningTicks", runningTicks);
     }
-    
+
     public void deserialize(Map<String, Object> aMap) {
         Object lGet = aMap.get("maxTicks");
         if (lGet != null) {
@@ -69,7 +73,7 @@ public abstract class SettlerActivity {
             runningTicks = Integer.parseInt(lGet.toString());
         }
     }
-    
+
     @Override
     public String toString() {
         return type + " " + (maxTicks - runningTicks);
@@ -81,5 +85,9 @@ public abstract class SettlerActivity {
     }
 
     public void deactivate(Settler aSettler) {
+    }
+
+    public void runTaskLater(Runnable aRunnable) {
+        SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, aRunnable, 1);
     }
 }

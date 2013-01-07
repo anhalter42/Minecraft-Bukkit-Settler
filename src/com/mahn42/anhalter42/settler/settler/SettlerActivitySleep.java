@@ -11,26 +11,34 @@ import com.mahn42.framework.npc.entity.NPCEntityPlayer;
  *
  * @author andre
  */
-public class SettlerActivityStandUp extends SettlerActivity {
+public class SettlerActivitySleep extends SettlerActivity {
 
-    public static final String TYPE = "StandUp";
+    public static final String TYPE = "Sleep";
+    
+    public boolean started = false;
 
-    public SettlerActivityStandUp() {
+    public SettlerActivitySleep() {
         type = TYPE;
+    }
+
+    public SettlerActivitySleep(int aMaxTicks) {
+        type = TYPE;
+        maxTicks = aMaxTicks;
     }
 
     @Override
     public boolean run(SettlerAccess aAccess, Settler aSettler) {
-        if (aSettler.hasEntity()) {
+        if (!started && aSettler.hasEntity()) {
             final NPCEntityPlayer lPlayer = aSettler.fEntity;
             runTaskLater(new Runnable() {
                 @Override
                 public void run() {
-                    lPlayer.standUp();
+                    lPlayer.goSleep();
+                    started = true;
                 }
             });
         }
-        return true;
+        return false;
     }
     
 }

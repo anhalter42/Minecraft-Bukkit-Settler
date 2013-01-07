@@ -76,6 +76,8 @@ public class SettlerBuildingHandler extends BuildingHandlerBase {
 
     @Override
     public boolean remove(Building aBuilding) {
+        SettlerBuilding lBuilding = (SettlerBuilding) aBuilding;
+        SettlerPlugin.plugin.getServer().getScheduler().runTaskLaterAsynchronously(SettlerPlugin.plugin, new SettlerBuildingTask(SettlerBuildingTask.Kind.Destroy, lBuilding), 1);
         return super.remove(aBuilding);
     }
 
