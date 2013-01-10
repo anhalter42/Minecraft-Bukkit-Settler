@@ -29,4 +29,13 @@ public class SettlerBuilding extends Building {
         basicProfession = aCols.pop();
         settlerCount = Integer.parseInt(aCols.pop());
     }
+
+    @Override
+    public String getIconName() {
+        if (basicProfession != null && !basicProfession.isEmpty()) {
+            return (super.getIconName() + "." + basicProfession).toLowerCase();
+        } else {
+            return super.getIconName();
+        }
+    }
 }

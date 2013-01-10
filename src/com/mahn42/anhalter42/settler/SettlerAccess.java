@@ -14,11 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -90,6 +93,7 @@ public class SettlerAccess {
         settlers.remove(aSettler);
         settlersByKey.remove(aSettler.getKey());
         settlersByEntityId.remove(aSettler.getEntityId());
+        aSettler.removed();
     }
 
     public void removeSettler(Settler aSettler) {
@@ -135,6 +139,27 @@ public class SettlerAccess {
     public EntityState getEntityState(int aId) {
         return entitiyStates.get(aId);
     }
+    
+    public Collection<EntityState> getEntityStatesNearby(BlockPosition aPos, int aRadius, EntityType aType) {
+        ArrayList<EntityState> lRes = new ArrayList<EntityState>();
+        for(EntityState lState : entitiyStates.values()) {
+            if (lState.type.equals(aType) && lState.pos.nearly(aPos, aRadius)) {
+                lRes.add(lState);
+            }
+        }
+        return lRes;
+    }
+    
+    public Collection<EntityState> getEntityStatesNearby(BlockPosition aPos, int aRadius, Collection<Material> aMats) {
+        ArrayList<EntityState> lRes = new ArrayList<EntityState>();
+        for(EntityState lState : entitiyStates.values()) {
+            if (lState.type.equals(EntityType.DROPPED_ITEM) && aMats.contains(lState.material) && lState.pos.nearly(aPos, aRadius)) {
+                lRes.add(lState);
+            }
+        }
+        return lRes;
+    }
+    
     protected ArrayList<Settler> settlersForEntity = new ArrayList<Settler>();
 
     public void addSettlerForEntity(Settler aSettler) {
@@ -209,6 +234,8 @@ public class SettlerAccess {
         public int health;
         public int foodLevel;
         public float saturation;
+        public Material material;
+        public int amount;
 
         public EntityState(Entity aEntity) {
             id = aEntity.getEntityId();
@@ -220,6 +247,10 @@ public class SettlerAccess {
                     foodLevel = ((Player) aEntity).getFoodLevel();
                     saturation = ((Player) aEntity).getSaturation();
                 }
+            } else if (aEntity instanceof Item) {
+                ItemStack itemStack = ((Item)aEntity).getItemStack();
+                material = itemStack.getType();
+                amount = itemStack.getAmount();
             }
         }
     }

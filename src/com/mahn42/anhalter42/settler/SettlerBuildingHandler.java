@@ -8,6 +8,8 @@ import com.mahn42.framework.Building;
 import com.mahn42.framework.BuildingBlock;
 import com.mahn42.framework.BuildingDB;
 import com.mahn42.framework.BuildingHandlerBase;
+import com.mahn42.framework.InventoryHelper;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
@@ -49,8 +51,8 @@ public class SettlerBuildingHandler extends BuildingHandlerBase {
                     Inventory lChestInv = lChest.getInventory();
                     for(SettlerProfession.Item lItem : lProf.armor) {
                         if (lItem.needed) {
-                            if (!lChestInv.containsAtLeast(lItem.item, lCount)) {
-                                lBuilding.sendToPlayer("You need at least %d of %s!", lCount, lItem.item.getType().toString());
+                            if (!InventoryHelper.hasAtleastItems(lChestInv, lItem.item.getType(), lItem.item.getAmount())) {
+                                lBuilding.sendToPlayer("&cYou need at least %d of %s!", lItem.item.getAmount(), lItem.item.getType().toString());
                                 return null;
                             }
                         }

@@ -19,6 +19,7 @@ public class SettlerActivitySleep extends SettlerActivity {
 
     public SettlerActivitySleep() {
         type = TYPE;
+        maxTicks = 8 * 1000; // 8h
     }
 
     public SettlerActivitySleep(int aMaxTicks) {

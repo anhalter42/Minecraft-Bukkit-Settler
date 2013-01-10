@@ -29,6 +29,8 @@ public abstract class SettlerActivity {
         registerActivity(SettlerActivityJump.TYPE, SettlerActivityJump.class);
         registerActivity(SettlerActivityStartSneaking.TYPE, SettlerActivityStartSneaking.class);
         registerActivity(SettlerActivityStopSneaking.TYPE, SettlerActivityStopSneaking.class);
+        registerActivity(SettlerActivityTeleport.TYPE, SettlerActivityTeleport.class);
+        registerActivity(SettlerActivityCollectItems.TYPE, SettlerActivityCollectItems.class);
     }
 
     public static void registerActivity(String aName, Class aClass) {
@@ -56,21 +58,32 @@ public abstract class SettlerActivity {
     public String type;
     public int maxTicks = 20 * 60; // 1min
     public int runningTicks = 0;
+    public String tag = "";
 
     public void serialize(Map<String, Object> aMap) {
         aMap.put("type", type);
         aMap.put("maxTicks", maxTicks);
         aMap.put("runningTicks", runningTicks);
+        aMap.put("tag", tag);
     }
 
     public void deserialize(Map<String, Object> aMap) {
-        Object lGet = aMap.get("maxTicks");
+        Object lGet;
+        lGet = aMap.get("type");
+        if (lGet != null) {
+            type = lGet.toString();
+        }
+        lGet = aMap.get("maxTicks");
         if (lGet != null) {
             maxTicks = Integer.parseInt(lGet.toString());
         }
         lGet = aMap.get("runningTicks");
         if (lGet != null) {
             runningTicks = Integer.parseInt(lGet.toString());
+        }
+        lGet = aMap.get("tag");
+        if (lGet != null) {
+            tag = lGet.toString();
         }
     }
 

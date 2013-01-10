@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 
 /**
@@ -37,9 +38,9 @@ public class SettlerActivityJump extends SettlerActivity {
                     lPlayer.jump();
                 }
             });
-            waitTicks = 5;
+            waitTicks = 10;
         } else {
-            waitTicks--;
+            waitTicks -= SettlerPlugin.plugin.configSettlerTicks;
         }
         return false;
     }

@@ -87,7 +87,7 @@ public class DynMapSettlerRenderer implements Runnable {
                     Marker lIconMark;
                     BlockPosition lPos = lSettler.getPosition();
                     lIconMark = lMarkerSet.createMarker(lSettler.getKey(), lSettler.getSettlerName(), lWorld.getName(), lPos.x, lPos.y, lPos.z, lIcon, false);
-                    lIconMark.setDescription(lSettler.getDisplayName());
+                    lIconMark.setDescription(lSettler.getDescription());
                 }
             }
         }
@@ -109,7 +109,12 @@ public class DynMapSettlerRenderer implements Runnable {
                         String lId = "settler." + lLabel;
                         try {
                             FileInputStream lInput = new FileInputStream(lFile);
-                            markerAPI.createMarkerIcon(lId, lName, lInput);
+                            MarkerIcon markerIcon = markerAPI.getMarkerIcon(lId);
+                            if (markerIcon != null) {
+                                markerIcon.setMarkerIconImage(lInput);
+                            } else {
+                                markerAPI.createMarkerIcon(lId, lName, lInput);
+                            }
                             try {
                                 lInput.close();
                             } catch (IOException ex) {

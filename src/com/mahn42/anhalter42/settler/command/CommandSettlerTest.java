@@ -11,6 +11,7 @@ import com.mahn42.anhalter42.settler.settler.SettlerActivityWalkToTarget;
 import com.mahn42.framework.BlockPosition;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -75,6 +76,17 @@ public class CommandSettlerTest implements CommandExecutor {
                 } else {
                     aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
                 }
+            } else if (aStrings[0].equalsIgnoreCase("time")) {
+                long ltime = lWorld.getTime();
+                long lt = 800 + ltime / 10;
+                if (lt > 2359) {
+                    lt -= 2400;
+                } 
+                aCommandSender.sendMessage("Its " + ltime + " time. " + lt);
+            } else if (aStrings[0].equalsIgnoreCase("y")) {
+                int highestBlockYAt = lWorld.getHighestBlockYAt(((Player)aCommandSender).getLocation());
+                Block highestBlockAt = lWorld.getHighestBlockAt(((Player)aCommandSender).getLocation());
+                aCommandSender.sendMessage("y " + highestBlockYAt + " block " + highestBlockAt);
             } else {
                 aCommandSender.sendMessage("whats " + aStrings[0] + "?");
             }

@@ -110,4 +110,26 @@ public class SettlerActivityList {
             return aActivity;
         }
     }
+    
+    public boolean exists(Class aClass) {
+        for(SettlerActivity lAct : fActivities) {
+            if (aClass.isInstance(lAct)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean existsTag(String aTag) {
+        for(SettlerActivity lAct : fActivities) {
+            if (lAct.tag == aTag) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int size() {
+        return fActivities.size();
+    }
 }

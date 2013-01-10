@@ -16,7 +16,6 @@ import com.mahn42.framework.BuildingDetector;
 import com.mahn42.framework.Framework;
 import com.mahn42.framework.WorldDBList;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
@@ -41,6 +39,8 @@ import org.bukkit.util.Vector;
  */
 public class SettlerPlugin extends JavaPlugin {
 
+    public int configSettlerTicks = 10;  // first a little bit slower
+    
     public static SettlerPlugin plugin;
     protected WorldDBList<SettlerDB> settlerDB;
     protected WorldDBList<SettlerBuildingDB> settlerBuildingDB;
@@ -78,12 +78,12 @@ public class SettlerPlugin extends JavaPlugin {
         Framework.plugin.registerSaver(settlerBuildingDB);
         getServer().getPluginManager().registerEvents(new EventListener(), this);
         getServer().getScheduler().runTaskTimerAsynchronously(this, new DynMapSettlerRenderer(), 40, 40);
-        getServer().getScheduler().runTaskTimer(this, settlerSyncTask, 10, 10); // first a little bit slower
+        getServer().getScheduler().runTaskTimer(this, settlerSyncTask, 10, configSettlerTicks);
         List<World> lWorlds = getServer().getWorlds();
         for (World lWorld : lWorlds) {
             SettlerTask lTask = new SettlerTask(lWorld);
             worldTasks.put(lWorld.getName(), lTask);
-            getServer().getScheduler().runTaskTimerAsynchronously(this, lTask, 20, 10); // first a little bit slower
+            getServer().getScheduler().runTaskTimerAsynchronously(this, lTask, 10 + (configSettlerTicks / 2), configSettlerTicks);
         }
     }
 
@@ -160,7 +160,7 @@ public class SettlerPlugin extends JavaPlugin {
         lTopMats.add(Material.SPRUCE_WOOD_STAIRS);
         lTopMats.add(Material.BIRCH_WOOD_STAIRS);
         lTopMats.add(Material.JUNGLE_WOOD_STAIRS);
-        lDesc.typeName = "Lodge for one man";
+        lDesc.typeName = "Lodge for one settler";
         lDesc.handler = aHandler;
         lDesc.iconName = "Settler.Building.Lodge.1";
         lBDesc = lDesc.newBlockDescription("corner1_bottom");

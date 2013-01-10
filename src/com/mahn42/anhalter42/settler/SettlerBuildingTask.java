@@ -9,12 +9,11 @@ import com.mahn42.anhalter42.settler.settler.SettlerActivityAwake;
 import com.mahn42.anhalter42.settler.settler.SettlerActivitySleep;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.BuildingBlock;
-import com.mahn42.framework.Framework;
-import com.mahn42.framework.Framework.ItemType;
+import com.mahn42.framework.InventoryHelper;
 import java.util.Collection;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -72,8 +71,25 @@ public class SettlerBuildingTask implements Runnable {
                 if (lSettler != null) {
                     lSettler.setPlayerName(building.playerName);
                     BlockPosition lPos = lBlock.position.clone();
+                    byte data = lBlock.position.getBlock(lSettler.getWorld()).getData();
+                    if ((data & 0x08) == 0x00) {
+                        switch((data & 0x03)) {
+                            case 0: // south
+                                lPos.z++;
+                                break;
+                            case 1: // west
+                                lPos.x--;
+                                break;
+                            case 2: // north
+                                lPos.z--;
+                                break;
+                            case 3: // east
+                                lPos.x++;
+                                break;
+                        }
+                    }
                     lSettler.setBedPosition(lPos);
-                    //lPos.add(0, 1, 0);
+                    lPos.add(0, 1, 0);
                     lSettler.setPosition(lPos);
                     bearSettler(lChestInv, lSettler);
                 }
@@ -87,7 +103,9 @@ public class SettlerBuildingTask implements Runnable {
     private void rebornSettler() {
         Chest lChest = (Chest) building.getBlock("chest").position.getBlock(building.world).getState();
         Inventory lChestInv = lChest.getInventory();
-        settler.setPosition(settler.getBedPosition());
+        BlockPosition lPos = settler.getBedPosition();
+        lPos.add(0, 1, 0);
+        settler.setPosition(lPos);
         bearSettler(lChestInv, settler);
     }
     
@@ -97,8 +115,8 @@ public class SettlerBuildingTask implements Runnable {
         }
         SettlerProfession lProf = aSettler.getProf();
         for (SettlerProfession.Item lItem : lProf.armor) {
-            if (lChestInv.containsAtLeast(lItem.item, lItem.item.getAmount())) {
-                lChestInv.remove(lItem.item);
+            if (InventoryHelper.hasAtleastItems(lChestInv, lItem.item.getType(), lItem.item.getAmount())) {
+                InventoryHelper.removeItems(lChestInv, lItem.item.getType(), lItem.item.getAmount());
                 aSettler.setArmor(lItem.item);
             }
         }

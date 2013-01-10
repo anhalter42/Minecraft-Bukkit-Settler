@@ -54,7 +54,7 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
     public boolean run(SettlerAccess aAccess, Settler aSettler) {
         if (!started && !reached && target != null && aSettler.hasEntity()) {
             final EntityControl lEC = new EntityControl(aSettler.fEntity.getAsPlayer());
-            lEC.path.add(new EntityControlPathItemDestination(target));
+            lEC.path.add(new EntityControlPathItemDestination(target, aSettler.fEntity.getAsPlayer().getWalkSpeed() /*aSettler.getWalkSpeed()*/));
             runTaskLater(new Runnable() {
                 @Override
                 public void run() {

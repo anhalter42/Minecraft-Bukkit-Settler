@@ -47,9 +47,13 @@ public class SettlerGeologist extends Settler {
         SettlerActivity.registerActivity(SettlerActivityGeologistPlaceSign.TYPE, SettlerActivityGeologistPlaceSign.class);
         SettlerActivity.registerActivity(SettlerActivityGeologistGetSigns.TYPE, SettlerActivityGeologistGetSigns.class);
     }
+    public static int chanceToWalk = 60; // 70%
+    public static int chanceForSign = 40; // 20%
 
     public SettlerGeologist() {
         super(typeName);
+        fItemsToCollect.add(Material.SIGN);
+        fItemsToCollect.add(Material.SIGN_POST);
     }
     protected int dowalk = 4;
 
@@ -62,6 +66,7 @@ public class SettlerGeologist extends Settler {
     }
 
     public static class SettlerActivityGeologistGetSigns extends SettlerActivity {
+
         public static final String TYPE = "GeologistGetSigns";
 
         public SettlerActivityGeologistGetSigns() {
@@ -75,9 +80,9 @@ public class SettlerGeologist extends Settler {
             BuildingBlock lChestB = lBuilding.getBlock("chest");
             Chest lChest = (Chest) lChestB.position.getBlock(aSettler.getWorld()).getState();
             Inventory lInv = lChest.getInventory();
-            if (InventoryHelper.hasAtleastItems(lInv, Material.SIGN_POST, 1)) {
-                int lRemoved = InventoryHelper.removeItems(lInv, Material.SIGN_POST, 10);
-                aSettler.removeItems(Material.SIGN_POST, lRemoved);
+            if (InventoryHelper.hasAtleastItems(lInv, Material.SIGN, 1)) {
+                int lRemoved = InventoryHelper.removeItems(lInv, Material.SIGN, 10);
+                aSettler.insertItems(Material.SIGN, lRemoved);
             }
             return true;
         }
@@ -101,48 +106,69 @@ public class SettlerGeologist extends Settler {
             importantMats.add(Material.COAL_ORE);
             importantMats.add(Material.LAPIS_ORE);
         }
+        protected static ArrayList<Material> vegetationMats;
+
+        {
+            vegetationMats = new ArrayList<Material>();
+            vegetationMats.add(Material.LONG_GRASS);
+            vegetationMats.add(Material.SAPLING);
+            vegetationMats.add(Material.YELLOW_FLOWER);
+            vegetationMats.add(Material.CACTUS);
+            vegetationMats.add(Material.COCOA);
+            vegetationMats.add(Material.LEAVES);
+            vegetationMats.add(Material.WATER_LILY);
+            vegetationMats.add(Material.VINE);
+            vegetationMats.add(Material.SNOW);
+        }
 
         @Override
         public boolean run(SettlerAccess aAccess, Settler aSettler) {
             HashMap<Material, Integer> counts = new HashMap<Material, Integer>();
             BlockPosition lPos = aSettler.getPosition();
             World world = aSettler.getWorld();
-            for (int x = -radius; x <= radius; x++) {
-                for (int z = -radius; z <= radius; z++) {
-                    for (int y = -lPos.y; y < 0; y++) {
-                        Block lBlock = lPos.getBlockAt(world, x, y, z);
-                        Material lMat = lBlock.getType();
-                        if (importantMats.contains(lMat)) {
-                            Integer count = counts.get(lMat);
-                            if (count == null) {
-                                count = new Integer(0);
+            Material blockType = lPos.getBlockType(world);
+            if (blockType.equals(Material.AIR) || vegetationMats.contains(blockType)) {
+                for (int x = -radius; x <= radius; x++) {
+                    for (int z = -radius; z <= radius; z++) {
+                        for (int y = -lPos.y; y < 0; y++) {
+                            Block lBlock = lPos.getBlockAt(world, x, y, z);
+                            Material lMat = lBlock.getType();
+                            if (importantMats.contains(lMat)) {
+                                Integer count = counts.get(lMat);
+                                if (count == null) {
+                                    count = new Integer(0);
+                                    counts.put(lMat, count);
+                                }
+                                count++;
                                 counts.put(lMat, count);
                             }
-                            count++;
-                            counts.put(lMat, count);
                         }
                     }
                 }
-            }
-            SettlerPlugin.plugin.getLogger().info("counts = " + counts);
-            Set<Material> keySet = counts.keySet();
-            String lLine1 = null, lLine2 = null, lLine3 = null, lLine4 = null;
-            for (Material lMat : keySet) {
-                String ls = "" + counts.get(lMat) + " " + Framework.plugin.getText(lMat.name());
-                if (lLine1 == null) {
-                    lLine1 = ls;
-                } else if (lLine2 == null) {
-                    lLine2 = ls;
-                } else if (lLine3 == null) {
-                    lLine3 = ls;
-                } else if (lLine4 == null) {
-                    lLine4 = ls;
+                Framework.plugin.log("settler", "counts = " + counts);
+                Set<Material> keySet = counts.keySet();
+                String lLine1 = null, lLine2 = null, lLine3 = null, lLine4 = null;
+                for (Material lMat : keySet) {
+                    String ls = "" + counts.get(lMat) + " " + Framework.plugin.getText(lMat.name());
+                    if (lLine1 == null) {
+                        lLine1 = ls;
+                    } else if (lLine2 == null) {
+                        lLine2 = ls;
+                    } else if (lLine3 == null) {
+                        lLine3 = ls;
+                    } else if (lLine4 == null) {
+                        lLine4 = ls;
+                    }
                 }
-            }
-            if (aSettler.removeItems(Material.SIGN_POST, 1) == 0) {
-                SyncBlockList lBS = new SyncBlockList(world);
-                lBS.add(lPos, Material.SIGN_POST, (byte) (new Random()).nextInt(16), true, 0, lLine1, lLine2, lLine3, lLine4, null, EntityType.UNKNOWN);
-                lBS.execute();
+                if (aSettler.removeItems(Material.SIGN, 1) == 1) {
+                    SyncBlockList lBS = new SyncBlockList(world);
+                    lBS.add(lPos, Material.SIGN_POST, (byte) (new Random()).nextInt(16), true, 0, lLine1, lLine2, lLine3, lLine4, null, EntityType.UNKNOWN);
+                    lBS.execute();
+                } else {
+                    Framework.plugin.log("settler", "SettlerGeo: no signs!");
+                }
+            } else {
+                Framework.plugin.log("settler", "SettlerGeo: placesign on " + blockType + " at " + lPos + " failed!");
             }
             return true;
         }
@@ -155,35 +181,26 @@ public class SettlerGeologist extends Settler {
         public SettlerActivityGeologistThinking() {
             type = TYPE;
         }
+        public int walkRadius = 42;
 
         @Override
         public boolean run(SettlerAccess aAccess, Settler aSettler) {
             Random lRnd = new Random();
             boolean lFound = false;
-            if (aSettler.hasAtleastItems(Material.SIGN_POST, 1)) {
-                if (((SettlerGeologist) aSettler).dowalk > 0 || lRnd.nextInt(100) < 50) {                                       // 50% laufen
+            if (aSettler.hasAtleastItems(Material.SIGN, 1)) {
+                if (((SettlerGeologist) aSettler).dowalk > 0 || lRnd.nextInt(100) < SettlerGeologist.chanceToWalk) {                                       // 50% laufen
                     ((SettlerGeologist) aSettler).dowalk--;
-                    BlockPosition lPos = aSettler.getPosition();
-                    lPos.add(lRnd.nextInt(20) - 10, 0, lRnd.nextInt(20) - 10);
-                    lPos.y = aSettler.getWorld().getHighestBlockYAt(lPos.x, lPos.z);
-                    Block lBlock = lPos.getBlock(aSettler.getWorld());
-                    if (!lBlock.isLiquid()) {
-                        while (lPos.y > 0 && !lBlock.getType().isSolid()) {
-                            lPos.y--;
-                            lBlock = lPos.getBlock(aSettler.getWorld());
-                        }
-                        lFound = aSettler.canWalkTo(lPos);
-                        if (lFound) {
-                            aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lPos));
-                        }
+                    BlockPosition lPos = aSettler.findRandomWalkToPosition(walkRadius, 10);
+                    if (lPos != null) {
+                        aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lPos));
+                        lFound = true;
                     }
                 } else {                                                            // 30% klopfen
                     ((SettlerGeologist) aSettler).dowalk = 2;
-                    if (lRnd.nextInt(100) < 100) {                                   // 20% Schild setzen
+                    if (lRnd.nextInt(100) < SettlerGeologist.chanceForSign) {                                   // 20% Schild setzen
                         aSettler.addActivityForNext(
                                 new SettlerActivityGeologistPlaceSign(),
-                                new SettlerActivityJump(20)
-                                );
+                                new SettlerActivityJump(20));
                     }
                     aSettler.addActivityForNext(
                             new SettlerActivityStartSneaking(),
@@ -195,7 +212,7 @@ public class SettlerGeologist extends Settler {
                 BlockPosition lPos = aSettler.getPosition();
                 BlockPosition lBedPos = aSettler.getBedPosition();
                 if (lBedPos != null) {
-                    if (!lBedPos.nearly(lPos)) {
+                    if (!lBedPos.nearly(lPos, 2)) {
                         aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lBedPos));
                     } else {
                         aSettler.addActivityForNext(new SettlerActivityGeologistGetSigns());
