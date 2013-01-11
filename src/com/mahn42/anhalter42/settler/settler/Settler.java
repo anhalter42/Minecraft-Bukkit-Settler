@@ -15,6 +15,7 @@ import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -64,13 +65,24 @@ public class Settler {
     public static Set<String> getSettlerProfessions() {
         return types.keySet();
     }
+    
+    public static class PutInChestItem {
+        Material material;
+        int keep;
+        
+        public PutInChestItem(Material aMaterial, int aKeep) {
+            material = aMaterial;
+            keep = aKeep;
+        }
+    }
+    
     //Runtime
     protected int fEntityId = 0;
     protected World fWorld;
     protected SettlerProfession fProf;
     protected NPCEntityPlayer fEntity = null;
     protected ArrayList<Material> fItemsToCollect = new ArrayList<Material>();
-    
+    protected ArrayList<PutInChestItem> fPutInChestItems = new ArrayList<PutInChestItem>();
     //Meta
     protected String fKey;
     protected String fProfession;
@@ -98,7 +110,6 @@ public class Settler {
     protected long fWorkEnd = 12500; // 20:30
     protected boolean fSendAtHome = false;
     protected float fWalkSpeed = 0.8f;
-    
     // profession specific?
     protected int fCollectItemRadius = 8;
 
@@ -107,6 +118,7 @@ public class Settler {
         fProfession = aProfession;
         fProf = SettlerPlugin.plugin.getProfession(fProfession);
         fItemsToCollect.add(Material.COOKIE);
+        fPutInChestItems.add(new PutInChestItem(Material.COOKIE, 0));
     }
 
     public String getKey() {
@@ -331,7 +343,7 @@ public class Settler {
         fWorkStart = aValues.getLong("workStart", fWorkStart);
         fWorkEnd = aValues.getLong("workEnd", fWorkEnd);
         fSendAtHome = aValues.getBoolean("sendAtHome", false);
-        fWalkSpeed = (float) aValues.getDouble("walkSpeed", (double)fWalkSpeed);
+        fWalkSpeed = (float) aValues.getDouble("walkSpeed", (double) fWalkSpeed);
     }
 
     public boolean isWorkingTime() {
@@ -364,13 +376,16 @@ public class Settler {
                     fActivityList.remove(lAct);
                 }
             }
+            runPutInChestItems(aAccess);
             runCollectItems(aAccess);
         }
+        /* try to swim.. doesnt work
         BlockPosition lPos = getPosition();
         lPos.y++;
         if (hasEntity() && lPos.getBlock(getWorld()).isLiquid()) {
             fEntity.swim();
         }
+        */
         SettlerActivity lAct = getCurrentActivity();
         if (lAct != null) {
             boolean lRemove = lAct.run(aAccess, this);
@@ -381,12 +396,23 @@ public class Settler {
             }
         }
     }
-    
+
+    public void runPutInChestItems(SettlerAccess aAccess) {
+        BlockPosition lPos = getPosition();
+        //TODO should be chest position
+        if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
+            for(PutInChestItem lpItem : fPutInChestItems) {
+                if (hasAtleastItems(lpItem.material, lpItem.keep + 1)) {
+                    addActivityForNow("PutInChestItems", new SettlerActivityPutItemsInChest(lpItem.material, -1, lpItem.keep));
+                }
+            }
+        }
+    }
     public void runCollectItems(SettlerAccess aAccess) {
         if (!existsTaggedActivity("CollectItems")) {
             Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), fCollectItemRadius, fItemsToCollect);
             if (!lStates.isEmpty()) {
-                for(SettlerAccess.EntityState lState : lStates) {
+                for (SettlerAccess.EntityState lState : lStates) {
                     if (lState.pos.nearly(getPosition(), 1)) {
                         addActivityForNow("CollectItems", new SettlerActivityCollectItems(fItemsToCollect));
                     } else if (canWalkTo(lState.pos)) {
@@ -403,7 +429,7 @@ public class Settler {
                 }
             }
         }
-        
+
     }
 
     public String getIconName() {
@@ -579,11 +605,11 @@ public class Settler {
     public void setWorkEnd(long aValue) {
         fWorkEnd = aValue;
     }
-    
+
     public float getWalkSpeed() {
         return fWalkSpeed;
     }
-    
+
     public void setWalkSpeed(float aValue) {
         fWalkSpeed = aValue;
     }
@@ -690,7 +716,7 @@ public class Settler {
             lAct.targetReached(aAccess, this);
         }
     }
-    
+
     public String getDescription() {
         String lRes = getDisplayName();
         SettlerActivity lAct = getCurrentActivity();
@@ -729,16 +755,16 @@ public class Settler {
     }
 
     public SettlerActivity[] tagActivities(String aTag, SettlerActivity... aActivities) {
-        for(SettlerActivity lAct : aActivities) {
+        for (SettlerActivity lAct : aActivities) {
             lAct.tag = aTag;
         }
         return aActivities;
     }
-    
+
     public void addActivityForNow(String aTag, SettlerActivity... aActivities) {
         addActivityForNow(tagActivities(aTag, aActivities));
     }
-    
+
     public void addActivityForNow(SettlerActivity... aActivities) {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
@@ -750,7 +776,7 @@ public class Settler {
     public void addActivityForLater(String aTag, SettlerActivity... aActivities) {
         addActivityForLater(tagActivities(aTag, aActivities));
     }
-    
+
     public void addActivityForLater(SettlerActivity... aActivities) {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
@@ -762,7 +788,7 @@ public class Settler {
     public void addActivityForNext(String aTag, SettlerActivity... aActivities) {
         addActivityForNext(tagActivities(aTag, aActivities));
     }
-    
+
     public void addActivityForNext(SettlerActivity... aActivities) {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
@@ -770,7 +796,7 @@ public class Settler {
             Framework.plugin.log("settler", "settler activity pushed next " + lAct);
         }
     }
-    
+
     public boolean existsActivity(Class aClass) {
         return fActivityList.exists(aClass);
     }
@@ -867,7 +893,7 @@ public class Settler {
         }
         return aO - aCount;
     }
-    
+
     public BlockPosition findRandomWalkToPosition(Random aRandom, int aRadius, int aAttempts) {
         boolean lFound = false;
         do {
@@ -881,13 +907,33 @@ public class Settler {
                     lBlock = lPos.getBlock(getWorld());
                 }
                 lPos.y++; // step in AIR
-                lFound = canWalkTo(lPos);
-                if (lFound) {
-                    return lPos;
+                lBlock = lPos.getBlock(getWorld());
+                if (!lBlock.isLiquid()) {
+                    lFound = canWalkTo(lPos);
+                    if (lFound) {
+                        return lPos;
+                    }
                 }
             }
             aAttempts--;
         } while (!lFound && aAttempts > 0);
         return null;
+    }
+
+    public List<BlockPosition> findBlocks(Material aMaterial, int aRadius) {
+        ArrayList<BlockPosition> lRes = new ArrayList<BlockPosition>();
+        BlockPosition lPos = getPosition();
+        for (int x = -aRadius; x <= aRadius; x++) {
+            for (int y = -aRadius; y <= aRadius; y++) {
+                for (int z = -aRadius; z <= aRadius; z++) {
+                    if (lPos.getBlockAt(getWorld(), x, y, z).getType().equals(aMaterial)) {
+                        BlockPosition lP = lPos.clone();
+                        lP.add(x,y,z);
+                        lRes.add(lP);
+                    }
+                }
+            }
+        }
+        return lRes;
     }
 }

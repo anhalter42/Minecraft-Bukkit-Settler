@@ -30,5 +30,9 @@ public class SettlerWoodcutter extends Settler {
     
     public SettlerWoodcutter() {
         super(typeName);
+        fItemsToCollect.add(Material.LOG);
+        fItemsToCollect.add(Material.SAPLING);
+        fPutInChestItems.add(new PutInChestItem(Material.LOG, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.SAPLING, 0));
     }
 }

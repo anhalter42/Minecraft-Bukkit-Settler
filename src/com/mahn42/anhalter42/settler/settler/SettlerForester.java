@@ -4,7 +4,9 @@
  */
 package com.mahn42.anhalter42.settler.settler;
 
+import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
+import com.mahn42.framework.BlockPosition;
 import org.bukkit.Material;
 
 /**
@@ -28,5 +30,21 @@ public class SettlerForester extends Settler {
     
     public SettlerForester() {
         super(typeName);
+        fItemsToCollect.add(Material.SAPLING);
+        fItemsToCollect.add(Material.LEAVES);
+        fItemsToCollect.add(Material.RED_ROSE);
+        fItemsToCollect.add(Material.YELLOW_FLOWER);
+        fItemsToCollect.add(Material.LONG_GRASS);
+    }
+
+    @Override
+    public void run(SettlerAccess aAccess) {
+        if (isWorkingTime() && getCurrentActivity() == null) {
+            BlockPosition lPos = findRandomWalkToPosition(aAccess.random, 42, 10);
+            if (lPos != null) {
+                addActivityForNow(new SettlerActivityWalkToTarget(lPos));
+            }
+        }
+        super.run(aAccess);
     }
 }

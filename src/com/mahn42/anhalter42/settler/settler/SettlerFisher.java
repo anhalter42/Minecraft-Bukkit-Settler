@@ -29,5 +29,12 @@ public class SettlerFisher extends Settler {
     
     public SettlerFisher() {
         super(typeName);
+        fItemsToCollect.add(Material.FISHING_ROD);
+        fItemsToCollect.add(Material.RAW_FISH);
+        fItemsToCollect.add(Material.COOKED_FISH);
+        fItemsToCollect.add(Material.INK_SACK);
+        fPutInChestItems.add(new PutInChestItem(Material.RAW_FISH, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.COOKED_FISH, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.INK_SACK, 0));
     }
 }

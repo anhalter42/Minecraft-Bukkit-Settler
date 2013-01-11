@@ -59,7 +59,7 @@ public class SettlerGeologist extends Settler {
 
     @Override
     public void run(SettlerAccess aAccess) {
-        if (getCurrentActivity() == null) {
+        if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(new SettlerActivityGeologistThinking());
         }
         super.run(aAccess);
@@ -113,6 +113,7 @@ public class SettlerGeologist extends Settler {
             vegetationMats.add(Material.LONG_GRASS);
             vegetationMats.add(Material.SAPLING);
             vegetationMats.add(Material.YELLOW_FLOWER);
+            vegetationMats.add(Material.RED_ROSE);
             vegetationMats.add(Material.CACTUS);
             vegetationMats.add(Material.COCOA);
             vegetationMats.add(Material.LEAVES);
