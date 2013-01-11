@@ -56,7 +56,7 @@ public class Settler {
     }
 
     public static void register(SettlerProfession aProf) {
-        SettlerPlugin.plugin.getLogger().info("profession registration: " + aProf.name);
+        //SettlerPlugin.plugin.getLogger().info("profession registration: " + aProf.name);
         register(aProf.name, aProf.settlerClass);
         SettlerPlugin.plugin.registerProfession(aProf);
     }
