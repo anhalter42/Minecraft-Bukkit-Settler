@@ -6,12 +6,12 @@ package com.mahn42.anhalter42.settler;
 
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
-import com.mahn42.framework.npc.entity.NPCEntityHuman;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Material;
@@ -30,6 +30,7 @@ import org.bukkit.inventory.ItemStack;
 public class SettlerAccess {
 
     public World world;
+    public Random random = new Random();
     protected boolean finit = false;
     protected final ArrayList<Settler> settlers = new ArrayList<Settler>();
     //protected HashMap<BlockPosition, Settler> settlersByPosition  = new HashMap<BlockPosition, Settler>();
@@ -153,7 +154,9 @@ public class SettlerAccess {
     public Collection<EntityState> getEntityStatesNearby(BlockPosition aPos, int aRadius, Collection<Material> aMats) {
         ArrayList<EntityState> lRes = new ArrayList<EntityState>();
         for(EntityState lState : entitiyStates.values()) {
-            if (lState.type.equals(EntityType.DROPPED_ITEM) && aMats.contains(lState.material) && lState.pos.nearly(aPos, aRadius)) {
+            if (lState.type.equals(EntityType.DROPPED_ITEM)
+                    && (aMats == null || aMats.contains(lState.material)) 
+                    && lState.pos.nearly(aPos, aRadius)) {
                 lRes.add(lState);
             }
         }

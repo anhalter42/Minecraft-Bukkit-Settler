@@ -28,7 +28,6 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -711,6 +710,7 @@ public class Settler {
         l.info("Position:" + fPosition);
         l.info("BedPosition:" + fBedPosition);
         l.info("Activity:" + getCurrentActivity());
+        l.info("Workingtime:" + fWorkStart + " - " + fWorkEnd);
         l.info("Boots:" + fBoots);
         l.info("Leggings:" + fLeggings);
         l.info("Chestplate:" + fChestplate);
@@ -831,9 +831,7 @@ public class Settler {
 
     public int insertItems(Material aMat, int aCount) {
         int aO = aCount;
-        int i = -1;
         for (ItemStack lItem : getInventory()) {
-            i++;
             if (lItem != null && lItem.getType().equals(aMat)) {
                 if (lItem.getAmount() < lItem.getMaxStackSize()) {
                     int lplace = lItem.getMaxStackSize() - lItem.getAmount();
@@ -849,7 +847,7 @@ public class Settler {
             }
         }
         if (aCount > 0) {
-            i = 0;
+            int i = -1;
             for (ItemStack lItem : getInventory()) {
                 i++;
                 if (lItem == null) {
@@ -870,12 +868,11 @@ public class Settler {
         return aO - aCount;
     }
     
-    public BlockPosition findRandomWalkToPosition(int aRadius, int aAttempts) {
-        Random lRnd = new Random();
+    public BlockPosition findRandomWalkToPosition(Random aRandom, int aRadius, int aAttempts) {
         boolean lFound = false;
         do {
             BlockPosition lPos = getPosition();
-            lPos.add(lRnd.nextInt(aRadius * 2) - aRadius, 0, lRnd.nextInt(aRadius * 2) - aRadius);
+            lPos.add(aRandom.nextInt(aRadius * 2) - aRadius, 0, aRandom.nextInt(aRadius * 2) - aRadius);
             lPos.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
             Block lBlock = lPos.getBlock(getWorld());
             if (!lBlock.isLiquid()) {

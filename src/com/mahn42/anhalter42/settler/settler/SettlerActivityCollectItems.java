@@ -8,6 +8,7 @@ import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerAccess.EntityState;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -21,7 +22,6 @@ import org.bukkit.inventory.ItemStack;
 class SettlerActivityCollectItems extends SettlerActivity {
 
     public static final String TYPE = "CollectItems";
-
     public Collection<Material> items;
 
     public SettlerActivityCollectItems() {
@@ -31,6 +31,32 @@ class SettlerActivityCollectItems extends SettlerActivity {
     public SettlerActivityCollectItems(Collection<Material> aItems) {
         type = TYPE;
         items = aItems;
+    }
+
+    @Override
+    public void serialize(Map<String, Object> aMap) {
+        super.serialize(aMap);
+        if (items != null) {
+            ArrayList<Integer> lMatIds = new ArrayList<Integer>();
+            for (Material lMat : items) {
+                lMatIds.add(lMat.getId());
+            }
+            aMap.put("items", lMatIds);
+        }
+    }
+
+    @Override
+    public void deserialize(Map<String, Object> aMap) {
+        super.deserialize(aMap);
+        Object lGet = aMap.get("items");
+        if (lGet != null) {
+            items = new ArrayList<Material>();
+            for (Object lObj : (Collection) lGet) {
+                if (lObj != null) {
+                    items.add(Material.getMaterial(Integer.parseInt(lObj.toString())));
+                }
+            }
+        }
     }
 
     @Override

@@ -162,7 +162,7 @@ public class SettlerGeologist extends Settler {
                 }
                 if (aSettler.removeItems(Material.SIGN, 1) == 1) {
                     SyncBlockList lBS = new SyncBlockList(world);
-                    lBS.add(lPos, Material.SIGN_POST, (byte) (new Random()).nextInt(16), true, 0, lLine1, lLine2, lLine3, lLine4, null, EntityType.UNKNOWN);
+                    lBS.add(lPos, Material.SIGN_POST, (byte) aAccess.random.nextInt(16), true, 0, lLine1, lLine2, lLine3, lLine4, null, EntityType.UNKNOWN);
                     lBS.execute();
                 } else {
                     Framework.plugin.log("settler", "SettlerGeo: no signs!");
@@ -185,19 +185,20 @@ public class SettlerGeologist extends Settler {
 
         @Override
         public boolean run(SettlerAccess aAccess, Settler aSettler) {
-            Random lRnd = new Random();
             boolean lFound = false;
             if (aSettler.hasAtleastItems(Material.SIGN, 1)) {
-                if (((SettlerGeologist) aSettler).dowalk > 0 || lRnd.nextInt(100) < SettlerGeologist.chanceToWalk) {                                       // 50% laufen
-                    ((SettlerGeologist) aSettler).dowalk--;
-                    BlockPosition lPos = aSettler.findRandomWalkToPosition(walkRadius, 10);
+                if (((SettlerGeologist) aSettler).dowalk > 0 || aAccess.random.nextInt(100) < SettlerGeologist.chanceToWalk) {                                       // 50% laufen
+                    if (((SettlerGeologist) aSettler).dowalk > 0) {
+                        ((SettlerGeologist) aSettler).dowalk--;
+                    }
+                    BlockPosition lPos = aSettler.findRandomWalkToPosition(aAccess.random, walkRadius, 10);
                     if (lPos != null) {
                         aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lPos));
                         lFound = true;
                     }
-                } else {                                                            // 30% klopfen
+                } else {
                     ((SettlerGeologist) aSettler).dowalk = 2;
-                    if (lRnd.nextInt(100) < SettlerGeologist.chanceForSign) {                                   // 20% Schild setzen
+                    if (aAccess.random.nextInt(100) < SettlerGeologist.chanceForSign) {
                         aSettler.addActivityForNext(
                                 new SettlerActivityGeologistPlaceSign(),
                                 new SettlerActivityJump(20));
