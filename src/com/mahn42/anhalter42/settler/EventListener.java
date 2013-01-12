@@ -6,11 +6,7 @@ package com.mahn42.anhalter42.settler;
 
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
-import com.mahn42.framework.EntityControl;
-import com.mahn42.framework.EntityControlPathItemDestination;
 import com.mahn42.framework.EntityReachedPathItemEvent;
-import com.mahn42.framework.Framework;
-import com.mahn42.framework.npc.entity.NPCEntityHuman;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -22,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -89,21 +86,21 @@ public class EventListener implements Listener {
     /*
      * Entity events
      */
+    /*
     @EventHandler
     public void onEntityCombust(EntityCombustEvent aEvent) {
         //SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + aEvent.getClass().getName());
     }
+    */
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent aEvent) {
-        LivingEntity lEntity;
-        if (aEvent.getEntity() instanceof Player) {
-            int health = -1;
-            lEntity = (LivingEntity) aEvent.getEntity();
-            health = lEntity.getHealth();
-            lEntity.getMaxFireTicks();
-            lEntity.getMaxHealth();
-            SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + " " + health + " of " + lEntity.getMaxHealth() + " " + lEntity.getMaxFireTicks() + aEvent.getClass().getName());
+        Entity lEntity = aEvent.getEntity();
+        if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
+            //TODO inform over SettlerAccess
+            SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(aEvent.getEntity().getWorld());
+            lAccess.addSettlerDamage((Settler) ((NPCEntityPlayer) lEntity).getDataObject(), aEvent.getDamage(), lEntity.getType(), lEntity.getEntityId(), aEvent.getCause(), new BlockPosition(lEntity.getLocation()));
+            //aEvent.getEntity().remove();
         }
     }
 
@@ -124,13 +121,13 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent aEvent) {
-        SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + aEvent.getClass().getName());
+        //SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + aEvent.getClass().getName());
         Player lEntity = aEvent.getEntity();
         if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
             //TODO inform over SettlerAccess
             SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(aEvent.getEntity().getWorld());
             lAccess.addSettlerDied((Settler) ((NPCEntityPlayer) lEntity).getDataObject());
-            aEvent.getEntity().remove();
+            lEntity.remove();
         }
     }
 

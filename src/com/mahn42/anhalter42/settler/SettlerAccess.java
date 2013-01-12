@@ -21,6 +21,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -229,6 +230,30 @@ public class SettlerAccess {
         }
     }
 
+    public static class SettlerDamage {
+        public Settler settler;
+        public int damage;
+        public EntityType entityType;
+        public int entityId;
+        public EntityDamageEvent.DamageCause cause;
+        public BlockPosition entityPos;
+    }
+    
+    protected ArrayList<SettlerDamage> settlerDamage = new ArrayList<SettlerDamage>();
+    
+    public void addSettlerDamage(Settler aSettler, int aDamage, EntityType aType, int aId, EntityDamageEvent.DamageCause aCause, BlockPosition aEntityPos) {
+        SettlerDamage lDamage = new SettlerDamage();
+        lDamage.settler = aSettler;
+        lDamage.damage = aDamage;
+        lDamage.entityType = aType;
+        lDamage.entityId = aId;
+        lDamage.cause = aCause;
+        lDamage.entityPos = aEntityPos;
+        synchronized(settlerDamage) {
+            settlerDamage.add(lDamage);
+        }
+    }
+
     public class EntityState {
 
         public int id;
@@ -328,5 +353,14 @@ public class SettlerAccess {
             reachedTargetSettler.clear();
         }
         return lSettlers;
+    }
+
+    public ArrayList<SettlerDamage> retrieveDamagedSettlers() {
+        ArrayList<SettlerDamage> lDamages = new ArrayList<SettlerDamage>();
+        synchronized (settlerDamage) {
+            lDamages.addAll(settlerDamage);
+            settlerDamage.clear();
+        }
+        return lDamages;
     }
 }

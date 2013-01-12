@@ -38,13 +38,10 @@ public class SettlerForester extends Settler {
     }
 
     @Override
-    public void run(SettlerAccess aAccess) {
+    public void runInternal(SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
-            BlockPosition lPos = findRandomWalkToPosition(aAccess.random, 42, 10);
-            if (lPos != null) {
-                addActivityForNow(new SettlerActivityWalkToTarget(lPos));
-            }
+            addActivityForNow(new SettlerActivityFindRandomPath());
         }
-        super.run(aAccess);
+        super.runInternal(aAccess);
     }
 }

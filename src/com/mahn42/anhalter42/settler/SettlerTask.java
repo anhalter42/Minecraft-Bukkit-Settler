@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess.ChunkLoad;
+import com.mahn42.anhalter42.settler.SettlerAccess.SettlerDamage;
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class SettlerTask implements Runnable {
     protected Collection<? extends Settler> fSettlers;
     protected ArrayList<Settler> fDiedSettlers;
     protected ArrayList<Settler> fReachedTargetSettlers;
+    protected ArrayList<SettlerDamage> fDamagedSettlers;
     protected boolean fIsRunning = false;
 
     protected enum ChunkChangeKind {
@@ -49,12 +51,20 @@ public class SettlerTask implements Runnable {
                 fChunkLoads = fAccess.retrieveChunkLoads();
                 fDiedSettlers = fAccess.retrieveDiedSettlers();
                 fReachedTargetSettlers = fAccess.retrieveReachedTargetSettlers();
+                fDamagedSettlers = fAccess.retrieveDamagedSettlers();
                 for (Settler lSettler : fSettlers) {
                     if (fDiedSettlers.contains(lSettler)) {
                         lSettler.died();
+                        fDiedSettlers.remove(lSettler);
                     }
                     if (fReachedTargetSettlers.contains(lSettler)) {
                         lSettler.targetReached(fAccess);
+                        fReachedTargetSettlers.remove(lSettler);
+                    }
+                    for(SettlerDamage lDamage : fDamagedSettlers) {
+                        if (lDamage.settler == lSettler) {
+                            lSettler.addDamage(lDamage);
+                        }
                     }
                     if (lSettler.isActive()) {
                         BlockPosition lPos = lSettler.getPosition();

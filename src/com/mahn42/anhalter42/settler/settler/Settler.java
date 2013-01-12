@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerAccess.SettlerDamage;
 import com.mahn42.anhalter42.settler.SettlerDBRecord;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
@@ -30,6 +31,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -46,6 +48,7 @@ public class Settler {
         SettlerWoodcutter.register();
         SettlerForester.register();
         SettlerGeologist.register();
+        SettlerShepherd.register();
     }
 
     public static Class getSettlerClass(String aTypename) {
@@ -65,7 +68,11 @@ public class Settler {
     public static Set<String> getSettlerProfessions() {
         return types.keySet();
     }
-    
+
+    public void addDamage(SettlerDamage lDamage) {
+        fDamages.add(lDamage);
+    }
+
     public static class PutInChestItem {
         Material material;
         int keep;
@@ -83,6 +90,7 @@ public class Settler {
     protected NPCEntityPlayer fEntity = null;
     protected ArrayList<Material> fItemsToCollect = new ArrayList<Material>();
     protected ArrayList<PutInChestItem> fPutInChestItems = new ArrayList<PutInChestItem>();
+    protected ArrayList<SettlerDamage> fDamages = new ArrayList<SettlerDamage>();
     //Meta
     protected String fKey;
     protected String fProfession;
@@ -356,6 +364,9 @@ public class Settler {
     }
 
     public void run(SettlerAccess aAccess) {
+        if (!hasEntity()) { // for testing?.. only settler working who have an entity
+            return;
+        }
         if (!isWorkingTime()) { // no work time :-) we go sleeping
             if (!fSendAtHome) {
                 if (getBedPosition() != null && !getPosition().nearly(getBedPosition(), 2)) {
@@ -379,24 +390,40 @@ public class Settler {
             runPutInChestItems(aAccess);
             runCollectItems(aAccess);
         }
-        /* try to swim.. doesnt work
-        BlockPosition lPos = getPosition();
-        lPos.y++;
-        if (hasEntity() && lPos.getBlock(getWorld()).isLiquid()) {
-            fEntity.swim();
-        }
-        */
+        runCheckDamage(aAccess);
+        runInternal(aAccess);
         SettlerActivity lAct = getCurrentActivity();
         if (lAct != null) {
             boolean lRemove = lAct.run(aAccess, this);
             lAct.runningTicks += SettlerPlugin.plugin.configSettlerTicks;
             if (lRemove || lAct.runningTicks > lAct.maxTicks) {
+                lAct.deactivate(this);
                 fActivityList.remove(lAct);
-                Framework.plugin.log("settler", "settler activity poped " + lAct);
+                Framework.plugin.log("settler", "settler " + getSettlerName() + " activity poped " + lAct);
+            }
+        }
+        fDamages.clear();
+    }
+    
+    protected void runInternal(SettlerAccess aAccess) {
+    }
+
+    protected void runCheckDamage(SettlerAccess aAccess) {
+        if (fDamages.size() > 0) {
+            for(SettlerDamage lDamage : fDamages) {
+                if (lDamage.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+                    if (!lDamage.entityPos.nearly(getPosition(), 2)) {
+                        addActivityForNow(
+                                new SettlerActivityWalkToTarget(lDamage.entityPos),
+                                new SettlerActivityFight(lDamage.entityId, 20));
+                    } else {
+                        addActivityForNow(new SettlerActivityFight(lDamage.entityId, 20));
+                    }
+                }
             }
         }
     }
-
+    
     public void runPutInChestItems(SettlerAccess aAccess) {
         BlockPosition lPos = getPosition();
         //TODO should be chest position
@@ -521,7 +548,7 @@ public class Settler {
 
     public void createEntity() {
         NPCEntityPlayer lNPC = Framework.plugin.createPlayerNPC(fWorld, getPosition(), getSettlerName(), this);
-        Framework.plugin.log("settler", "new settler '" + getDisplayName() + "' at " + getPosition());
+        //Framework.plugin.log("settler", "new settler '" + getDisplayName() + "' at " + getPosition());
         updateEntity(lNPC);
     }
 
@@ -704,13 +731,6 @@ public class Settler {
     }
 
     public void targetReached(SettlerAccess aAccess) {
-        /*
-         if (getActivity() == ACT_WALK_TO_TARGET) {
-         setActivity(null);
-         setActivityState(null);
-         }
-         setTargetPosition(null);
-         */
         SettlerActivity lAct = getCurrentActivity();
         if (lAct != null) {
             lAct.targetReached(aAccess, this);
@@ -769,7 +789,7 @@ public class Settler {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
             fActivityList.push(lAct);
-            Framework.plugin.log("settler", "settler activity pushed now " + lAct);
+            Framework.plugin.log("settler", "settler " + getSettlerName() + " activity pushed now " + lAct);
         }
     }
 
@@ -781,7 +801,7 @@ public class Settler {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
             fActivityList.add(lAct);
-            Framework.plugin.log("settler", "settler activity pushed later " + lAct);
+            Framework.plugin.log("settler", "settler " + getSettlerName() + " activity pushed later " + lAct);
         }
     }
 
@@ -793,7 +813,7 @@ public class Settler {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
             fActivityList.addAsNext(lAct);
-            Framework.plugin.log("settler", "settler activity pushed next " + lAct);
+            Framework.plugin.log("settler", "settler " + getSettlerName() + " activity pushed next " + lAct);
         }
     }
 
@@ -917,6 +937,28 @@ public class Settler {
             }
             aAttempts--;
         } while (!lFound && aAttempts > 0);
+        return null;
+    }
+
+    public BlockPosition findRandomTeleportToPosition(Random aRandom, int aRadius, int aAttempts) {
+        do {
+            BlockPosition lPos = getPosition();
+            lPos.add(aRandom.nextInt(aRadius * 2) - aRadius, 0, aRandom.nextInt(aRadius * 2) - aRadius);
+            lPos.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
+            Block lBlock = lPos.getBlock(getWorld());
+            if (!lBlock.isLiquid()) {
+                while (lPos.y > 0 && !lBlock.getType().isSolid()) {
+                    lPos.y--;
+                    lBlock = lPos.getBlock(getWorld());
+                }
+                lPos.y++; // step in AIR
+                lBlock = lPos.getBlock(getWorld());
+                if (!lBlock.isLiquid()) {
+                    return lPos;
+                }
+            }
+            aAttempts--;
+        } while (aAttempts > 0);
         return null;
     }
 

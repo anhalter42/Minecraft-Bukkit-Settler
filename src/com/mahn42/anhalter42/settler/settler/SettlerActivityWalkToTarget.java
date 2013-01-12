@@ -5,11 +5,14 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityControl;
 import com.mahn42.framework.EntityControlPathItemDestination;
 import com.mahn42.framework.Framework;
+import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.Map;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -22,6 +25,9 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
     public BlockPosition target;
     public boolean started = false;
     public boolean reached = false;
+    
+    protected BlockPosition lastPos;
+    protected int samePosTicks = 0;
 
     public SettlerActivityWalkToTarget() {
         type = TYPE;
@@ -54,14 +60,34 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
     public boolean run(SettlerAccess aAccess, Settler aSettler) {
         if (!started && !reached && target != null && aSettler.hasEntity()) {
             final EntityControl lEC = new EntityControl(aSettler.fEntity.getAsPlayer());
+            double lDistance = aSettler.getPosition().distance(target);
+            maxTicks = (int)(lDistance * 30 / aSettler.fEntity.getAsPlayer().getWalkSpeed());
             lEC.path.add(new EntityControlPathItemDestination(target, aSettler.fEntity.getAsPlayer().getWalkSpeed() /*aSettler.getWalkSpeed()*/));
             runTaskLater(new Runnable() {
                 @Override
                 public void run() {
+                    if (((Player)lEC.entity).isSleeping()) {
+                        ((NPCEntityPlayer)lEC.entity).awake();
+                    }
                     Framework.plugin.getEntityController().add(lEC);
                     started = true;
                 }
             });
+        } else {
+            BlockPosition lPos = aSettler.getPosition();
+            if (lastPos != null) {
+                if (lastPos.equals(lPos) && !lPos.nearly(target, 3)) {
+                    samePosTicks += SettlerPlugin.plugin.configSettlerTicks;
+                    if (samePosTicks > (20 * 30)) { // 30s?
+                        SettlerPlugin.plugin.getLogger().info("Settler " + aSettler.getSettlerName() + " is hanging... " + lPos);
+                        aSettler.addActivityForNow(new SettlerActivityFindRandomTeleport());
+                        //reached = true;
+                    }
+                } else {
+                    samePosTicks = 0;
+                }
+            }
+            lastPos = lPos;
         }
         return reached;
     }
@@ -78,6 +104,16 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
         super.deactivate(aSettler);
         if (started) {
             Framework.plugin.getEntityController().remove(aSettler.fEntityId);
+            if (aSettler.hasEntity()) {
+                final NPCEntityPlayer lPlayer = aSettler.fEntity;
+                runTaskLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        lPlayer.stop();
+                        started = true;
+                    }
+                });
+            }
             started = false;
         }
     }

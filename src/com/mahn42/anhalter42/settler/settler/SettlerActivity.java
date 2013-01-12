@@ -31,6 +31,12 @@ public abstract class SettlerActivity {
         registerActivity(SettlerActivityStopSneaking.TYPE, SettlerActivityStopSneaking.class);
         registerActivity(SettlerActivityTeleport.TYPE, SettlerActivityTeleport.class);
         registerActivity(SettlerActivityCollectItems.TYPE, SettlerActivityCollectItems.class);
+        registerActivity(SettlerActivityPutItemsInChest.TYPE, SettlerActivityPutItemsInChest.class);
+        registerActivity(SettlerActivityFight.TYPE, SettlerActivityFight.class);
+        registerActivity(SettlerActivityFindRandomPath.TYPE, SettlerActivityFindRandomPath.class);
+        registerActivity(SettlerActivityFindRandomTeleport.TYPE, SettlerActivityFindRandomTeleport.class);
+        registerActivity(SettlerActivityShearSheep.TYPE, SettlerActivityShearSheep.class);
+        
     }
 
     public static void registerActivity(String aName, Class aClass) {

@@ -4,6 +4,7 @@
  */
 package com.mahn42.anhalter42.settler;
 
+import com.mahn42.anhalter42.settler.command.CommandSettlerList;
 import com.mahn42.anhalter42.settler.command.CommandSettlerListProfessions;
 import com.mahn42.anhalter42.settler.command.CommandSettlerTest;
 import com.mahn42.anhalter42.settler.settler.Settler;
@@ -83,6 +84,7 @@ public class SettlerPlugin extends JavaPlugin {
         for (World lWorld : lWorlds) {
             SettlerTask lTask = new SettlerTask(lWorld);
             worldTasks.put(lWorld.getName(), lTask);
+            //getServer().getScheduler().runTaskTimer(this, lTask, 10 + (configSettlerTicks / 2), configSettlerTicks);
             getServer().getScheduler().runTaskTimerAsynchronously(this, lTask, 10 + (configSettlerTicks / 2), configSettlerTicks);
         }
     }
@@ -274,6 +276,7 @@ public class SettlerPlugin extends JavaPlugin {
 
     private void registerSettlerCommands() {
         getCommand("s_list_professions").setExecutor(new CommandSettlerListProfessions());
+        getCommand("s_list").setExecutor(new CommandSettlerList());
         getCommand("s_test").setExecutor(new CommandSettlerTest());
     }
 

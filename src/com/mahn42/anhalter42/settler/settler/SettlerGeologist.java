@@ -58,11 +58,11 @@ public class SettlerGeologist extends Settler {
     protected int dowalk = 4;
 
     @Override
-    public void run(SettlerAccess aAccess) {
+    public void runInternal(SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(new SettlerActivityGeologistThinking());
         }
-        super.run(aAccess);
+        super.runInternal(aAccess);
     }
 
     public static class SettlerActivityGeologistGetSigns extends SettlerActivity {
@@ -192,11 +192,15 @@ public class SettlerGeologist extends Settler {
                     if (((SettlerGeologist) aSettler).dowalk > 0) {
                         ((SettlerGeologist) aSettler).dowalk--;
                     }
+                    aSettler.addActivityForNext(new SettlerActivityFindRandomPath());
+                    lFound = true;
+                    /*
                     BlockPosition lPos = aSettler.findRandomWalkToPosition(aAccess.random, walkRadius, 10);
                     if (lPos != null) {
                         aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lPos));
                         lFound = true;
                     }
+                    */
                 } else {
                     ((SettlerGeologist) aSettler).dowalk = 2;
                     if (aAccess.random.nextInt(100) < SettlerGeologist.chanceForSign) {
