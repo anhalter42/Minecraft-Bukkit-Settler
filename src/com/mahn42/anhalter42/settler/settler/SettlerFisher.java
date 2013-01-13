@@ -4,6 +4,7 @@
  */
 package com.mahn42.anhalter42.settler.settler;
 
+import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import org.bukkit.Material;
 
@@ -36,5 +37,13 @@ public class SettlerFisher extends Settler {
         fPutInChestItems.add(new PutInChestItem(Material.RAW_FISH, 0));
         fPutInChestItems.add(new PutInChestItem(Material.COOKED_FISH, 0));
         fPutInChestItems.add(new PutInChestItem(Material.INK_SACK, 0));
+    }
+
+    @Override
+    protected void runInternal(SettlerAccess aAccess) {
+        if (isWorkingTime() && getCurrentActivity() == null) {
+            addActivityForNow(new SettlerActivityFindRandomPath());
+        }
+        super.runInternal(aAccess);
     }
 }

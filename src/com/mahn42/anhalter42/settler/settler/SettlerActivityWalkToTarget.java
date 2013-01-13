@@ -61,7 +61,10 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
         if (!started && !reached && target != null && aSettler.hasEntity()) {
             final EntityControl lEC = new EntityControl(aSettler.fEntity.getAsPlayer());
             double lDistance = aSettler.getPosition().distance(target);
-            maxTicks = (int)(lDistance * 30 / aSettler.fEntity.getAsPlayer().getWalkSpeed());
+            maxTicks = (int)(lDistance * 20 / aSettler.fEntity.getAsPlayer().getWalkSpeed());
+            if (maxTicks > 1200) {
+                maxTicks = 1200;
+            }
             lEC.path.add(new EntityControlPathItemDestination(target, aSettler.fEntity.getAsPlayer().getWalkSpeed() /*aSettler.getWalkSpeed()*/));
             runTaskLater(new Runnable() {
                 @Override

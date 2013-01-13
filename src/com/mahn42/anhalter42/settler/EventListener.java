@@ -11,12 +11,14 @@ import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -99,7 +101,12 @@ public class EventListener implements Listener {
         if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
             //TODO inform over SettlerAccess
             SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(aEvent.getEntity().getWorld());
-            lAccess.addSettlerDamage((Settler) ((NPCEntityPlayer) lEntity).getDataObject(), aEvent.getDamage(), lEntity.getType(), lEntity.getEntityId(), aEvent.getCause(), new BlockPosition(lEntity.getLocation()));
+            if (aEvent instanceof EntityDamageByEntityEvent) {
+                EntityDamageByEntityEvent lEvent = (EntityDamageByEntityEvent) aEvent;
+                lAccess.addSettlerDamage((Settler) ((NPCEntityPlayer) lEntity).getDataObject(), aEvent.getDamage(), lEvent.getDamager().getType(), lEvent.getDamager().getEntityId(), aEvent.getCause(), new BlockPosition(lEvent.getDamager().getLocation()));
+            } else {
+                lAccess.addSettlerDamage((Settler) ((NPCEntityPlayer) lEntity).getDataObject(), aEvent.getDamage(), EntityType.UNKNOWN, 0, aEvent.getCause(), null);
+            }
             //aEvent.getEntity().remove();
         }
     }

@@ -49,24 +49,24 @@ public class SettlerShepherd extends Settler {
                 Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), 42, EntityType.SHEEP);
                 if (!lStates.isEmpty()) {
                     for (SettlerAccess.EntityState lState : lStates) {
-                        /*
-                        if (lState.pos.nearly(getPosition(), 1)) {
-                            addActivityForNow(
-                                    "FindSheep",
-                                    new SettlerActivityShearSheep(lState.id),
-                                    new SettlerActivityCollectItems(fItemsToCollect));
-                        } else*/ if (canWalkTo(lState.pos)) {
-                            addActivityForNow(
-                                    "FindSheep",
-                                    new SettlerActivityWalkToTarget(lState.pos),
-                                    new SettlerActivityShearSheep(lState.id),
-                                    new SettlerActivityCollectItems(fItemsToCollect));
+                        if ((Boolean) lState.props.get("isAdult") && !(Boolean) lState.props.get("isSheared")) {
+                            if (canWalkTo(lState.pos)) {
+                                addActivityForNow(
+                                        "FindSheep",
+                                        new SettlerActivityWalkToTarget(lState.pos),
+                                        new SettlerActivitySwingArm(5),
+                                        new SettlerActivityShearSheep(lState.id),
+                                        new SettlerActivityCollectItems(fItemsToCollect));
+                            }
                         }
                     }
                 } else {
                     // walk a bit
-                    addActivityForNow(new SettlerActivityFindRandomPath());
+                    addActivityForNow(new SettlerActivityFindRandomPath(10, 10));
                 }
+            } else {
+                // walk a bit
+                addActivityForNow(new SettlerActivityFindRandomPath(10, 10));
             }
         }
 

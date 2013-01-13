@@ -4,6 +4,7 @@
  */
 package com.mahn42.anhalter42.settler.settler;
 
+import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import org.bukkit.Material;
 
@@ -34,5 +35,13 @@ public class SettlerWoodcutter extends Settler {
         fItemsToCollect.add(Material.SAPLING);
         fPutInChestItems.add(new PutInChestItem(Material.LOG, 0));
         fPutInChestItems.add(new PutInChestItem(Material.SAPLING, 0));
+    }
+
+    @Override
+    protected void runInternal(SettlerAccess aAccess) {
+        if (isWorkingTime() && getCurrentActivity() == null) {
+            addActivityForNow(new SettlerActivityFindRandomPath());
+        }
+        super.runInternal(aAccess);
     }
 }

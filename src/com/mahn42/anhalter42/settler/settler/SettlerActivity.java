@@ -36,6 +36,7 @@ public abstract class SettlerActivity {
         registerActivity(SettlerActivityFindRandomPath.TYPE, SettlerActivityFindRandomPath.class);
         registerActivity(SettlerActivityFindRandomTeleport.TYPE, SettlerActivityFindRandomTeleport.class);
         registerActivity(SettlerActivityShearSheep.TYPE, SettlerActivityShearSheep.class);
+        registerActivity(SettlerActivityGetItemsFromChest.TYPE, SettlerActivityGetItemsFromChest.class);
         
     }
 

@@ -16,11 +16,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -264,6 +267,8 @@ public class SettlerAccess {
         public float saturation;
         public Material material;
         public int amount;
+        
+        public HashMap<String, Object> props = new HashMap<String, Object>();
 
         public EntityState(Entity aEntity) {
             id = aEntity.getEntityId();
@@ -279,6 +284,18 @@ public class SettlerAccess {
                 ItemStack itemStack = ((Item)aEntity).getItemStack();
                 material = itemStack.getType();
                 amount = itemStack.getAmount();
+            }
+            switch (type) {
+                case SHEEP:
+                    props.put("isAdult", ((Sheep)aEntity).isAdult());
+                    props.put("isSheared", ((Sheep)aEntity).isSheared());
+                    break;
+                case PIG:
+                    props.put("isAdult", ((Pig)aEntity).isAdult());
+                    break;
+                case COW:
+                    props.put("isAdult", ((Cow)aEntity).isAdult());
+                    break;
             }
         }
     }

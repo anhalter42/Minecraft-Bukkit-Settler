@@ -77,12 +77,14 @@ public class SettlerGeologist extends Settler {
         public boolean run(SettlerAccess aAccess, Settler aSettler) {
             SettlerBuildingDB lDB = SettlerPlugin.plugin.getSettlerBuildingDB(aSettler.getWorld());
             SettlerBuilding lBuilding = lDB.getRecord(aSettler.getHomeKey());
-            BuildingBlock lChestB = lBuilding.getBlock("chest");
-            Chest lChest = (Chest) lChestB.position.getBlock(aSettler.getWorld()).getState();
-            Inventory lInv = lChest.getInventory();
-            if (InventoryHelper.hasAtleastItems(lInv, Material.SIGN, 1)) {
-                int lRemoved = InventoryHelper.removeItems(lInv, Material.SIGN, 10);
-                aSettler.insertItems(Material.SIGN, lRemoved);
+            if (lBuilding != null) {
+                BuildingBlock lChestB = lBuilding.getBlock("chest");
+                Chest lChest = (Chest) lChestB.position.getBlock(aSettler.getWorld()).getState();
+                Inventory lInv = lChest.getInventory();
+                if (InventoryHelper.hasAtleastItems(lInv, Material.SIGN, 1)) {
+                    int lRemoved = InventoryHelper.removeItems(lInv, Material.SIGN, 10);
+                    aSettler.insertItems(Material.SIGN, lRemoved);
+                }
             }
             return true;
         }
@@ -195,12 +197,12 @@ public class SettlerGeologist extends Settler {
                     aSettler.addActivityForNext(new SettlerActivityFindRandomPath());
                     lFound = true;
                     /*
-                    BlockPosition lPos = aSettler.findRandomWalkToPosition(aAccess.random, walkRadius, 10);
-                    if (lPos != null) {
-                        aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lPos));
-                        lFound = true;
-                    }
-                    */
+                     BlockPosition lPos = aSettler.findRandomWalkToPosition(aAccess.random, walkRadius, 10);
+                     if (lPos != null) {
+                     aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lPos));
+                     lFound = true;
+                     }
+                     */
                 } else {
                     ((SettlerGeologist) aSettler).dowalk = 2;
                     if (aAccess.random.nextInt(100) < SettlerGeologist.chanceForSign) {

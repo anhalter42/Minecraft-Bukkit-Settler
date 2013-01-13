@@ -74,15 +74,15 @@ public class Settler {
     }
 
     public static class PutInChestItem {
+
         Material material;
         int keep;
-        
+
         public PutInChestItem(Material aMaterial, int aKeep) {
             material = aMaterial;
             keep = aKeep;
         }
     }
-    
     //Runtime
     protected int fEntityId = 0;
     protected World fWorld;
@@ -404,14 +404,15 @@ public class Settler {
         }
         fDamages.clear();
     }
-    
+
     protected void runInternal(SettlerAccess aAccess) {
     }
 
     protected void runCheckDamage(SettlerAccess aAccess) {
         if (fDamages.size() > 0) {
-            for(SettlerDamage lDamage : fDamages) {
-                if (lDamage.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+            for (SettlerDamage lDamage : fDamages) {
+                if (lDamage.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                        && lDamage.entityPos != null) {
                     if (!lDamage.entityPos.nearly(getPosition(), 2)) {
                         addActivityForNow(
                                 new SettlerActivityWalkToTarget(lDamage.entityPos),
@@ -423,18 +424,19 @@ public class Settler {
             }
         }
     }
-    
+
     public void runPutInChestItems(SettlerAccess aAccess) {
         BlockPosition lPos = getPosition();
         //TODO should be chest position
         if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
-            for(PutInChestItem lpItem : fPutInChestItems) {
+            for (PutInChestItem lpItem : fPutInChestItems) {
                 if (hasAtleastItems(lpItem.material, lpItem.keep + 1)) {
                     addActivityForNow("PutInChestItems", new SettlerActivityPutItemsInChest(lpItem.material, -1, lpItem.keep));
                 }
             }
         }
     }
+
     public void runCollectItems(SettlerAccess aAccess) {
         if (!existsTaggedActivity("CollectItems")) {
             Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), fCollectItemRadius, fItemsToCollect);
@@ -922,16 +924,19 @@ public class Settler {
             lPos.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
             Block lBlock = lPos.getBlock(getWorld());
             if (!lBlock.isLiquid()) {
-                while (lPos.y > 0 && !lBlock.getType().isSolid()) {
+                while (lPos.y > 0 && !lBlock.getType().isSolid() && lBlock.getType().equals(Material.LEAVES)) {
                     lPos.y--;
                     lBlock = lPos.getBlock(getWorld());
                 }
                 lPos.y++; // step in AIR
                 lBlock = lPos.getBlock(getWorld());
                 if (!lBlock.isLiquid()) {
-                    lFound = canWalkTo(lPos);
-                    if (lFound) {
-                        return lPos;
+                    lBlock = lPos.getBlockAt(getWorld(), 0, 1, 0);
+                    if (!lBlock.getType().isSolid() || lBlock.getType().isTransparent()) {
+                        lFound = canWalkTo(lPos);
+                        if (lFound) {
+                            return lPos;
+                        }
                     }
                 }
             }
@@ -947,14 +952,17 @@ public class Settler {
             lPos.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
             Block lBlock = lPos.getBlock(getWorld());
             if (!lBlock.isLiquid()) {
-                while (lPos.y > 0 && !lBlock.getType().isSolid()) {
+                while (lPos.y > 0 && !lBlock.getType().isSolid() && lBlock.getType().equals(Material.LEAVES)) {
                     lPos.y--;
                     lBlock = lPos.getBlock(getWorld());
                 }
                 lPos.y++; // step in AIR
                 lBlock = lPos.getBlock(getWorld());
                 if (!lBlock.isLiquid()) {
-                    return lPos;
+                    lBlock = lPos.getBlockAt(getWorld(), 0, 1, 0);
+                    if (!lBlock.getType().isSolid() || lBlock.getType().isTransparent()) {
+                        return lPos;
+                    }
                 }
             }
             aAttempts--;
@@ -970,7 +978,7 @@ public class Settler {
                 for (int z = -aRadius; z <= aRadius; z++) {
                     if (lPos.getBlockAt(getWorld(), x, y, z).getType().equals(aMaterial)) {
                         BlockPosition lP = lPos.clone();
-                        lP.add(x,y,z);
+                        lP.add(x, y, z);
                         lRes.add(lP);
                     }
                 }

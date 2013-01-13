@@ -6,8 +6,12 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import java.util.List;
+import java.util.Random;
+import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Sheep;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -39,8 +43,11 @@ public class SettlerActivityShearSheep extends SettlerActivity {
                     if (lEntity.getEntityId() == entityId) {
                         if (lEntity instanceof Sheep) {
                             Sheep lSheep = (Sheep) lEntity;
-                            if (lSheep.isSheared()) {
+                            if (!lSheep.isSheared()) {
                                 lSheep.setSheared(true);
+                                ItemStack lWool = new ItemStack(Material.WOOL, (new Random()).nextInt(4));
+                                lWool.setData(new MaterialData(Material.WOOL, lSheep.getColor().getData()));
+                                lSheep.getWorld().dropItemNaturally(lSheep.getLocation(), lWool);
                             }
                         }
                         break;
