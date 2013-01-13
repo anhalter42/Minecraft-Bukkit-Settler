@@ -50,13 +50,15 @@ public class SettlerShepherd extends Settler {
                 if (!lStates.isEmpty()) {
                     for (SettlerAccess.EntityState lState : lStates) {
                         if ((Boolean) lState.props.get("isAdult") && !(Boolean) lState.props.get("isSheared")) {
-                            if (canWalkTo(lState.pos)) {
+                            if (lState.pos.nearly(getPosition(), 2)) {
                                 addActivityForNow(
                                         "FindSheep",
-                                        new SettlerActivityWalkToTarget(lState.pos),
                                         new SettlerActivitySwingArm(5),
                                         new SettlerActivityShearSheep(lState.id),
                                         new SettlerActivityCollectItems(fItemsToCollect));
+                            } else if (canWalkTo(lState.pos)) {
+                                addActivityForNow(
+                                        new SettlerActivityWalkToTarget(lState.pos));
                             }
                         }
                     }
