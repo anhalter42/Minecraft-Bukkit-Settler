@@ -76,7 +76,7 @@ class SettlerActivityCollectItems extends SettlerActivity {
                     if (!lItem.isDead() && lIds.contains(lItem.getEntityId()) && lSettler.getPosition().distance(lItem.getLocation()) < 1.5) {
                         ItemStack lStack = ((Item) lItem).getItemStack();
                         lItem.remove();
-                        lSettler.insertItems(lStack.getType(), lStack.getAmount());
+                        lSettler.insertItems(lStack);
                     }
                 }
             }

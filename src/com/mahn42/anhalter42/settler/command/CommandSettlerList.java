@@ -32,11 +32,12 @@ public class CommandSettlerList implements CommandExecutor {
         }
         ArrayList<Settler> lSettlers = SettlerPlugin.plugin.getSettlers(lWorld);
         for(Settler lSettler : lSettlers) {
-            if (aProf == null || aProf.equalsIgnoreCase(lSettler.getProfession())) {
+            if (lSettler.isActive() && aProf == null || aProf.equalsIgnoreCase(lSettler.getProfession())) {
                 aCommandSender.sendMessage(
                         lSettler.getSettlerName() + " " + 
                         lSettler.getProfession() + " " + 
                         lSettler.getPosition() + " " + 
+                        lSettler.getEntityId() + " " +
                         (lSettler.getCurrentActivity() != null ? lSettler.getCurrentActivity().toString() : ""));
             }
         }

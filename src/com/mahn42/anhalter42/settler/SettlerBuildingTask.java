@@ -98,6 +98,12 @@ public class SettlerBuildingTask implements Runnable {
     }
 
     private void checkBuilding() {
+        Collection<? extends Settler> lSettlers = fAccess.getSettlersForHomeKey(building.key);
+        if (lSettlers.size() < building.settlerCount) {
+            //TODO check which settlers are killed and if enough items to reborn settler
+            for(Settler lSettler : lSettlers) {
+            }
+        }
     }
 
     private void rebornSettler() {

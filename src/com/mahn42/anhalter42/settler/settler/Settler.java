@@ -69,10 +69,6 @@ public class Settler {
         return types.keySet();
     }
 
-    public void addDamage(SettlerDamage lDamage) {
-        fDamages.add(lDamage);
-    }
-
     public static class PutInChestItem {
 
         Material material;
@@ -120,6 +116,7 @@ public class Settler {
     protected float fWalkSpeed = 0.8f;
     // profession specific?
     protected int fCollectItemRadius = 8;
+    protected boolean fResetOnNight = true;
 
     public Settler(String aProfession) {
         fKey = UUID.randomUUID().toString();
@@ -363,6 +360,23 @@ public class Settler {
         }
     }
 
+    public void addDamage(SettlerDamage lDamage) {
+        fDamages.add(lDamage);
+    }
+
+    public void removeEntity() {
+        if (hasEntity()) {
+            SettlerPlugin.plugin.getServer().getScheduler().runTask(SettlerPlugin.plugin, new Runnable() {
+                @Override
+                public void run() {
+                    fEntity.getAsPlayer().remove();
+                }
+            });
+            Framework.plugin.log("settler", "settler " + getSettlerName() + " entity " + fEntityId + " removed.");
+        }
+        setEntityId(0);
+    }
+
     public void run(SettlerAccess aAccess) {
         if (!hasEntity()) { // for testing?.. only settler working who have an entity
             return;
@@ -371,12 +385,25 @@ public class Settler {
             if (!fSendAtHome) {
                 if (getBedPosition() != null && !getPosition().nearly(getBedPosition(), 2)) {
                     fSendAtHome = true;
-                    addActivityForNow(
-                            new SettlerActivityWalkToTarget(getBedPosition()),
-                            new SettlerActivityTeleport(getBedPosition()),
-                            new SettlerActivitySleep(),
-                            new SettlerActivityAwake(),
-                            new SettlerActivityWalkToTarget(getPosition()));
+                    if (fResetOnNight) {
+                        SettlerActivity lAct = getCurrentActivity();
+                        if (lAct != null) {
+                            lAct.deactivate(this);
+                        }
+                        fActivityList.clear();
+                        addActivityForNow(
+                                new SettlerActivityWalkToTarget(getBedPosition()),
+                                new SettlerActivityTeleport(getBedPosition()),
+                                new SettlerActivitySleep(),
+                                new SettlerActivityAwake());
+                    } else {
+                        addActivityForNow(
+                                new SettlerActivityWalkToTarget(getBedPosition()),
+                                new SettlerActivityTeleport(getBedPosition()),
+                                new SettlerActivitySleep(),
+                                new SettlerActivityAwake(),
+                                new SettlerActivityWalkToTarget(getPosition()));
+                    }
                 }
             }
         } else { // lets work..
@@ -394,12 +421,29 @@ public class Settler {
         runInternal(aAccess);
         SettlerActivity lAct = getCurrentActivity();
         if (lAct != null) {
-            boolean lRemove = lAct.run(aAccess, this);
-            lAct.runningTicks += SettlerPlugin.plugin.configSettlerTicks;
-            if (lRemove || lAct.runningTicks > lAct.maxTicks) {
+            boolean lRemove = true;
+            if ((lAct.control.condition == SettlerActivity.RunCondition.IfPreviousSuccess && lAct.control.previous_success)
+                    || (lAct.control.condition == SettlerActivity.RunCondition.IfPreviousFaild && !lAct.control.previous_success)
+                    || (lAct.control.condition == SettlerActivity.RunCondition.Always)) {
+                lRemove = lAct.run(aAccess, this);
+                lAct.runningTicks += SettlerPlugin.plugin.configSettlerTicks;
+                if (lRemove || lAct.runningTicks > lAct.maxTicks) {
+                    lAct.deactivate(this);
+                    fActivityList.remove(lAct);
+                    SettlerActivity lNext = getCurrentActivity();
+                    if (lNext != null) {
+                        lNext.control.previous_success = lAct.control.success;
+                    }
+                    Framework.plugin.log("settler", "settler " + getSettlerName() + " activity poped " + lAct);
+                }
+            } else {
                 lAct.deactivate(this);
                 fActivityList.remove(lAct);
-                Framework.plugin.log("settler", "settler " + getSettlerName() + " activity poped " + lAct);
+                SettlerActivity lNext = getCurrentActivity();
+                if (lNext != null) {
+                    lNext.control.previous_success = lAct.control.success;
+                }
+                Framework.plugin.log("settler", "settler " + getSettlerName() + " activity skipped " + lAct);
             }
         }
         fDamages.clear();
@@ -431,7 +475,13 @@ public class Settler {
         if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
             for (PutInChestItem lpItem : fPutInChestItems) {
                 if (hasAtleastItems(lpItem.material, lpItem.keep + 1)) {
-                    addActivityForNow("PutInChestItems", new SettlerActivityPutItemsInChest(lpItem.material, -1, lpItem.keep));
+                    for (ItemStack lItem : getInventory()) {
+                        if (lItem != null && lItem.getType().equals(lpItem.material)) {
+                            addActivityForNow(
+                                    "PutInChestItems",
+                                    new SettlerActivityPutItemsInChest(lpItem.material, lItem.getData().getData(), -1, lpItem.keep));
+                        }
+                    }
                 }
             }
         }
@@ -523,7 +573,7 @@ public class Settler {
         lPlayer.setCanPickupItems(true);
         lPlayer.setWalkSpeed(getWalkSpeed());
         aEntity.setDataObject(this);
-        fEntityId = lPlayer.getEntityId();
+        setEntityId(lPlayer.getEntityId());
     }
 
     public void updateFromEntity(NPCEntityPlayer aEntity) {
@@ -545,12 +595,15 @@ public class Settler {
     }
 
     public void setEntityId(int aEntityId) {
-        fEntityId = aEntityId;
+        if (fEntityId != aEntityId) {
+            Framework.plugin.log("settler", "settler " + getSettlerName() + " has now entity id " + aEntityId + ".");
+            fEntityId = aEntityId;
+        }
     }
 
     public void createEntity() {
         NPCEntityPlayer lNPC = Framework.plugin.createPlayerNPC(fWorld, getPosition(), getSettlerName(), this);
-        //Framework.plugin.log("settler", "new settler '" + getDisplayName() + "' at " + getPosition());
+        Framework.plugin.log("settler", "settler entity " + lNPC.getAsPlayer().getEntityId() + "created for '" + getSettlerName() + "' at " + getPosition());
         updateEntity(lNPC);
     }
 
@@ -778,7 +831,14 @@ public class Settler {
 
     public SettlerActivity[] tagActivities(String aTag, SettlerActivity... aActivities) {
         for (SettlerActivity lAct : aActivities) {
-            lAct.tag = aTag;
+            lAct.control.tag = aTag;
+        }
+        return aActivities;
+    }
+
+    public SettlerActivity[] controlActivities(SettlerActivity.Control aControl, SettlerActivity... aActivities) {
+        for (SettlerActivity lAct : aActivities) {
+            lAct.control = aControl;
         }
         return aActivities;
     }
@@ -877,6 +937,67 @@ public class Settler {
         }
     }
 
+    public int removeItems(ItemStack aItem) {
+        int aO = aItem.getAmount();
+        int i = -1;
+        for (ItemStack lItem : getInventory()) {
+            i++;
+            if (lItem != null && lItem.isSimilar(aItem)) {
+                if (lItem.getAmount() > aItem.getAmount()) {
+                    lItem.setAmount(lItem.getAmount() - aItem.getAmount());
+                    aItem.setAmount(0);
+                    break;
+                } else {
+                    aItem.setAmount(aItem.getAmount() - lItem.getAmount());
+                    getInventory()[i] = null;
+                    if (aItem.getAmount() == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return aO - aItem.getAmount();
+    }
+
+    public int insertItems(ItemStack aItem) {
+        int aO = aItem.getAmount();
+        for (ItemStack lItem : getInventory()) {
+            if (lItem != null && aItem.isSimilar(lItem)) {
+                if (lItem.getAmount() < lItem.getMaxStackSize()) {
+                    int lplace = lItem.getMaxStackSize() - lItem.getAmount();
+                    if (lplace >= aItem.getAmount()) {
+                        lItem.setAmount(lItem.getAmount() + aItem.getAmount());
+                        aItem.setAmount(0);
+                        break;
+                    } else {
+                        lItem.setAmount(lItem.getMaxStackSize());
+                        aItem.setAmount(aItem.getAmount() - lplace);
+                    }
+                }
+            }
+        }
+        if (aItem.getAmount() > 0) {
+            int i = -1;
+            for (ItemStack lItem : getInventory()) {
+                i++;
+                if (lItem == null) {
+                    lItem = new ItemStack(aItem.getType());
+                    getInventory()[i] = lItem;
+                    int lplace = lItem.getMaxStackSize() - lItem.getAmount();
+                    if (lplace >= aItem.getAmount()) {
+                        lItem.setAmount(lItem.getAmount() + aItem.getAmount());
+                        aItem.setAmount(0);
+                        break;
+                    } else {
+                        lItem.setAmount(lItem.getMaxStackSize());
+                        aItem.setAmount(aItem.getAmount() - lplace);
+                    }
+                }
+            }
+        }
+        return aO - aItem.getAmount();
+    }
+
     public int insertItems(Material aMat, int aCount) {
         int aO = aCount;
         for (ItemStack lItem : getInventory()) {
@@ -916,7 +1037,40 @@ public class Settler {
         return aO - aCount;
     }
 
-    public BlockPosition findRandomWalkToPosition(Random aRandom, int aRadius, int aAttempts) {
+    public enum PositionCondition {
+
+        None,
+        NaturalBlocksAround,
+        GrassOrDirtAround
+    }
+    public static ArrayList<Material> grassOrDirt = new ArrayList<Material>();
+
+    {
+        grassOrDirt.add(Material.GRASS);
+        grassOrDirt.add(Material.DIRT);
+        grassOrDirt.add(Material.LONG_GRASS);
+        grassOrDirt.add(Material.YELLOW_FLOWER);
+        grassOrDirt.add(Material.RED_ROSE);
+        grassOrDirt.add(Material.DEAD_BUSH);
+    }
+    public static ArrayList<Material> naturalBlocks = new ArrayList<Material>();
+
+    {
+        naturalBlocks.add(Material.GRASS);
+        naturalBlocks.add(Material.DIRT);
+        naturalBlocks.add(Material.LONG_GRASS);
+        naturalBlocks.add(Material.DEAD_BUSH);
+        naturalBlocks.add(Material.STONE);
+        naturalBlocks.add(Material.YELLOW_FLOWER);
+        naturalBlocks.add(Material.RED_ROSE);
+        naturalBlocks.add(Material.SAND);
+        naturalBlocks.add(Material.SANDSTONE);
+        naturalBlocks.add(Material.SNOW);
+        naturalBlocks.add(Material.LEAVES);
+        naturalBlocks.add(Material.LOG);
+    }
+
+    public BlockPosition findRandomWalkToPosition(Random aRandom, int aRadius, int aAttempts, PositionCondition aCondition) {
         boolean lFound = false;
         do {
             BlockPosition lPos = getPosition();
@@ -933,9 +1087,61 @@ public class Settler {
                 if (!lBlock.isLiquid()) {
                     lBlock = lPos.getBlockAt(getWorld(), 0, 1, 0);
                     if (!lBlock.getType().isSolid() || lBlock.getType().isTransparent()) {
-                        lFound = canWalkTo(lPos);
+                        lFound = false;
+                        switch (aCondition) {
+                            case None:
+                                lFound = true;
+                                break;
+                            case GrassOrDirtAround:
+                                lFound = true;
+                                for (int x = -2; x <= 2; x++) {
+                                    for (int z = -2; z <= 2; z++) {
+                                        BlockPosition lP = lPos.clone();
+                                        lP.add(x, 0, z);
+                                        lP.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
+                                        Material lMat = lP.getBlockType(getWorld());
+                                        while (lMat.equals(Material.AIR)) {
+                                            lP.y--;
+                                            lMat = lP.getBlockType(getWorld());
+                                        }
+                                        if (!grassOrDirt.contains(lMat)) {
+                                            lFound = false;
+                                            break;
+                                        }
+                                    }
+                                    if (!lFound) {
+                                        break;
+                                    }
+                                }
+                                break;
+                            case NaturalBlocksAround:
+                                lFound = true;
+                                for (int x = -2; x <= 2; x++) {
+                                    for (int z = -2; z <= 2; z++) {
+                                        BlockPosition lP = lPos.clone();
+                                        lP.add(x, 0, z);
+                                        lP.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
+                                        Material lMat = lP.getBlockType(getWorld());
+                                        while (lMat.equals(Material.AIR)) {
+                                            lP.y--;
+                                            lMat = lP.getBlockType(getWorld());
+                                        }
+                                        if (!naturalBlocks.contains(lMat)) {
+                                            lFound = false;
+                                            break;
+                                        }
+                                    }
+                                    if (!lFound) {
+                                        break;
+                                    }
+                                }
+                                break;
+                        }
                         if (lFound) {
-                            return lPos;
+                            lFound = canWalkTo(lPos);
+                            if (lFound) {
+                                return lPos;
+                            }
                         }
                     }
                 }
@@ -985,5 +1191,15 @@ public class Settler {
             }
         }
         return lRes;
+    }
+
+    public ItemStack getFirstItem(Material aMaterial) {
+        for (int i = 0; i < getInventory().length; i++) {
+            ItemStack lItem = getInventory()[i];
+            if (lItem != null && lItem.getType().equals(aMaterial)) {
+                return lItem;
+            }
+        }
+        return null;
     }
 }

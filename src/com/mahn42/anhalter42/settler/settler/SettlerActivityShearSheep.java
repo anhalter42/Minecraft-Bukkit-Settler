@@ -45,7 +45,7 @@ public class SettlerActivityShearSheep extends SettlerActivity {
                             Sheep lSheep = (Sheep) lEntity;
                             if (!lSheep.isSheared()) {
                                 lSheep.setSheared(true);
-                                ItemStack lWool = new ItemStack(Material.WOOL, (new Random()).nextInt(4));
+                                ItemStack lWool = new ItemStack(Material.WOOL, 1 + (new Random()).nextInt(3));
                                 lWool.setData(new MaterialData(Material.WOOL, lSheep.getColor().getData()));
                                 lSheep.getWorld().dropItemNaturally(lSheep.getLocation(), lWool);
                             }

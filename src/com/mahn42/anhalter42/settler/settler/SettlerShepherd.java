@@ -64,11 +64,11 @@ public class SettlerShepherd extends Settler {
                     }
                 } else {
                     // walk a bit
-                    addActivityForNow(new SettlerActivityFindRandomPath(10, 10));
+                    addActivityForNow(new SettlerActivityFindRandomPath(10, 10, PositionCondition.None));
                 }
             } else {
                 // walk a bit
-                addActivityForNow(new SettlerActivityFindRandomPath(10, 10));
+                addActivityForNow(new SettlerActivityFindRandomPath(10, 10, PositionCondition.None));
             }
         }
 

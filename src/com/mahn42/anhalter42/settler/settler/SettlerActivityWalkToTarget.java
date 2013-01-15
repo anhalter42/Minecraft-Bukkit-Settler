@@ -41,16 +41,18 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
     @Override
     public void serialize(Map<String, Object> aMap) {
         super.serialize(aMap);
-        aMap.put("target", target.toCSV(","));
+        if (target != null) {
+            aMap.put("target", target.toCSV(","));
+        }
     }
 
     @Override
     public void deserialize(Map<String, Object> aMap) {
         super.deserialize(aMap);
-        String lStr = aMap.get("target").toString();
-        if (lStr != null && !lStr.isEmpty()) {
+        Object lObj = aMap.get("target");
+        if (lObj != null) {
             target = new BlockPosition();
-            target.fromCSV(lStr, "\\,");
+            target.fromCSV(lObj.toString(), "\\,");
         } else {
             target = null;
         }
@@ -58,6 +60,9 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
 
     @Override
     public boolean run(SettlerAccess aAccess, Settler aSettler) {
+        if (target == null) {
+            return true;
+        }
         if (!started && !reached && target != null && aSettler.hasEntity()) {
             final EntityControl lEC = new EntityControl(aSettler.fEntity.getAsPlayer());
             double lDistance = aSettler.getPosition().distance(target);

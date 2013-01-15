@@ -23,6 +23,7 @@ public class SettlerActivityPutItemsInChest extends SettlerActivity {
 
     public static final String TYPE = "PutItemsInChest";
     public Material material;
+    public byte data = 0;
     public int amount = -1; // -1 means all
     public int keep = 0; // behalte 
 
@@ -30,9 +31,10 @@ public class SettlerActivityPutItemsInChest extends SettlerActivity {
         type = TYPE;
     }
 
-    public SettlerActivityPutItemsInChest(Material aMaterial, int aAmount, int aKeep) {
+    public SettlerActivityPutItemsInChest(Material aMaterial, byte aData, int aAmount, int aKeep) {
         type = TYPE;
         material = aMaterial;
+        data = aData;
         amount = aAmount;
         keep = aKeep;
     }
@@ -41,6 +43,7 @@ public class SettlerActivityPutItemsInChest extends SettlerActivity {
     public void serialize(Map<String, Object> aMap) {
         super.serialize(aMap);
         aMap.put("material", material.getId());
+        aMap.put("data", data);
         aMap.put("amount", amount);
         aMap.put("keep", keep);
     }
@@ -55,6 +58,10 @@ public class SettlerActivityPutItemsInChest extends SettlerActivity {
         lGet = aMap.get("amount");
         if (lGet != null) {
             amount = Integer.parseInt(lGet.toString());
+        }
+        lGet = aMap.get("data");
+        if (lGet != null) {
+            data = Byte.parseByte(lGet.toString());
         }
         lGet = aMap.get("keep");
         if (lGet != null) {

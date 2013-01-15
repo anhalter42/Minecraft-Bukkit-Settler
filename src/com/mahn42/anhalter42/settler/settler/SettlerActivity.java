@@ -17,27 +17,61 @@ import java.util.logging.Logger;
  */
 public abstract class SettlerActivity {
 
+    public enum RunCondition {
+
+        IfPreviousSuccess,
+        IfPreviousFaild,
+        Always
+    }
+
+    public static class Control {
+
+        public String tag;
+        public RunCondition condition = RunCondition.Always;
+        public boolean previous_success = true;
+        public boolean success = true;
+
+        public Control() {
+        }
+
+        public Control(String aTag) {
+            tag = aTag;
+        }
+
+        public Control(String aTag, RunCondition aCondition) {
+            tag = aTag;
+            condition = aCondition;
+        }
+
+        public Control(RunCondition aCondition) {
+            condition = aCondition;
+        }
+    }
+    
     public static HashMap<String, Class> activityTypes = new HashMap<String, Class>();
 
     public static void register() {
-        registerActivity(SettlerActivityWalkToTarget.TYPE, SettlerActivityWalkToTarget.class);
-        registerActivity(SettlerActivitySwingArm.TYPE, SettlerActivitySwingArm.class);
-        registerActivity(SettlerActivitySitDown.TYPE, SettlerActivitySitDown.class);
-        registerActivity(SettlerActivityStandUp.TYPE, SettlerActivityStandUp.class);
         registerActivity(SettlerActivityAwake.TYPE, SettlerActivityAwake.class);
-        registerActivity(SettlerActivitySleep.TYPE, SettlerActivitySleep.class);
-        registerActivity(SettlerActivityJump.TYPE, SettlerActivityJump.class);
-        registerActivity(SettlerActivityStartSneaking.TYPE, SettlerActivityStartSneaking.class);
-        registerActivity(SettlerActivityStopSneaking.TYPE, SettlerActivityStopSneaking.class);
-        registerActivity(SettlerActivityTeleport.TYPE, SettlerActivityTeleport.class);
         registerActivity(SettlerActivityCollectItems.TYPE, SettlerActivityCollectItems.class);
-        registerActivity(SettlerActivityPutItemsInChest.TYPE, SettlerActivityPutItemsInChest.class);
         registerActivity(SettlerActivityFight.TYPE, SettlerActivityFight.class);
         registerActivity(SettlerActivityFindRandomPath.TYPE, SettlerActivityFindRandomPath.class);
         registerActivity(SettlerActivityFindRandomTeleport.TYPE, SettlerActivityFindRandomTeleport.class);
-        registerActivity(SettlerActivityShearSheep.TYPE, SettlerActivityShearSheep.class);
         registerActivity(SettlerActivityGetItemsFromChest.TYPE, SettlerActivityGetItemsFromChest.class);
-        
+        registerActivity(SettlerActivityJump.TYPE, SettlerActivityJump.class);
+        registerActivity(SettlerActivityNothing.TYPE, SettlerActivityNothing.class);
+        registerActivity(SettlerActivityPlaceBlock.TYPE, SettlerActivityPlaceBlock.class);
+        registerActivity(SettlerActivityPutItemsInChest.TYPE, SettlerActivityPutItemsInChest.class);
+        registerActivity(SettlerActivityShearSheep.TYPE, SettlerActivityShearSheep.class);
+        registerActivity(SettlerActivitySitDown.TYPE, SettlerActivitySitDown.class);
+        registerActivity(SettlerActivitySleep.TYPE, SettlerActivitySleep.class);
+        registerActivity(SettlerActivityStandUp.TYPE, SettlerActivityStandUp.class);
+        registerActivity(SettlerActivityStartSneaking.TYPE, SettlerActivityStartSneaking.class);
+        registerActivity(SettlerActivityStopSneaking.TYPE, SettlerActivityStopSneaking.class);
+        registerActivity(SettlerActivitySwingArm.TYPE, SettlerActivitySwingArm.class);
+        registerActivity(SettlerActivityTakeInHand.TYPE, SettlerActivityTakeInHand.class);
+        registerActivity(SettlerActivityTeleport.TYPE, SettlerActivityTeleport.class);
+        registerActivity(SettlerActivityWalkToTarget.TYPE, SettlerActivityWalkToTarget.class);
+
     }
 
     public static void registerActivity(String aName, Class aClass) {
@@ -65,13 +99,13 @@ public abstract class SettlerActivity {
     public String type;
     public int maxTicks = 20 * 60; // 1min
     public int runningTicks = 0;
-    public String tag = "";
+    public Control control = new Control();
 
     public void serialize(Map<String, Object> aMap) {
         aMap.put("type", type);
         aMap.put("maxTicks", maxTicks);
         aMap.put("runningTicks", runningTicks);
-        aMap.put("tag", tag);
+        aMap.put("tag", control.tag);
     }
 
     public void deserialize(Map<String, Object> aMap) {
@@ -90,7 +124,7 @@ public abstract class SettlerActivity {
         }
         lGet = aMap.get("tag");
         if (lGet != null) {
-            tag = lGet.toString();
+            control.tag = lGet.toString();
         }
     }
 

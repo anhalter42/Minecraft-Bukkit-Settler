@@ -122,7 +122,7 @@ public class SettlerActivityList {
 
     public boolean existsTag(String aTag) {
         for(SettlerActivity lAct : fActivities) {
-            if (lAct.tag == aTag) {
+            if (lAct.control.tag == aTag) {
                 return true;
             }
         }
@@ -131,5 +131,9 @@ public class SettlerActivityList {
 
     public int size() {
         return fActivities.size();
+    }
+
+    public void clear() {
+        fActivities.clear();
     }
 }

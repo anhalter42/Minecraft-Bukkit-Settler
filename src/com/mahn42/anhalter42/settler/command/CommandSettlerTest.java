@@ -9,6 +9,7 @@ import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.anhalter42.settler.settler.SettlerActivityWalkToTarget;
 import com.mahn42.framework.BlockPosition;
+import java.util.ArrayList;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -81,12 +82,45 @@ public class CommandSettlerTest implements CommandExecutor {
                 long lt = 800 + ltime / 10;
                 if (lt > 2359) {
                     lt -= 2400;
-                } 
+                }
                 aCommandSender.sendMessage("Its " + ltime + " time. " + lt);
             } else if (aStrings[0].equalsIgnoreCase("y")) {
-                int highestBlockYAt = lWorld.getHighestBlockYAt(((Player)aCommandSender).getLocation());
-                Block highestBlockAt = lWorld.getHighestBlockAt(((Player)aCommandSender).getLocation());
+                int highestBlockYAt = lWorld.getHighestBlockYAt(((Player) aCommandSender).getLocation());
+                Block highestBlockAt = lWorld.getHighestBlockAt(((Player) aCommandSender).getLocation());
                 aCommandSender.sendMessage("y " + highestBlockYAt + " block " + highestBlockAt);
+            } else if (aStrings[0].equalsIgnoreCase("reorg")) {
+                ArrayList<Settler> settlers = SettlerPlugin.plugin.getSettlers(lWorld);
+                SettlerAccess settlerAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                for (Settler lSettler : settlers) {
+                    if (!lSettler.isActive()) {
+                        settlerAccess.removeSettler(lSettler);
+                        aCommandSender.sendMessage("settler " + lSettler.getDisplayName() + " was removed!");
+                    }
+                }
+            } else if (aStrings[0].equalsIgnoreCase("isgrass")) {
+                boolean lFound = true;
+                BlockPosition lPos = new BlockPosition(((Player) aCommandSender).getLocation());
+                for (int x = -2; x <= 2; x++) {
+                    for (int z = -2; z <= 2; z++) {
+                        BlockPosition lP = lPos.clone();
+                        lP.add(x, 0, z);
+                        lP.y = lWorld.getHighestBlockYAt(lPos.x, lPos.z);
+                        Material lMat = lP.getBlockType(lWorld);
+                        while (lMat.equals(Material.AIR)) {
+                            lP.y--;
+                            lMat = lP.getBlockType(lWorld);
+                        }
+                        if (!Settler.grassOrDirt.contains(lMat)) {
+                            aCommandSender.sendMessage("Mat: " + lMat.name());
+                            lFound = false;
+                            break;
+                        }
+                    }
+                    if (!lFound) {
+                        break;
+                    }
+                }
+                aCommandSender.sendMessage("found: " + lFound);
             } else {
                 aCommandSender.sendMessage("whats " + aStrings[0] + "?");
             }

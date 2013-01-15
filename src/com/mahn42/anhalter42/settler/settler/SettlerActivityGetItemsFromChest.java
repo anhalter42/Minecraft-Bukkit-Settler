@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -77,9 +78,11 @@ public class SettlerActivityGetItemsFromChest extends SettlerActivity {
                     if (lState instanceof Chest) {
                         Chest lChest = (Chest) lState;
                         Inventory lInv = lChest.getInventory();
-                        int lremoved = InventoryHelper.removeItems(lInv, lMat, lCount);
-                        lSettler.insertItems(lMat, lremoved);
-                        lCount -= lremoved;
+                        List<ItemStack> lRemovedItemsByMaterial = InventoryHelper.removeItemsByMaterial(lInv, lMat, lCount); //removeItems(lInv, lMat, lCount);
+                        for(ItemStack lItem : lRemovedItemsByMaterial) {
+                            lSettler.insertItems(lItem);
+                            lCount -= lItem.getAmount();
+                        }
                         if (lCount <= 0) {
                             break;
                         }
@@ -89,4 +92,10 @@ public class SettlerActivityGetItemsFromChest extends SettlerActivity {
         });
         return true;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " " +  material.name();
+    }
+
 }

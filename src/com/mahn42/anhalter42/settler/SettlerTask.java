@@ -77,7 +77,7 @@ public class SettlerTask implements Runnable {
                             case Unloaded:
                                 if (lSettler.hasEntity()) {
                                     // entity should destroyd by minecraft
-                                    lSettler.setEntityId(0);
+                                    lSettler.removeEntity();
                                 }
                             case None:
                                 if (!lSettler.hasEntity()) {

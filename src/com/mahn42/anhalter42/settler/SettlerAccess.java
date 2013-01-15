@@ -167,7 +167,7 @@ public class SettlerAccess {
         return lRes;
     }
     
-    protected ArrayList<Settler> settlersForEntity = new ArrayList<Settler>();
+    final protected ArrayList<Settler> settlersForEntity = new ArrayList<Settler>();
 
     public void addSettlerForEntity(Settler aSettler) {
         synchronized (settlersForEntity) {
@@ -195,9 +195,12 @@ public class SettlerAccess {
                     //TODO
                     if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
                         Settler lSettler = (Settler) ((NPCEntityPlayer) lEntity).getDataObject();
-                        settlersByEntityId.put(lEntity.getEntityId(), lSettler);
-                        lSettler.setEntityId(lEntity.getEntityId());
-                        lSettler.updateFromEntity((NPCEntityPlayer) lEntity);
+                        if (!lSettler.hasEntity() || lSettler.getEntityId() == lEntity.getEntityId()) {
+                            settlersByEntityId.put(lEntity.getEntityId(), lSettler);
+                            lSettler.setEntityId(lEntity.getEntityId());
+                            lSettler.updateFromEntity((NPCEntityPlayer) lEntity);
+                            lSettler.updateToEntity((NPCEntityPlayer) lEntity);
+                        }
                     }
                 } else {
                     //TODO
@@ -205,13 +208,21 @@ public class SettlerAccess {
             }
         }
     }
-    protected ArrayList<Settler> diedSettler = new ArrayList<Settler>();
+    
+    final protected ArrayList<Settler> diedSettler = new ArrayList<Settler>();
 
     public void addSettlerDied(Settler aSettler) {
         synchronized (diedSettler) {
             diedSettler.add(aSettler);
         }
         aSettler.deactivate();
+        String lHome = aSettler.getHomeKey();
+        if (lHome != null && !lHome.isEmpty()) {
+            SettlerBuilding lBuilding = SettlerPlugin.plugin.getSettlerBuildingDB(aSettler.getWorld()).getRecord(lHome);
+            SettlerBuildingTask lTask = new SettlerBuildingTask(SettlerBuildingTask.Kind.SettlerDied, lBuilding);
+            lTask.settler = aSettler;
+            SettlerPlugin.plugin.getServer().getScheduler().runTaskLaterAsynchronously(SettlerPlugin.plugin, lTask, 10);
+        }
         aSettler.setEntityId(0);
     }
 
@@ -317,7 +328,7 @@ public class SettlerAccess {
             kind = aKind;
         }
     }
-    protected ArrayList<ChunkLoad> chunkLoads = new ArrayList<ChunkLoad>();
+    final protected ArrayList<ChunkLoad> chunkLoads = new ArrayList<ChunkLoad>();
 
     public void addChunkUnLoad(int aX, int aZ) {
         //SettlerPlugin.plugin.getLogger().info("chunk unloaded " + aX + " " + aZ);
