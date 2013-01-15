@@ -185,7 +185,7 @@ public class SettlerGeologist extends Settler {
         public SettlerActivityGeologistThinking() {
             type = TYPE;
         }
-        public int walkRadius = 42;
+        public int walkRadius = 23;
 
         @Override
         public boolean run(SettlerAccess aAccess, Settler aSettler) {
@@ -195,7 +195,7 @@ public class SettlerGeologist extends Settler {
                     if (((SettlerGeologist) aSettler).dowalk > 0) {
                         ((SettlerGeologist) aSettler).dowalk--;
                     }
-                    aSettler.addActivityForNext(new SettlerActivityFindRandomPath(42, 40, PositionCondition.NaturalBlocksAround));
+                    aSettler.addActivityForNext(new SettlerActivityFindRandomPath(walkRadius, 10, PositionCondition.NaturalBlocksAround));
                     lFound = true;
                     /*
                      BlockPosition lPos = aSettler.findRandomWalkToPosition(aAccess.random, walkRadius, 10);

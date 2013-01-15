@@ -54,7 +54,7 @@ public class SettlerForester extends Settler {
             } else {
                 ItemStack lItem = getFirstItem(Material.SAPLING);
                 addActivityForNow(
-                        new SettlerActivityFindRandomPath(42, 40, PositionCondition.GrassOrDirtAround),
+                        new SettlerActivityFindRandomPath(23, 10, PositionCondition.GrassOrDirtAround),
                         new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
                         new SettlerActivityPlaceBlock());
             }

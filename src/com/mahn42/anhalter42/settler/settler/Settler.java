@@ -1078,7 +1078,7 @@ public class Settler {
             lPos.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
             Block lBlock = lPos.getBlock(getWorld());
             if (!lBlock.isLiquid()) {
-                while (lPos.y > 0 && !lBlock.getType().isSolid() && lBlock.getType().equals(Material.LEAVES)) {
+                while (lPos.y > 0 && (!lBlock.getType().isSolid() || lBlock.getType().equals(Material.LEAVES))) {
                     lPos.y--;
                     lBlock = lPos.getBlock(getWorld());
                 }
@@ -1158,7 +1158,7 @@ public class Settler {
             lPos.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
             Block lBlock = lPos.getBlock(getWorld());
             if (!lBlock.isLiquid()) {
-                while (lPos.y > 0 && !lBlock.getType().isSolid() && lBlock.getType().equals(Material.LEAVES)) {
+                while (lPos.y > 0 && (!lBlock.getType().isSolid() || lBlock.getType().equals(Material.LEAVES))) {
                     lPos.y--;
                     lBlock = lPos.getBlock(getWorld());
                 }
