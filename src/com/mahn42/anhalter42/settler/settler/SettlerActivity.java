@@ -71,6 +71,7 @@ public abstract class SettlerActivity {
         registerActivity(SettlerActivityTakeInHand.TYPE, SettlerActivityTakeInHand.class);
         registerActivity(SettlerActivityTeleport.TYPE, SettlerActivityTeleport.class);
         registerActivity(SettlerActivityWalkToTarget.TYPE, SettlerActivityWalkToTarget.class);
+        registerActivity(SettlerActivityBreakBlock.TYPE, SettlerActivityBreakBlock.class);
 
     }
 
@@ -142,6 +143,10 @@ public abstract class SettlerActivity {
     }
 
     public void runTaskLater(Runnable aRunnable) {
-        SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, aRunnable, 1);
+        runTaskLater(aRunnable, 1);
+    }
+
+    public void runTaskLater(Runnable aRunnable, int aTicks) {
+        SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, aRunnable, aTicks);
     }
 }

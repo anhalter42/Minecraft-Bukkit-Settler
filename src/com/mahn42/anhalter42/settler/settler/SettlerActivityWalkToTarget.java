@@ -11,7 +11,12 @@ import com.mahn42.framework.EntityControl;
 import com.mahn42.framework.EntityControlPathItemDestination;
 import com.mahn42.framework.Framework;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
+import java.util.List;
 import java.util.Map;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 
 /**
@@ -21,11 +26,9 @@ import org.bukkit.entity.Player;
 public class SettlerActivityWalkToTarget extends SettlerActivity {
 
     public static final String TYPE = "WalkToTarget";
-    
     public BlockPosition target;
     public boolean started = false;
     public boolean reached = false;
-    
     protected BlockPosition lastPos;
     protected int samePosTicks = 0;
 
@@ -66,7 +69,7 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
         if (!started && !reached && target != null && aSettler.hasEntity()) {
             final EntityControl lEC = new EntityControl(aSettler.fEntity.getAsPlayer());
             double lDistance = aSettler.getPosition().distance(target);
-            maxTicks = (int)(lDistance * 20 / aSettler.fEntity.getAsPlayer().getWalkSpeed());
+            maxTicks = (int) (lDistance * 20 / aSettler.fEntity.getAsPlayer().getWalkSpeed());
             if (maxTicks > 1200) {
                 maxTicks = 1200;
             }
@@ -74,8 +77,8 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
             runTaskLater(new Runnable() {
                 @Override
                 public void run() {
-                    if (((Player)lEC.entity).isSleeping()) {
-                        ((NPCEntityPlayer)lEC.entity).awake();
+                    if (((Player) lEC.entity).isSleeping()) {
+                        ((NPCEntityPlayer) lEC.entity).awake();
                     }
                     Framework.plugin.getEntityController().add(lEC);
                     started = true;
@@ -86,9 +89,32 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
             if (lastPos != null) {
                 if (lastPos.equals(lPos) && !lPos.nearly(target, 3)) {
                     samePosTicks += SettlerPlugin.plugin.configSettlerTicks;
+                    if (samePosTicks > (20 * 2)) { // 2s
+                        List<BlockPosition> lDoorPoss = aSettler.findBlocks(Material.WOODEN_DOOR, 2);
+                        for(BlockPosition lDPos : lDoorPoss) {
+                            Block lBlock = lDPos.getBlock(aSettler.getWorld());
+                            if ((lBlock.getData() & 0x8) == 0) { // bottom part of door
+                                final Block lDoor = lBlock;
+                                runTaskLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        lDoor.getWorld().playSound(lDoor.getLocation(), Sound.DOOR_OPEN, 0, 0);
+                                        lDoor.setData((byte)(lDoor.getData() | 0x4), true);
+                                    }
+                                });
+                                runTaskLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        lDoor.getWorld().playSound(lDoor.getLocation(), Sound.DOOR_CLOSE, 0, 0);
+                                        lDoor.setData((byte)(lDoor.getData() & ~0x4), true);
+                                    }
+                                }, 20);
+                            }
+                        }
+                    }
                     if (samePosTicks > (20 * 30)) { // 30s?
                         SettlerPlugin.plugin.getLogger().info("Settler " + aSettler.getSettlerName() + " is hanging... " + lPos);
-                        aSettler.addActivityForNow(new SettlerActivityFindRandomTeleport());
+                        aSettler.addActivityForNow(new SettlerActivityFindRandomTeleport(2, 10));
                         //reached = true;
                     }
                 } else {

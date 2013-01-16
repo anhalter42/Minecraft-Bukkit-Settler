@@ -65,36 +65,10 @@ public class SettlerGeologist extends Settler {
         super.runInternal(aAccess);
     }
 
-    /*
-     public static class SettlerActivityGeologistGetSigns extends SettlerActivity {
-
-     public static final String TYPE = "GeologistGetSigns";
-
-     public SettlerActivityGeologistGetSigns() {
-     type = TYPE;
-     }
-
-     @Override
-     public boolean run(SettlerAccess aAccess, Settler aSettler) {
-     SettlerBuildingDB lDB = SettlerPlugin.plugin.getSettlerBuildingDB(aSettler.getWorld());
-     SettlerBuilding lBuilding = lDB.getRecord(aSettler.getHomeKey());
-     if (lBuilding != null) {
-     BuildingBlock lChestB = lBuilding.getBlock("chest");
-     Chest lChest = (Chest) lChestB.position.getBlock(aSettler.getWorld()).getState();
-     Inventory lInv = lChest.getInventory();
-     if (InventoryHelper.hasAtleastItems(lInv, Material.SIGN, 1)) {
-     int lRemoved = InventoryHelper.removeItems(lInv, Material.SIGN, 10);
-     aSettler.insertItems(Material.SIGN, lRemoved);
-     }
-     }
-     return true;
-     }
-     }
-     */
     public static class SettlerActivityGeologistPlaceSign extends SettlerActivity {
 
         public static final String TYPE = "GeologistPlaceSign";
-        public int radius = 16;
+        public int radius = 3;
 
         public SettlerActivityGeologistPlaceSign() {
             type = TYPE;
@@ -108,6 +82,7 @@ public class SettlerGeologist extends Settler {
             importantMats.add(Material.IRON_ORE);
             importantMats.add(Material.COAL_ORE);
             importantMats.add(Material.LAPIS_ORE);
+            importantMats.add(Material.EMERALD_ORE);
         }
         protected static ArrayList<Material> vegetationMats;
 
@@ -197,13 +172,6 @@ public class SettlerGeologist extends Settler {
                     }
                     aSettler.addActivityForNext(new SettlerActivityFindRandomPath(walkRadius, 10, PositionCondition.NaturalBlocksAround));
                     lFound = true;
-                    /*
-                     BlockPosition lPos = aSettler.findRandomWalkToPosition(aAccess.random, walkRadius, 10);
-                     if (lPos != null) {
-                     aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lPos));
-                     lFound = true;
-                     }
-                     */
                 } else {
                     ((SettlerGeologist) aSettler).dowalk = 2;
                     if (aAccess.random.nextInt(100) < SettlerGeologist.chanceForSign) {
@@ -224,12 +192,12 @@ public class SettlerGeologist extends Settler {
                     if (!lBedPos.nearly(lPos, 2)) {
                         aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lBedPos));
                     } else {
-                        if (((SettlerGeologist) aSettler).getSignFromChestCount > 2) {
+                        if (((SettlerGeologist) aSettler).getSignFromChestCount > 0) {
                             ((SettlerGeologist) aSettler).getSignFromChestCount = 0;
-                            aSettler.addActivityForNext(new SettlerActivityNothing(20*60*5)); //5min
+                            ((SettlerGeologist) aSettler).dowalk = 5;
+                            //aSettler.addActivityForNext(new SettlerActivityNothing(20*60)); //1min
                         } else {
                             ((SettlerGeologist) aSettler).getSignFromChestCount++;
-//                        aSettler.addActivityForNext(new SettlerActivityGeologistGetSigns());
                             aSettler.addActivityForNext(new SettlerActivityGetItemsFromChest(Material.SIGN, 10, 0));
                         }
                     }

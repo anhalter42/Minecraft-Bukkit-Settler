@@ -280,6 +280,7 @@ public class SettlerAccess {
         public int amount;
         
         public HashMap<String, Object> props = new HashMap<String, Object>();
+        public ItemStack item;
 
         public EntityState(Entity aEntity) {
             id = aEntity.getEntityId();
@@ -295,6 +296,7 @@ public class SettlerAccess {
                 ItemStack itemStack = ((Item)aEntity).getItemStack();
                 material = itemStack.getType();
                 amount = itemStack.getAmount();
+                item = new ItemStack(itemStack);
             }
             switch (type) {
                 case SHEEP:

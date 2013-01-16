@@ -101,12 +101,28 @@ public class SettlerActivityPutItemsInChest extends SettlerActivity {
                         if (lState instanceof Chest) {
                             Chest lChest = (Chest) lState;
                             Inventory lInv = lChest.getInventory();
+                            int lIndex = -1;
+                            for (ItemStack lItem : lSettler.getInventory()) {
+                                lIndex++;
+                                if (lItem != null && lItem.getType().equals(lMat)) {
+                                    int linserted = InventoryHelper.insertItems(lInv, lItem);
+                                    if (linserted < lItem.getAmount()) {
+                                        lItem.setAmount(lItem.getAmount() - linserted);
+                                        break;
+                                    } else {
+                                        lSettler.getInventory()[lIndex] = null;
+                                    }
+                                }
+                            }
+                            
+                            /*
                             int linserted = InventoryHelper.insertItems(lInv, lMat, lCount);
                             lSettler.removeItems(lMat, linserted);
                             lCount -= linserted;
                             if (lCount <= 0) {
                                 break;
                             }
+                            */
                         }
                     }
                 }

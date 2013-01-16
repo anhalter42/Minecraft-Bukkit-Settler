@@ -73,10 +73,10 @@ class SettlerActivityCollectItems extends SettlerActivity {
             public void run() {
                 Collection<Entity> lItems = lWorld.getEntitiesByClasses(Item.class);
                 for (Entity lItem : lItems) {
-                    if (!lItem.isDead() && lIds.contains(lItem.getEntityId()) && lSettler.getPosition().distance(lItem.getLocation()) < 1.5) {
+                    if (!lItem.isDead() && lItem.isValid() && lIds.contains(lItem.getEntityId()) && lSettler.getPosition().distance(lItem.getLocation()) < 1.5) {
                         ItemStack lStack = ((Item) lItem).getItemStack();
+                        lSettler.insertItems(new ItemStack(lStack));
                         lItem.remove();
-                        lSettler.insertItems(lStack);
                     }
                 }
             }

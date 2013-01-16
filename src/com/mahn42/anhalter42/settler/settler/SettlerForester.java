@@ -29,6 +29,7 @@ public class SettlerForester extends Settler {
 
     public SettlerForester() {
         super(typeName);
+        fCollectItemRadius = 12;
         fItemsToCollect.add(Material.SAPLING);
         fItemsToCollect.add(Material.LEAVES);
         fItemsToCollect.add(Material.RED_ROSE);
@@ -36,15 +37,18 @@ public class SettlerForester extends Settler {
         fItemsToCollect.add(Material.LONG_GRASS);
     }
     protected int getSaplingsCount = 0;
+    protected int goWalkingCount = 0;
 
     @Override
     public void runInternal(SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             if (!hasAtleastItems(Material.SAPLING, 1)) {
-                if (getSaplingsCount > 2) {
+                if (goWalkingCount > 0) {
+                    goWalkingCount--;
+                    addActivityForNow(new SettlerActivityFindRandomPath(23, 10, PositionCondition.None));
+                } else if (getSaplingsCount > 0) {
+                    goWalkingCount = 5;
                     getSaplingsCount = 0;
-                    addActivityForNow(new SettlerActivityNothing(20 * 60 * 5));
-
                 } else {
                     getSaplingsCount++;
                     addActivityForNow(

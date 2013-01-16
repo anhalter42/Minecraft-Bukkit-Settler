@@ -60,6 +60,7 @@ public class SettlerShepherd extends Settler {
                                 addActivityForNow(
                                         new SettlerActivityWalkToTarget(lState.pos));
                             }
+                            break;
                         }
                     }
                 } else {

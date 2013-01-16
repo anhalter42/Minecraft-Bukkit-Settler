@@ -5,13 +5,16 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import java.util.List;
 import java.util.Random;
 import org.bukkit.Material;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.bukkit.material.Wool;
 
 /**
  *
@@ -45,9 +48,27 @@ public class SettlerActivityShearSheep extends SettlerActivity {
                             Sheep lSheep = (Sheep) lEntity;
                             if (!lSheep.isSheared()) {
                                 lSheep.setSheared(true);
-                                ItemStack lWool = new ItemStack(Material.WOOL, 1 + (new Random()).nextInt(3));
-                                lWool.setData(new MaterialData(Material.WOOL, lSheep.getColor().getData()));
-                                lSheep.getWorld().dropItemNaturally(lSheep.getLocation(), lWool);
+                                Wool lW = new Wool(lSheep.getColor());
+                                int lCount = 1 + (new Random()).nextInt(3);
+                                ItemStack lWool = new ItemStack(Material.WOOL, lCount);
+                                lWool.setData(lW);
+                                int insertedItems = lSettler.insertItems(lWool);
+                                /*
+                                if (insertedItems < lCount) {
+                                    lWool = new ItemStack(Material.WOOL, lCount - insertedItems);
+                                    lWool.setData(lW);
+                                    lSheep.getWorld().dropItemNaturally(lSheep.getLocation(), lWool);
+                                }
+                                */
+                                //SettlerPlugin.plugin.getLogger().info("dyecolor = " + lSheep.getColor().getData() + " sheep " + lSheep);
+                                //lWool.setData(new MaterialData(Material.WOOL, lSheep.getColor().getData()));
+                                //SettlerPlugin.plugin.getLogger().info("item = " + lWool + " " + lWool.getData() + " " + lWool.getData().getData());
+                                //Item dropItemNaturally = lSheep.getWorld().dropItemNaturally(lSheep.getLocation(), lWool);
+                                //SettlerPlugin.plugin.getLogger().info("dropped nat item = " + dropItemNaturally.getItemStack() + " " + dropItemNaturally.getItemStack().getData() + " " + dropItemNaturally.getItemStack().getData().getData());
+                                //dropItemNaturally.getItemStack().setData(lW); // getItemStack().setData(new MaterialData(Material.WOOL, lSheep.getColor().getData()));
+                                //SettlerPlugin.plugin.getLogger().info("dropped nat item = " + dropItemNaturally.getItemStack() + " " + dropItemNaturally.getItemStack().getData() + " " + dropItemNaturally.getItemStack().getData().getData());
+                                //dropItemNaturally = lSheep.getWorld().dropItem(lSheep.getLocation(), lWool);
+                                //SettlerPlugin.plugin.getLogger().info("dropped item = " + dropItemNaturally.getItemStack() + " " + dropItemNaturally.getItemStack().getData() + " " + dropItemNaturally.getItemStack().getData().getData());
                             }
                         }
                         break;

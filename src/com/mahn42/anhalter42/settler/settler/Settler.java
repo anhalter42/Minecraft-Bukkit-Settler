@@ -12,6 +12,8 @@ import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityControl;
 import com.mahn42.framework.Framework;
+import com.mahn42.framework.InventoryHelper;
+import com.mahn42.framework.WorldScanner;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -385,6 +387,8 @@ public class Settler {
             if (!fSendAtHome) {
                 if (getBedPosition() != null && !getPosition().nearly(getBedPosition(), 2)) {
                     fSendAtHome = true;
+                    BlockPosition lBed = getBedPosition().clone();
+                    lBed.y++;
                     if (fResetOnNight) {
                         SettlerActivity lAct = getCurrentActivity();
                         if (lAct != null) {
@@ -393,13 +397,13 @@ public class Settler {
                         fActivityList.clear();
                         addActivityForNow(
                                 new SettlerActivityWalkToTarget(getBedPosition()),
-                                new SettlerActivityTeleport(getBedPosition()),
+                                new SettlerActivityTeleport(lBed),
                                 new SettlerActivitySleep(),
                                 new SettlerActivityAwake());
                     } else {
                         addActivityForNow(
                                 new SettlerActivityWalkToTarget(getBedPosition()),
-                                new SettlerActivityTeleport(getBedPosition()),
+                                new SettlerActivityTeleport(lBed),
                                 new SettlerActivitySleep(),
                                 new SettlerActivityAwake(),
                                 new SettlerActivityWalkToTarget(getPosition()));
@@ -492,18 +496,20 @@ public class Settler {
             Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), fCollectItemRadius, fItemsToCollect);
             if (!lStates.isEmpty()) {
                 for (SettlerAccess.EntityState lState : lStates) {
-                    if (lState.pos.nearly(getPosition(), 1)) {
-                        addActivityForNow("CollectItems", new SettlerActivityCollectItems(fItemsToCollect));
-                    } else if (canWalkTo(lState.pos)) {
-                        if (!existsTaggedActivity("CollectItems.back")) {
+                    if (InventoryHelper.canInsertItems(getInventory(), lState.item) > 0) {
+                        if (lState.pos.nearly(getPosition(), 1)) {
+                            addActivityForNow("CollectItems", new SettlerActivityCollectItems(fItemsToCollect));
+                        } else if (canWalkTo(lState.pos)) {
+                            if (!existsTaggedActivity("CollectItems.back")) {
+                                addActivityForNow(
+                                        "CollectItems.back",
+                                        new SettlerActivityWalkToTarget(getPosition()));
+                            }
                             addActivityForNow(
-                                    "CollectItems.back",
-                                    new SettlerActivityWalkToTarget(getPosition()));
+                                    "CollectItems",
+                                    new SettlerActivityWalkToTarget(lState.pos),
+                                    new SettlerActivityCollectItems(fItemsToCollect));
                         }
-                        addActivityForNow(
-                                "CollectItems",
-                                new SettlerActivityWalkToTarget(lState.pos),
-                                new SettlerActivityCollectItems(fItemsToCollect));
                     }
                 }
             }
@@ -938,110 +944,19 @@ public class Settler {
     }
 
     public int removeItems(ItemStack aItem) {
-        int aO = aItem.getAmount();
-        int i = -1;
-        for (ItemStack lItem : getInventory()) {
-            i++;
-            if (lItem != null && lItem.isSimilar(aItem)) {
-                if (lItem.getAmount() > aItem.getAmount()) {
-                    lItem.setAmount(lItem.getAmount() - aItem.getAmount());
-                    aItem.setAmount(0);
-                    break;
-                } else {
-                    aItem.setAmount(aItem.getAmount() - lItem.getAmount());
-                    getInventory()[i] = null;
-                    if (aItem.getAmount() == 0) {
-                        break;
-                    }
-                }
-            }
-        }
-        return aO - aItem.getAmount();
+        return InventoryHelper.removeItems(getInventory(), aItem);
     }
 
     public int insertItems(ItemStack aItem) {
-        int aO = aItem.getAmount();
-        for (ItemStack lItem : getInventory()) {
-            if (lItem != null && aItem.isSimilar(lItem)) {
-                if (lItem.getAmount() < lItem.getMaxStackSize()) {
-                    int lplace = lItem.getMaxStackSize() - lItem.getAmount();
-                    if (lplace >= aItem.getAmount()) {
-                        lItem.setAmount(lItem.getAmount() + aItem.getAmount());
-                        aItem.setAmount(0);
-                        break;
-                    } else {
-                        lItem.setAmount(lItem.getMaxStackSize());
-                        aItem.setAmount(aItem.getAmount() - lplace);
-                    }
-                }
-            }
-        }
-        if (aItem.getAmount() > 0) {
-            int i = -1;
-            for (ItemStack lItem : getInventory()) {
-                i++;
-                if (lItem == null) {
-                    lItem = new ItemStack(aItem.getType());
-                    getInventory()[i] = lItem;
-                    int lplace = lItem.getMaxStackSize() - lItem.getAmount();
-                    if (lplace >= aItem.getAmount()) {
-                        lItem.setAmount(lItem.getAmount() + aItem.getAmount());
-                        aItem.setAmount(0);
-                        break;
-                    } else {
-                        lItem.setAmount(lItem.getMaxStackSize());
-                        aItem.setAmount(aItem.getAmount() - lplace);
-                    }
-                }
-            }
-        }
-        return aO - aItem.getAmount();
-    }
-
-    public int insertItems(Material aMat, int aCount) {
-        int aO = aCount;
-        for (ItemStack lItem : getInventory()) {
-            if (lItem != null && lItem.getType().equals(aMat)) {
-                if (lItem.getAmount() < lItem.getMaxStackSize()) {
-                    int lplace = lItem.getMaxStackSize() - lItem.getAmount();
-                    if (lplace >= aCount) {
-                        lItem.setAmount(lItem.getAmount() + aCount);
-                        aCount = 0;
-                    } else {
-                        lItem.setAmount(lItem.getMaxStackSize());
-                        aCount -= lplace;
-                    }
-                    break;
-                }
-            }
-        }
-        if (aCount > 0) {
-            int i = -1;
-            for (ItemStack lItem : getInventory()) {
-                i++;
-                if (lItem == null) {
-                    lItem = new ItemStack(aMat);
-                    getInventory()[i] = lItem;
-                    int lplace = lItem.getMaxStackSize() - lItem.getAmount();
-                    if (lplace >= aCount) {
-                        lItem.setAmount(lItem.getAmount() + aCount);
-                        aCount = 0;
-                    } else {
-                        lItem.setAmount(lItem.getMaxStackSize());
-                        aCount -= lplace;
-                    }
-                    break;
-                }
-            }
-        }
-        return aO - aCount;
+        return InventoryHelper.insertItems(getInventory(), aItem);
     }
 
     public enum PositionCondition {
 
         None,
         NaturalBlocksAround,
-        GrassOrDirtAround
+        GrassOrDirtAround,
+        Tree
     }
     public static ArrayList<Material> grassOrDirt = new ArrayList<Material>();
 
@@ -1136,6 +1051,15 @@ public class Settler {
                                     }
                                 }
                                 break;
+                            case Tree:
+                                List<BlockPosition> lPoss = WorldScanner.findBlocks(getWorld(), lPos, Material.LOG, 3);
+                                if (lPoss.size() > 0) {
+                                    lPoss = WorldScanner.findBlocks(getWorld(), lPos, Material.LEAVES, 3);
+                                    if (lPoss.size() > 0) {
+                                        lFound = true;
+                                    }
+                                }
+                                break;
                         }
                         if (lFound) {
                             lFound = canWalkTo(lPos);
@@ -1177,22 +1101,9 @@ public class Settler {
     }
 
     public List<BlockPosition> findBlocks(Material aMaterial, int aRadius) {
-        ArrayList<BlockPosition> lRes = new ArrayList<BlockPosition>();
-        BlockPosition lPos = getPosition();
-        for (int x = -aRadius; x <= aRadius; x++) {
-            for (int y = -aRadius; y <= aRadius; y++) {
-                for (int z = -aRadius; z <= aRadius; z++) {
-                    if (lPos.getBlockAt(getWorld(), x, y, z).getType().equals(aMaterial)) {
-                        BlockPosition lP = lPos.clone();
-                        lP.add(x, y, z);
-                        lRes.add(lP);
-                    }
-                }
-            }
-        }
-        return lRes;
+        return WorldScanner.findBlocks(getWorld(), getPosition(), aMaterial, aRadius);
     }
-
+    
     public ItemStack getFirstItem(Material aMaterial) {
         for (int i = 0; i < getInventory().length; i++) {
             ItemStack lItem = getInventory()[i];
