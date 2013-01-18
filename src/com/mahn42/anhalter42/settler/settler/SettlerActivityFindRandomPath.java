@@ -27,8 +27,18 @@ public class SettlerActivityFindRandomPath extends SettlerActivity {
         attempts = aAttempts;
         condition = aCondition;
     }
+
+    public SettlerActivityFindRandomPath(BlockPosition aStart, int aRadius, int aAttempts, Settler.PositionCondition aCondition) {
+        type = TYPE;
+        radius = aRadius;
+        attempts = aAttempts;
+        condition = aCondition;
+        startPos = aStart;
+    }
+    
     public int radius = 42;
     public int attempts = 10;
+    public BlockPosition startPos;
     public BlockPosition position;
     public boolean started = false;
     public boolean found = false;
@@ -40,6 +50,9 @@ public class SettlerActivityFindRandomPath extends SettlerActivity {
         aMap.put("radius", radius);
         aMap.put("attempts", attempts);
         aMap.put("condition", condition.toString());
+        if (startPos != null) {
+            aMap.put("startPos", startPos.toCSV(","));
+        }
     }
 
     @Override
@@ -57,6 +70,11 @@ public class SettlerActivityFindRandomPath extends SettlerActivity {
         if (lGet != null) {
             condition = Settler.PositionCondition.valueOf(lGet.toString());
         }
+        lGet = aMap.get("startPos");
+        if (lGet != null) {
+            startPos = new BlockPosition();
+            startPos.fromCSV(lGet.toString(), "\\,");
+        }
     }
 
     @Override
@@ -68,19 +86,19 @@ public class SettlerActivityFindRandomPath extends SettlerActivity {
             runTaskLater(new Runnable() {
                 @Override
                 public void run() {
-                    position = lSettler.findRandomWalkToPosition(lAccess.random, radius, attempts, condition);
+                    position = lSettler.findRandomWalkToPosition(startPos, lAccess.random, radius, attempts, condition);
                     found = true;
                 }
             });
         } else if (found) {
             if (position != null) {
-                aSettler.addActivityForNow(new SettlerActivityWalkToTarget(position));
+                aSettler.addActivityForNow(control.tag, new SettlerActivityWalkToTarget(position));
                 control.success = true;
             } else {
                 control.success = false;
                 Framework.plugin.log("settler", "no path for settler " + aSettler.getSettlerName() + " found! " + condition);
                 if (condition == Settler.PositionCondition.None) {
-                    aSettler.addActivityForNow(new SettlerActivityFindRandomTeleport(3, 10));
+                    aSettler.addActivityForNow(control.tag, new SettlerActivityFindRandomTeleport(3, 10));
                 }
             }
         }

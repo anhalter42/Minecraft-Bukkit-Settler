@@ -47,16 +47,22 @@ public class SettlerTask implements Runnable {
                 if (fAccess == null) {
                     fAccess = SettlerPlugin.plugin.getSettlerAccess(fWorld);
                 }
+                fDiedSettlers = fAccess.retrieveDiedSettlers();
+                for(Settler lSettler : fDiedSettlers) {
+                    fAccess.removeSettler(lSettler);
+                    lSettler.died();
+                }
                 fSettlers = fAccess.getSettlers();
                 fChunkLoads = fAccess.retrieveChunkLoads();
-                fDiedSettlers = fAccess.retrieveDiedSettlers();
                 fReachedTargetSettlers = fAccess.retrieveReachedTargetSettlers();
                 fDamagedSettlers = fAccess.retrieveDamagedSettlers();
                 for (Settler lSettler : fSettlers) {
+                    /*
                     if (fDiedSettlers.contains(lSettler)) {
                         lSettler.died();
                         fDiedSettlers.remove(lSettler);
                     }
+                    */
                     if (fReachedTargetSettlers.contains(lSettler)) {
                         lSettler.targetReached(fAccess);
                         fReachedTargetSettlers.remove(lSettler);

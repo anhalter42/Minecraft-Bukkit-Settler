@@ -9,7 +9,7 @@ import com.mahn42.anhalter42.settler.SettlerProfession;
 import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Sheep;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -27,6 +27,7 @@ public class SettlerShepherd extends Settler {
         profession.armor.add(new SettlerProfession.Item(Material.SHEARS, true));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, true));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, false));
+        profession.output.add(new ItemStack(Material.WOOL));
         register(profession);
     }
 

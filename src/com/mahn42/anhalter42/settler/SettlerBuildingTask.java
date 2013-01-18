@@ -11,7 +11,6 @@ import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.BuildingBlock;
 import com.mahn42.framework.InventoryHelper;
 import java.util.Collection;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 
@@ -39,6 +38,10 @@ public class SettlerBuildingTask implements Runnable {
 
     @Override
     public void run() {
+        // is building removed --> nothing to do
+        if (SettlerPlugin.plugin.settlerBuildingDB.getDB(building.world).getRecord(building.key) == null) {
+            return;
+        }
         fAccess = SettlerPlugin.plugin.getSettlerAccess(building.world);
         switch (kind) {
             case Initialize:
@@ -113,6 +116,7 @@ public class SettlerBuildingTask implements Runnable {
         lPos.add(0, 1, 0);
         settler.setPosition(lPos);
         bearSettler(lChestInv, settler);
+        fAccess.addSettler(settler);
     }
     
     private void bearSettler(Inventory lChestInv, Settler aSettler) {
@@ -127,6 +131,8 @@ public class SettlerBuildingTask implements Runnable {
             }
         }
         aSettler.addActivityForNow(new SettlerActivitySleep(40), new SettlerActivityAwake());
+        aSettler.setHealth(20);
+        aSettler.setFoodLevel(20);
         aSettler.activate();
         building.sendToPlayer("Settler %s was born.", aSettler.getDisplayName());
     }

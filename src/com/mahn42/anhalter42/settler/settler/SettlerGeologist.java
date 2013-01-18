@@ -23,6 +23,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -41,6 +42,7 @@ public class SettlerGeologist extends Settler {
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, true));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, false));
         profession.inventory.add(new SettlerProfession.Item(Material.SIGN, false));
+        profession.input.add(new ItemStack(Material.SIGN));
         register(profession);
         SettlerActivity.registerActivity(SettlerActivityGeologistThinking.TYPE, SettlerActivityGeologistThinking.class);
         SettlerActivity.registerActivity(SettlerActivityGeologistPlaceSign.TYPE, SettlerActivityGeologistPlaceSign.class);

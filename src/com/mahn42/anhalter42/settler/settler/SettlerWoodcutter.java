@@ -10,6 +10,7 @@ import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.WorldScanner;
 import java.util.List;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -28,12 +29,16 @@ public class SettlerWoodcutter extends Settler {
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_CHESTPLATE, true));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, false));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, false));
+        profession.output.add(new ItemStack(Material.LOG));
+        profession.output.add(new ItemStack(Material.SAPLING));
+        profession.output.add(new ItemStack(Material.APPLE));
         register(profession);
     }
 
     public SettlerWoodcutter() {
         super(typeName);
         fItemsToCollect.add(Material.LOG);
+        fItemsToCollect.add(Material.SAPLING);
         fItemsToCollect.add(Material.APPLE);
         fPutInChestItems.add(new PutInChestItem(Material.LOG, 0));
         fPutInChestItems.add(new PutInChestItem(Material.SAPLING, 0));

@@ -90,8 +90,10 @@ public class SettlerAccess {
     }
 
     protected void addSettlerInternal(Settler aSettler) {
-        settlers.add(aSettler);
-        settlersByKey.put(aSettler.getKey(), aSettler);
+        if (!settlers.contains(aSettler)) {
+            settlers.add(aSettler);
+            settlersByKey.put(aSettler.getKey(), aSettler);
+        }
     }
 
     protected void removeSettlerInternal(Settler aSettler) {
@@ -106,6 +108,7 @@ public class SettlerAccess {
             removeSettlerInternal(aSettler);
         }
     }
+
     public Settler addSettler(Settler aSettler) {
         synchronized (settlers) {
             addSettlerInternal(aSettler);
@@ -139,34 +142,53 @@ public class SettlerAccess {
         }
         return lSettler;
     }
-    protected HashMap<Integer, EntityState> entitiyStates = new HashMap<Integer, EntityState>();
+    final protected HashMap<Integer, EntityState> entitiyStates = new HashMap<Integer, EntityState>();
 
     public EntityState getEntityState(int aId) {
-        return entitiyStates.get(aId);
+        EntityState get;
+        synchronized (entitiyStates) {
+            get = entitiyStates.get(aId);
+        }
+        return get;
     }
-    
+
     public Collection<EntityState> getEntityStatesNearby(BlockPosition aPos, int aRadius, EntityType aType) {
         ArrayList<EntityState> lRes = new ArrayList<EntityState>();
-        for(EntityState lState : entitiyStates.values()) {
-            if (lState.type.equals(aType) && lState.pos.nearly(aPos, aRadius)) {
-                lRes.add(lState);
+        synchronized (entitiyStates) {
+            for (EntityState lState : entitiyStates.values()) {
+                if (lState.type.equals(aType) && lState.pos.nearly(aPos, aRadius)) {
+                    lRes.add(lState);
+                }
             }
         }
         return lRes;
     }
-    
+
+    public Collection<EntityState> getEntityStatesNearby(BlockPosition aPos, int aRadius, List<EntityType> aTypes) {
+        ArrayList<EntityState> lRes = new ArrayList<EntityState>();
+        synchronized (entitiyStates) {
+            for (EntityState lState : entitiyStates.values()) {
+                if (aTypes.contains(lState.type) && lState.pos.nearly(aPos, aRadius)) {
+                    lRes.add(lState);
+                }
+            }
+        }
+        return lRes;
+    }
+
     public Collection<EntityState> getEntityStatesNearby(BlockPosition aPos, int aRadius, Collection<Material> aMats) {
         ArrayList<EntityState> lRes = new ArrayList<EntityState>();
-        for(EntityState lState : entitiyStates.values()) {
-            if (lState.type.equals(EntityType.DROPPED_ITEM)
-                    && (aMats == null || aMats.contains(lState.material)) 
-                    && lState.pos.nearly(aPos, aRadius)) {
-                lRes.add(lState);
+        synchronized (entitiyStates) {
+            for (EntityState lState : entitiyStates.values()) {
+                if (lState.type.equals(EntityType.DROPPED_ITEM)
+                        && (aMats == null || aMats.contains(lState.material))
+                        && lState.pos.nearly(aPos, aRadius)) {
+                    lRes.add(lState);
+                }
             }
         }
         return lRes;
     }
-    
     final protected ArrayList<Settler> settlersForEntity = new ArrayList<Settler>();
 
     public void addSettlerForEntity(Settler aSettler) {
@@ -178,6 +200,7 @@ public class SettlerAccess {
     }
 
     public void runSynchron() {
+        List<Entity> lEntities = world.getEntities();
         synchronized (settlersForEntity) {
             for (Settler lSettler : settlersForEntity) {
                 lSettler.checkForBecomeEntity();
@@ -185,19 +208,22 @@ public class SettlerAccess {
             settlersForEntity.clear();
         }
         synchronized (settlers) {
-            entitiyStates.clear();
+            synchronized (entitiyStates) {
+                entitiyStates.clear();
+            }
             settlersByEntityId.clear();
-            List<Entity> lEntities = world.getEntities();
             for (Entity lEntity : lEntities) {
                 EntityState lState = new EntityState(lEntity);
-                entitiyStates.put(lEntity.getEntityId(), lState);
+                synchronized (entitiyStates) {
+                    entitiyStates.put(lEntity.getEntityId(), lState);
+                }
                 if (lEntity instanceof LivingEntity) {
                     //TODO
                     if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
                         Settler lSettler = (Settler) ((NPCEntityPlayer) lEntity).getDataObject();
                         if (!lSettler.hasEntity() || lSettler.getEntityId() == lEntity.getEntityId()) {
                             settlersByEntityId.put(lEntity.getEntityId(), lSettler);
-                            lSettler.setEntityId(lEntity.getEntityId());
+                            //lSettler.setEntityId(lEntity.getEntityId());
                             lSettler.updateFromEntity((NPCEntityPlayer) lEntity);
                             lSettler.updateToEntity((NPCEntityPlayer) lEntity);
                         }
@@ -208,7 +234,6 @@ public class SettlerAccess {
             }
         }
     }
-    
     final protected ArrayList<Settler> diedSettler = new ArrayList<Settler>();
 
     public void addSettlerDied(Settler aSettler) {
@@ -219,11 +244,13 @@ public class SettlerAccess {
         String lHome = aSettler.getHomeKey();
         if (lHome != null && !lHome.isEmpty()) {
             SettlerBuilding lBuilding = SettlerPlugin.plugin.getSettlerBuildingDB(aSettler.getWorld()).getRecord(lHome);
-            SettlerBuildingTask lTask = new SettlerBuildingTask(SettlerBuildingTask.Kind.SettlerDied, lBuilding);
-            lTask.settler = aSettler;
-            SettlerPlugin.plugin.getServer().getScheduler().runTaskLaterAsynchronously(SettlerPlugin.plugin, lTask, 10);
+            if (lBuilding != null) {
+                SettlerBuildingTask lTask = new SettlerBuildingTask(SettlerBuildingTask.Kind.SettlerDied, lBuilding);
+                lTask.settler = aSettler;
+                SettlerPlugin.plugin.getServer().getScheduler().runTaskLaterAsynchronously(SettlerPlugin.plugin, lTask, 20);
+            }
         }
-        aSettler.setEntityId(0);
+        //aSettler.setEntityId(0);
     }
 
     public Settler getSettlerById(int lEntityId) {
@@ -245,6 +272,7 @@ public class SettlerAccess {
     }
 
     public static class SettlerDamage {
+
         public Settler settler;
         public int damage;
         public EntityType entityType;
@@ -252,9 +280,8 @@ public class SettlerAccess {
         public EntityDamageEvent.DamageCause cause;
         public BlockPosition entityPos;
     }
-    
     protected ArrayList<SettlerDamage> settlerDamage = new ArrayList<SettlerDamage>();
-    
+
     public void addSettlerDamage(Settler aSettler, int aDamage, EntityType aType, int aId, EntityDamageEvent.DamageCause aCause, BlockPosition aEntityPos) {
         SettlerDamage lDamage = new SettlerDamage();
         lDamage.settler = aSettler;
@@ -263,7 +290,7 @@ public class SettlerAccess {
         lDamage.entityId = aId;
         lDamage.cause = aCause;
         lDamage.entityPos = aEntityPos;
-        synchronized(settlerDamage) {
+        synchronized (settlerDamage) {
             settlerDamage.add(lDamage);
         }
     }
@@ -278,7 +305,6 @@ public class SettlerAccess {
         public float saturation;
         public Material material;
         public int amount;
-        
         public HashMap<String, Object> props = new HashMap<String, Object>();
         public ItemStack item;
 
@@ -293,21 +319,21 @@ public class SettlerAccess {
                     saturation = ((Player) aEntity).getSaturation();
                 }
             } else if (aEntity instanceof Item) {
-                ItemStack itemStack = ((Item)aEntity).getItemStack();
+                ItemStack itemStack = ((Item) aEntity).getItemStack();
                 material = itemStack.getType();
                 amount = itemStack.getAmount();
                 item = new ItemStack(itemStack);
             }
             switch (type) {
                 case SHEEP:
-                    props.put("isAdult", ((Sheep)aEntity).isAdult());
-                    props.put("isSheared", ((Sheep)aEntity).isSheared());
+                    props.put("isAdult", ((Sheep) aEntity).isAdult());
+                    props.put("isSheared", ((Sheep) aEntity).isSheared());
                     break;
                 case PIG:
-                    props.put("isAdult", ((Pig)aEntity).isAdult());
+                    props.put("isAdult", ((Pig) aEntity).isAdult());
                     break;
                 case COW:
-                    props.put("isAdult", ((Cow)aEntity).isAdult());
+                    props.put("isAdult", ((Cow) aEntity).isAdult());
                     break;
             }
         }

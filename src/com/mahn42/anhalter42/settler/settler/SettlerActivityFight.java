@@ -22,6 +22,8 @@ public class SettlerActivityFight extends SettlerActivity {
     public int entityId;
     //Runtime
     public int waitTicks = 0;
+    
+    public boolean entityDead = false;
 
     public SettlerActivityFight() {
         type = TYPE;
@@ -50,17 +52,22 @@ public class SettlerActivityFight extends SettlerActivity {
 
     @Override
     public boolean run(SettlerAccess aAccess, Settler aSettler) {
-        if (aSettler.hasEntity()) {
+        if (!entityDead && aSettler.hasEntity()) {
             if (waitTicks <= 0) {
                 waitTicks = 5;
                 final NPCEntityPlayer lPlayer = aSettler.fEntity;
                 runTaskLater(new Runnable() {
                     @Override
                     public void run() {
-                        //lPlayer.swingArm();
+                        lPlayer.swingArm();
+                        boolean lfound = false;
                         List<LivingEntity> lEntities = lPlayer.getAsPlayer().getWorld().getLivingEntities();
                         for (LivingEntity lEntity : lEntities) {
                             if (lEntity.getEntityId() == entityId) {
+                                lPlayer.attack(lEntity);
+                                lPlayer.attack(lEntity);
+                                lPlayer.attack(lEntity);
+                                lPlayer.attack(lEntity);
                                 lPlayer.attack(lEntity);
                                 /*
                                 int lDamage = 1;
@@ -74,8 +81,12 @@ public class SettlerActivityFight extends SettlerActivity {
                                 }
                                 lEntity.damage(lDamage, lEntity);
                                 */
+                                lfound = true;
                                 break;
                             }
+                        }
+                        if (!lfound) {
+                            entityDead = true;
                         }
                     }
                 });
@@ -83,6 +94,6 @@ public class SettlerActivityFight extends SettlerActivity {
                 waitTicks -= SettlerPlugin.plugin.configSettlerTicks;
             }
         }
-        return false;
+        return entityDead;
     }
 }

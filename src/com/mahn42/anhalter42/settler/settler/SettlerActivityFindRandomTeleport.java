@@ -67,7 +67,7 @@ public class SettlerActivityFindRandomTeleport extends SettlerActivity {
             });
         } else if (found) {
             if (position != null) {
-                aSettler.addActivityForNow(new SettlerActivityTeleport(position));
+                aSettler.addActivityForNow(control.tag, new SettlerActivityTeleport(position));
             }
         }
         return found;

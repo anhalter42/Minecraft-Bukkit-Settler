@@ -35,6 +35,9 @@ public class SettlerProfession {
     public ArrayList<Item> armor = new ArrayList<SettlerProfession.Item>();
     public ArrayList<Item> inventory = new ArrayList<SettlerProfession.Item>();
     
+    public ArrayList<ItemStack> input = new ArrayList<ItemStack>();
+    public ArrayList<ItemStack> output = new ArrayList<ItemStack>();
+    
     public boolean equals(Object aObject) {
         if (aObject instanceof SettlerProfession) {
             return name.equalsIgnoreCase(((SettlerProfession)aObject).name);

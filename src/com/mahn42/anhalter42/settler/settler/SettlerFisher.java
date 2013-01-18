@@ -7,6 +7,7 @@ package com.mahn42.anhalter42.settler.settler;
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -25,6 +26,7 @@ public class SettlerFisher extends Settler {
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, true));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, false));
         profession.inventory.add(new SettlerProfession.Item(Material.BOAT, true));
+        profession.output.add(new ItemStack(Material.RAW_FISH));
         register(profession);
     }
     

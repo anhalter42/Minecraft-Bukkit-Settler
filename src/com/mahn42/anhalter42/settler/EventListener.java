@@ -101,6 +101,7 @@ public class EventListener implements Listener {
         if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
             //TODO inform over SettlerAccess
             SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(aEvent.getEntity().getWorld());
+            aEvent.setDamage(aEvent.getDamage() / 2); // make a settler a little bit stronger
             if (aEvent instanceof EntityDamageByEntityEvent) {
                 EntityDamageByEntityEvent lEvent = (EntityDamageByEntityEvent) aEvent;
                 lAccess.addSettlerDamage((Settler) ((NPCEntityPlayer) lEntity).getDataObject(), aEvent.getDamage(), lEvent.getDamager().getType(), lEvent.getDamager().getEntityId(), aEvent.getCause(), new BlockPosition(lEvent.getDamager().getLocation()));
@@ -134,7 +135,7 @@ public class EventListener implements Listener {
             //TODO inform over SettlerAccess
             SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(aEvent.getEntity().getWorld());
             lAccess.addSettlerDied((Settler) ((NPCEntityPlayer) lEntity).getDataObject());
-            lEntity.remove();
+            //lEntity.remove();
         }
     }
 

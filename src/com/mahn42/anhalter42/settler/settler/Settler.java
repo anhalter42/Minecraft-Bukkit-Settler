@@ -51,6 +51,7 @@ public class Settler {
         SettlerForester.register();
         SettlerGeologist.register();
         SettlerShepherd.register();
+        SettlerGuard.register();
     }
 
     public static Class getSettlerClass(String aTypename) {
@@ -368,10 +369,11 @@ public class Settler {
 
     public void removeEntity() {
         if (hasEntity()) {
+            final Player lPlayer = fEntity.getAsPlayer();
             SettlerPlugin.plugin.getServer().getScheduler().runTask(SettlerPlugin.plugin, new Runnable() {
                 @Override
                 public void run() {
-                    fEntity.getAsPlayer().remove();
+                    lPlayer.remove();
                 }
             });
             Framework.plugin.log("settler", "settler " + getSettlerName() + " entity " + fEntityId + " removed.");
@@ -579,11 +581,16 @@ public class Settler {
         lPlayer.setCanPickupItems(true);
         lPlayer.setWalkSpeed(getWalkSpeed());
         aEntity.setDataObject(this);
-        setEntityId(lPlayer.getEntityId());
     }
 
-    public void updateFromEntity(NPCEntityPlayer aEntity) {
+    public void setEntity(NPCEntityPlayer aEntity) {
+        Player lPlayer = aEntity.getAsPlayer();
         fEntity = aEntity;
+        setEntityId(lPlayer.getEntityId());
+    }
+    
+    public void updateFromEntity(NPCEntityPlayer aEntity) {
+        setEntity(aEntity);
         Player lPlayer = aEntity.getAsPlayer();
         setPosition(new BlockPosition(lPlayer.getLocation()));
         setFoodLevel(lPlayer.getFoodLevel());
@@ -604,12 +611,16 @@ public class Settler {
         if (fEntityId != aEntityId) {
             Framework.plugin.log("settler", "settler " + getSettlerName() + " has now entity id " + aEntityId + ".");
             fEntityId = aEntityId;
+            if (fEntityId == 0) {
+                fEntity = null;
+            }
         }
     }
 
     public void createEntity() {
         NPCEntityPlayer lNPC = Framework.plugin.createPlayerNPC(fWorld, getPosition(), getSettlerName(), this);
         Framework.plugin.log("settler", "settler entity " + lNPC.getAsPlayer().getEntityId() + "created for '" + getSettlerName() + "' at " + getPosition());
+        setEntity(lNPC);
         updateEntity(lNPC);
     }
 
@@ -743,6 +754,9 @@ public class Settler {
     }
 
     public void died() {
+        if (hasEntity()) {
+            removeEntity();
+        }
         //dropAllArmor();
         //dropInventory();
         setBoots(null);
@@ -939,7 +953,7 @@ public class Settler {
 
     public void removed() {
         if (hasEntity()) {
-            fEntity.getAsPlayer().remove();
+            removeEntity();
         }
     }
 
@@ -952,7 +966,6 @@ public class Settler {
     }
 
     public enum PositionCondition {
-
         None,
         NaturalBlocksAround,
         GrassOrDirtAround,
@@ -986,9 +999,16 @@ public class Settler {
     }
 
     public BlockPosition findRandomWalkToPosition(Random aRandom, int aRadius, int aAttempts, PositionCondition aCondition) {
+        return findRandomWalkToPosition(getPosition(), aRandom, aRadius, aAttempts, aCondition);
+    }
+    
+    public BlockPosition findRandomWalkToPosition(BlockPosition aStart, Random aRandom, int aRadius, int aAttempts, PositionCondition aCondition) {
         boolean lFound = false;
         do {
-            BlockPosition lPos = getPosition();
+            if (aStart == null) {
+                aStart = getPosition();
+            }
+            BlockPosition lPos = aStart.clone();
             lPos.add(aRandom.nextInt(aRadius * 2) - aRadius, 0, aRandom.nextInt(aRadius * 2) - aRadius);
             lPos.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
             Block lBlock = lPos.getBlock(getWorld());

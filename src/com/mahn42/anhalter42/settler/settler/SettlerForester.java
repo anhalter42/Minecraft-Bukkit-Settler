@@ -24,6 +24,7 @@ public class SettlerForester extends Settler {
         profession.frameMaterial = Material.SAPLING;
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, false));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, false));
+        profession.input.add(new ItemStack(Material.SAPLING));
         register(profession);
     }
 
