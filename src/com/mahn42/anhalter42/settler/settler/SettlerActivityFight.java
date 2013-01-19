@@ -6,10 +6,13 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
+import com.mahn42.framework.Framework;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -55,21 +58,20 @@ public class SettlerActivityFight extends SettlerActivity {
         if (!entityDead && aSettler.hasEntity()) {
             if (waitTicks <= 0) {
                 waitTicks = 5;
-                final NPCEntityPlayer lPlayer = aSettler.fEntity;
+                //final NPCEntityPlayer lPlayer = aSettler.fEntity;
+                final Settler lSettler = aSettler;
                 runTaskLater(new Runnable() {
                     @Override
                     public void run() {
+                        entityDead = lSettler.fight(entityId);
+                        /*
                         lPlayer.swingArm();
                         boolean lfound = false;
                         List<LivingEntity> lEntities = lPlayer.getAsPlayer().getWorld().getLivingEntities();
                         for (LivingEntity lEntity : lEntities) {
                             if (lEntity.getEntityId() == entityId) {
                                 lPlayer.attack(lEntity);
-                                lPlayer.attack(lEntity);
-                                lPlayer.attack(lEntity);
-                                lPlayer.attack(lEntity);
-                                lPlayer.attack(lEntity);
-                                /*
+                                
                                 int lDamage = 1;
                                 ItemStack lItem = lPlayer.getAsPlayer().getItemInHand();
                                 if (lItem != null) {
@@ -79,8 +81,8 @@ public class SettlerActivityFight extends SettlerActivity {
                                         lDamage = lDamage + lEnchantmentLevel; //TODO
                                     }
                                 }
-                                lEntity.damage(lDamage, lEntity);
-                                */
+                                lEntity.damage(lDamage, lPlayer.getAsPlayer());
+                                
                                 lfound = true;
                                 break;
                             }
@@ -88,6 +90,7 @@ public class SettlerActivityFight extends SettlerActivity {
                         if (!lfound) {
                             entityDead = true;
                         }
+                        */
                     }
                 });
             } else {

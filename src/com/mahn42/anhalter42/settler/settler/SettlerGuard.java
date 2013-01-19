@@ -95,7 +95,7 @@ public class SettlerGuard extends Settler {
                     } else {
                         addActivityForNow(
                                 "Fight",
-                                new SettlerActivityWalkToTarget(lmin.pos),
+                                new SettlerActivityWalkToTarget(lmin.pos, SettlerActivityWalkToTarget.WalkAction.Fight, lmin.id),
                                 new SettlerActivityFight(lmin.id, 20));
                     }
                 }
@@ -105,5 +105,12 @@ public class SettlerGuard extends Settler {
             addActivityForNow(new SettlerActivityFindRandomPath(getBedPosition(), 20, 10, PositionCondition.None));
         }
         super.runInternal(aAccess);
+    }
+
+    @Override
+    protected void runCheckDamage(SettlerAccess aAccess) {
+        if (!fActivityList.existsTag("Fight")) {
+            super.runCheckDamage(aAccess);
+        }
     }
 }

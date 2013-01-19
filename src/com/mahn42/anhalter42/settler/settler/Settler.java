@@ -27,11 +27,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Rotation;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
@@ -117,6 +120,8 @@ public class Settler {
     protected long fWorkEnd = 12500; // 20:30
     protected boolean fSendAtHome = false;
     protected float fWalkSpeed = 0.8f;
+    protected Rotation fFrameConfig = Rotation.NONE;
+    
     // profession specific?
     protected int fCollectItemRadius = 8;
     protected boolean fResetOnNight = true;
@@ -161,6 +166,14 @@ public class Settler {
         if (aPos != null) {
             fPosition = aPos.clone();
         }
+    }
+
+    public Rotation getFrameConfig() {
+        return fFrameConfig;
+    }
+    
+    public void setFrameConfig(Rotation aConfig) {
+        fFrameConfig = aConfig;
     }
 
     public BlockPosition getBedPosition() {
@@ -303,6 +316,7 @@ public class Settler {
         aValues.set("workEnd", fWorkEnd);
         aValues.set("sendAtHome", fSendAtHome);
         aValues.set("walkSpeed", fWalkSpeed);
+        aValues.set("frameConfig", getFrameConfig());
     }
 
     protected ItemStack deserializeItemStack(YamlConfiguration aValues, String aName) {
@@ -352,6 +366,7 @@ public class Settler {
         fWorkEnd = aValues.getLong("workEnd", fWorkEnd);
         fSendAtHome = aValues.getBoolean("sendAtHome", false);
         fWalkSpeed = (float) aValues.getDouble("walkSpeed", (double) fWalkSpeed);
+        fFrameConfig = Rotation.valueOf(aValues.getString("frameConfig", Rotation.NONE.toString()));
     }
 
     public boolean isWorkingTime() {
@@ -465,7 +480,7 @@ public class Settler {
                         && lDamage.entityPos != null) {
                     if (!lDamage.entityPos.nearly(getPosition(), 2)) {
                         addActivityForNow(
-                                new SettlerActivityWalkToTarget(lDamage.entityPos),
+                                new SettlerActivityWalkToTarget(lDamage.entityPos, SettlerActivityWalkToTarget.WalkAction.Fight, lDamage.entityId),
                                 new SettlerActivityFight(lDamage.entityId, 20));
                     } else {
                         addActivityForNow(new SettlerActivityFight(lDamage.entityId, 20));
@@ -588,7 +603,7 @@ public class Settler {
         fEntity = aEntity;
         setEntityId(lPlayer.getEntityId());
     }
-    
+
     public void updateFromEntity(NPCEntityPlayer aEntity) {
         setEntity(aEntity);
         Player lPlayer = aEntity.getAsPlayer();
@@ -832,6 +847,8 @@ public class Settler {
         l.info("BedPosition:" + fBedPosition);
         l.info("Activity:" + getCurrentActivity());
         l.info("Workingtime:" + fWorkStart + " - " + fWorkEnd);
+        l.info("Health:" + fHealth + " Food:" + fFoodLevel);
+        l.info("frameConfig:" + fFrameConfig);
         l.info("Boots:" + fBoots);
         l.info("Leggings:" + fLeggings);
         l.info("Chestplate:" + fChestplate);
@@ -966,6 +983,7 @@ public class Settler {
     }
 
     public enum PositionCondition {
+
         None,
         NaturalBlocksAround,
         GrassOrDirtAround,
@@ -1001,7 +1019,7 @@ public class Settler {
     public BlockPosition findRandomWalkToPosition(Random aRandom, int aRadius, int aAttempts, PositionCondition aCondition) {
         return findRandomWalkToPosition(getPosition(), aRandom, aRadius, aAttempts, aCondition);
     }
-    
+
     public BlockPosition findRandomWalkToPosition(BlockPosition aStart, Random aRandom, int aRadius, int aAttempts, PositionCondition aCondition) {
         boolean lFound = false;
         do {
@@ -1123,7 +1141,7 @@ public class Settler {
     public List<BlockPosition> findBlocks(Material aMaterial, int aRadius) {
         return WorldScanner.findBlocks(getWorld(), getPosition(), aMaterial, aRadius);
     }
-    
+
     public ItemStack getFirstItem(Material aMaterial) {
         for (int i = 0; i < getInventory().length; i++) {
             ItemStack lItem = getInventory()[i];
@@ -1132,5 +1150,37 @@ public class Settler {
             }
         }
         return null;
+    }
+
+    public boolean fight(int aEntityId) {
+        boolean ldead = false;
+        if (hasEntity()) {
+            fEntity.swingArm();
+            boolean lfound = false;
+            List<LivingEntity> lEntities = getWorld().getLivingEntities();
+            for (LivingEntity lEntity : lEntities) {
+                if (lEntity.getEntityId() == aEntityId) {
+                    fEntity.attack(lEntity);
+
+                    int lDamage = 1;
+                    ItemStack lItem = fEntity.getAsPlayer().getItemInHand();
+                    if (lItem != null) {
+                        lDamage = Framework.plugin.getItemWeaponLevel(lItem.getType());
+                        int lEnchantmentLevel = lItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
+                        if (lEnchantmentLevel > 0) {
+                            lDamage = lDamage + lEnchantmentLevel; //TODO
+                        }
+                    }
+                    lEntity.damage(lDamage, fEntity.getAsPlayer());
+
+                    lfound = true;
+                    break;
+                }
+            }
+            if (!lfound) {
+                ldead = true;
+            }
+        }
+        return ldead;
     }
 }

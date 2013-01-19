@@ -19,7 +19,7 @@ import org.bukkit.entity.Player;
  */
 public class CommandSettlerList implements CommandExecutor {
 
-    //s_list [world][profession]
+    //s_list [profession|name] [world]
     @Override
     public boolean onCommand(CommandSender aCommandSender, Command aCommand, String aString, String[] aStrings) {
         World lWorld = SettlerPlugin.plugin.getServer().getWorld("world");
@@ -30,9 +30,12 @@ public class CommandSettlerList implements CommandExecutor {
         if (aStrings.length > 0) {
             aProf = aStrings[0];
         }
+        if (aStrings.length > 1) {
+            lWorld = SettlerPlugin.plugin.getServer().getWorld(aStrings[1]);
+        }
         ArrayList<Settler> lSettlers = SettlerPlugin.plugin.getSettlers(lWorld);
         for(Settler lSettler : lSettlers) {
-            if (lSettler.isActive() && (aProf == null || aProf.equalsIgnoreCase(lSettler.getProfession()))) {
+            if (lSettler.isActive() && (aProf == null || aProf.equalsIgnoreCase(lSettler.getProfession()) || aProf.equals(lSettler.getSettlerName()))) {
                 aCommandSender.sendMessage(
                         lSettler.getSettlerName() + " " + 
                         lSettler.getProfession() + " " + 

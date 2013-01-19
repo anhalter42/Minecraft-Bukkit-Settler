@@ -10,6 +10,7 @@ import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.anhalter42.settler.settler.SettlerActivityWalkToTarget;
 import com.mahn42.framework.BlockPosition;
 import java.util.ArrayList;
+import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -71,7 +72,18 @@ public class CommandSettlerTest implements CommandExecutor {
                 }
             } else if (aStrings[0].equalsIgnoreCase("dump")) {
                 SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
-                Settler lSettler = lAccess.getSettlerById(Integer.parseInt(aStrings[1]));
+                Settler lSettler = null;
+                if (aStrings[1].charAt(0) >= '0' && aStrings[1].charAt(0) <= 'A') {
+                    lSettler = lAccess.getSettlerById(Integer.parseInt(aStrings[1]));
+                } else {
+                    Collection<? extends Settler> lSettlers = lAccess.getSettlers();
+                    for(Settler lS : lSettlers) {
+                        if (aStrings[1].equalsIgnoreCase(lS.getSettlerName())) {
+                            lSettler = lS;
+                            break;
+                        }
+                    }
+                }
                 if (lSettler != null) {
                     lSettler.dump();
                 } else {

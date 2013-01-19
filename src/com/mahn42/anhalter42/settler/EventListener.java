@@ -8,10 +8,13 @@ import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityReachedPathItemEvent;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
+import java.util.ArrayList;
 import org.bukkit.Chunk;
+import org.bukkit.Rotation;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -89,12 +92,11 @@ public class EventListener implements Listener {
      * Entity events
      */
     /*
-    @EventHandler
-    public void onEntityCombust(EntityCombustEvent aEvent) {
-        //SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + aEvent.getClass().getName());
-    }
-    */
-
+     @EventHandler
+     public void onEntityCombust(EntityCombustEvent aEvent) {
+     //SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + aEvent.getClass().getName());
+     }
+     */
     @EventHandler
     public void onEntityDamage(EntityDamageEvent aEvent) {
         Entity lEntity = aEvent.getEntity();
@@ -141,33 +143,24 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent aEvent) {
-        SettlerPlugin.plugin.getLogger().info(aEvent.getPlayer().getDisplayName() + aEvent.getRightClicked().toString() + aEvent.getClass().getName());
-        /*
-        if (aEvent.getRightClicked() instanceof NPCEntityPlayer) {
-            NPCEntityPlayer lNPC = (NPCEntityPlayer) aEvent.getRightClicked();
-            Player lPlayer = lNPC.getAsPlayer();
-            //lPlayer.setItemInHand(new ItemStack(Material.IRON_AXE));
-            //lPlayer.setSneaking(!lPlayer.isSneaking());
-            lNPC.swingArm();
-            lNPC.setMot(0.2f,0,0.2f);
-            lPlayer.setCanPickupItems(true);
-            SettlerPlugin.plugin.getLogger().info(lPlayer.getDisplayName() + ": food=" + lPlayer.getFoodLevel() + " health=" + lPlayer.getHealth() + "/" + lPlayer.getMaxHealth());
-            EntityControl lEC = new EntityControl(lPlayer);
-            BlockPosition lPos = new BlockPosition(lPlayer.getLocation());
-            lPos.add(10, 0, 10);
-            lPos.y = lPlayer.getWorld().getHighestBlockYAt(lPos.x, lPos.z);
-            SettlerPlugin.plugin.getLogger().info("send settler to " + lPos);
-            lEC.showPath(lPos);
-            //lEC.createPath(lPos);
-            lEC.path.add(new EntityControlPathItemDestination(lPos, 0.7f));
-            Framework.plugin.getEntityController().add(lEC);
-            //lNPC.goSleep();
-            //PlayerAnimation.ARM_SWING.play(lPlayer);
-            //PlayerAnimation.SNEAK.play(lPlayer);
-            //lPlayer.setSneaking(!lPlayer.isSneaking());
-        }*/
+        //SettlerPlugin.plugin.getLogger().info(aEvent.getPlayer().getDisplayName() + aEvent.getRightClicked().toString() + aEvent.getClass().getName());
+        Entity lEntity = aEvent.getRightClicked();
+        if (lEntity instanceof ItemFrame) {
+            ArrayList<SettlerBuilding> lBuildings = SettlerPlugin.plugin.settlerBuildingDB.getDB(aEvent.getPlayer().getWorld()).getBuildingsWithBlock(new BlockPosition(lEntity.getLocation()));
+            if (lBuildings.size() == 1) {
+                Rotation rotation = ((ItemFrame)lEntity).getRotation();
+                lBuildings.get(0).setFrameConfig(rotation);
+            }
+        } else if (lEntity instanceof NPCEntityPlayer) {
+            Object lDataObject = ((NPCEntityPlayer)lEntity).getDataObject();
+            if (lDataObject instanceof Settler) {
+                //TODO configure settler
+                ((Settler)lDataObject).dump();
+                aEvent.getPlayer().sendMessage("health: " + ((Settler)lDataObject).getHealth() + " food: " + ((Settler)lDataObject).getFoodLevel());
+            }
+        }
     }
-    
+
     @EventHandler
     public void onEntityReachTarget(EntityReachedPathItemEvent aEvent) {
         Entity lEntity = aEvent.getEntity();
