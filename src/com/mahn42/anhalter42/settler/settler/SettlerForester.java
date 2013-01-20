@@ -30,7 +30,7 @@ public class SettlerForester extends Settler {
 
     public SettlerForester() {
         super(typeName);
-        fCollectItemRadius = 12;
+        fCollectItemRadius = 23;
         fItemsToCollect.add(Material.SAPLING);
         fItemsToCollect.add(Material.LEAVES);
         fItemsToCollect.add(Material.RED_ROSE);
@@ -65,5 +65,10 @@ public class SettlerForester extends Settler {
             }
         }
         super.runInternal(aAccess);
+    }
+
+    @Override
+    public String getFrameConfigName() {
+        return "plant seedlings";
     }
 }

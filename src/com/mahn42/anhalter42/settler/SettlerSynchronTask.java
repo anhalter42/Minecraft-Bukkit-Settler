@@ -4,6 +4,7 @@
  */
 package com.mahn42.anhalter42.settler;
 
+import com.mahn42.framework.Framework;
 import java.util.List;
 import org.bukkit.World;
 
@@ -19,18 +20,27 @@ public class SettlerSynchronTask implements Runnable {
     public void run() {
         synchronized (this) {
             if (!fIsRunning) {
+                fIsRunning = true;
                 try {
-                    fIsRunning = true;
-                    List<World> lWorlds = SettlerPlugin.plugin.getServer().getWorlds();
-                    for (World lWorld : lWorlds) {
-                        SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
-                        lAccess.runSynchron();
+                    //Framework.plugin.log("settler", getClass().getSimpleName() + " started.");
+                    try {
+                        List<World> lWorlds = SettlerPlugin.plugin.getServer().getWorlds();
+                        for (World lWorld : lWorlds) {
+                            SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                            lAccess.runSynchron();
+                            SettlerBuildingDB lDB = SettlerPlugin.plugin.settlerBuildingDB.getDB(lWorld);
+                            for (SettlerBuilding lBuilding : lDB) {
+                                lBuilding.runCheck();
+                            }
+                        }
+                    } catch (Exception ex) {
+                        SettlerPlugin.plugin.getLogger().throwing(getClass().getName(), null, ex);
                     }
-                } catch (Exception ex) {
-                    SettlerPlugin.plugin.getLogger().throwing(getClass().getName(), null, ex);
+                } finally {
+                    fIsRunning = false;
+                    //Framework.plugin.log("settler", getClass().getSimpleName() + " ended.");
                 }
             }
-            fIsRunning = false;
         }
     }
 }

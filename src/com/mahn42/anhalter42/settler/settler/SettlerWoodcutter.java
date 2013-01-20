@@ -33,6 +33,7 @@ public class SettlerWoodcutter extends Settler {
         profession.output.add(new ItemStack(Material.SAPLING));
         profession.output.add(new ItemStack(Material.APPLE));
         register(profession);
+        SettlerActivity.registerActivity(SettlerActivityWoodcutterBreakLog.TYPE, SettlerActivityWoodcutterBreakLog.class);
     }
 
     public SettlerWoodcutter() {
@@ -56,9 +57,16 @@ public class SettlerWoodcutter extends Settler {
         super.runInternal(aAccess);
     }
 
+    @Override
+    public void runCollectItems(SettlerAccess aAccess) {
+        if (!existsActivity(SettlerActivityWoodcutterBreakLog.class)) {
+            super.runCollectItems(aAccess);
+        }
+    }
+
     public static class SettlerActivityWoodcutterBreakLog extends SettlerActivity {
 
-        public static final String TYPE = "BreakBlock";
+        public static final String TYPE = "WoodcutterBreakLog";
 
         public SettlerActivityWoodcutterBreakLog() {
             type = TYPE;
@@ -82,5 +90,10 @@ public class SettlerWoodcutter extends Settler {
             }
             return true;
         }
+    }
+
+    @Override
+    public String getFrameConfigName() {
+        return "chop down trees";
     }
 }

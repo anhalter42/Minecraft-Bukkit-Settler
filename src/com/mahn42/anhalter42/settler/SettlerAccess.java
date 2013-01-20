@@ -6,6 +6,7 @@ package com.mahn42.anhalter42.settler;
 
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
+import com.mahn42.framework.Framework;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +60,7 @@ public class SettlerAccess {
         initialize();
         synchronized (settlers) {
             for (Settler lSettler : settlers) {
-                if (lSettler.getHomeKey() == aHomeKey) {
+                if (lSettler.getHomeKey() == null ? aHomeKey == null : lSettler.getHomeKey().equals(aHomeKey)) {
                     lResult.add(lSettler);
                 }
             }
@@ -207,10 +208,10 @@ public class SettlerAccess {
             }
             settlersForEntity.clear();
         }
+        synchronized (entitiyStates) {
+            entitiyStates.clear();
+        }
         synchronized (settlers) {
-            synchronized (entitiyStates) {
-                entitiyStates.clear();
-            }
             settlersByEntityId.clear();
             for (Entity lEntity : lEntities) {
                 EntityState lState = new EntityState(lEntity);
@@ -247,7 +248,7 @@ public class SettlerAccess {
             if (lBuilding != null) {
                 SettlerBuildingTask lTask = new SettlerBuildingTask(SettlerBuildingTask.Kind.SettlerDied, lBuilding);
                 lTask.settler = aSettler;
-                SettlerPlugin.plugin.getServer().getScheduler().runTaskLaterAsynchronously(SettlerPlugin.plugin, lTask, 20);
+                SettlerPlugin.plugin.getServer().getScheduler().runTaskLaterAsynchronously(SettlerPlugin.plugin, lTask, 20 * 60);
             }
         }
         //aSettler.setEntityId(0);

@@ -67,9 +67,17 @@ public class SettlerActivityBreakBlock extends SettlerActivity {
                     done = true;
                 }
             });
+            control.success = false;
+            done = true;
         } else {
+            control.success = false;
             done = true;
         }
         return done;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " " + target;
     }
 }

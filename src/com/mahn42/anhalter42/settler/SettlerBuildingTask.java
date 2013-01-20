@@ -21,6 +21,7 @@ import org.bukkit.inventory.Inventory;
 public class SettlerBuildingTask implements Runnable {
 
     public enum Kind {
+
         Initialize,
         Check,
         SettlerDied,
@@ -38,25 +39,31 @@ public class SettlerBuildingTask implements Runnable {
 
     @Override
     public void run() {
-        // is building removed --> nothing to do
-        if (SettlerPlugin.plugin.settlerBuildingDB.getDB(building.world).getRecord(building.key) == null) {
-            return;
-        }
         fAccess = SettlerPlugin.plugin.getSettlerAccess(building.world);
         switch (kind) {
             case Initialize:
-                initBuilding();
+                if (existsBuilding()) {
+                    initBuilding();
+                }
                 break;
             case Check:
-                checkBuilding();
+                if (existsBuilding()) {
+                    checkBuilding();
+                }
                 break;
             case SettlerDied:
-                rebornSettler();
+                if (existsBuilding()) {
+                    rebornSettler();
+                }
                 break;
             case Destroy:
                 destroyBuilding();
                 break;
         }
+    }
+
+    private boolean existsBuilding() {
+        return SettlerPlugin.plugin.settlerBuildingDB.getDB(building.world).getRecord(building.key) != null;
     }
 
     private void initBuilding() {
@@ -76,7 +83,7 @@ public class SettlerBuildingTask implements Runnable {
                     BlockPosition lPos = lBlock.position.clone();
                     byte data = lBlock.position.getBlock(lSettler.getWorld()).getData();
                     if ((data & 0x08) == 0x00) {
-                        switch((data & 0x03)) {
+                        switch ((data & 0x03)) {
                             case 0: // south
                                 lPos.z++;
                                 break;
@@ -104,7 +111,7 @@ public class SettlerBuildingTask implements Runnable {
         Collection<? extends Settler> lSettlers = fAccess.getSettlersForHomeKey(building.key);
         if (lSettlers.size() < building.settlerCount) {
             //TODO check which settlers are killed and if enough items to reborn settler
-            for(Settler lSettler : lSettlers) {
+            for (Settler lSettler : lSettlers) {
             }
         }
     }
@@ -118,7 +125,7 @@ public class SettlerBuildingTask implements Runnable {
         bearSettler(lChestInv, settler);
         fAccess.addSettler(settler);
     }
-    
+
     private void bearSettler(Inventory lChestInv, Settler aSettler) {
         if (aSettler.getSettlerName() == null) {
             aSettler.setSettlerName(SettlerPlugin.plugin.getRandomSettlerName());
@@ -139,9 +146,8 @@ public class SettlerBuildingTask implements Runnable {
 
     private void destroyBuilding() {
         Collection<? extends Settler> lSettlers = fAccess.getSettlersForHomeKey(building.key);
-        for(Settler lSettler : lSettlers) {
+        for (Settler lSettler : lSettlers) {
             fAccess.removeSettler(lSettler);
         }
     }
-
 }

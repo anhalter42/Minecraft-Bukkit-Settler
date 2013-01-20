@@ -40,7 +40,7 @@ import org.bukkit.util.Vector;
  */
 public class SettlerPlugin extends JavaPlugin {
 
-    public int configSettlerTicks = 10;  // first a little bit slower
+    public int configSettlerTicks = 20;  // first a little bit slower
     
     public static SettlerPlugin plugin;
     protected WorldDBList<SettlerDB> settlerDB;

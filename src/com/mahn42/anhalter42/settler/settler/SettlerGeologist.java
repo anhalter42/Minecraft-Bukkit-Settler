@@ -209,4 +209,9 @@ public class SettlerGeologist extends Settler {
             return lFound;
         }
     }
+
+    @Override
+    public String getFrameConfigName() {
+        return "searching ores";
+    }
 }

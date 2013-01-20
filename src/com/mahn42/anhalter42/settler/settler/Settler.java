@@ -121,9 +121,9 @@ public class Settler {
     protected boolean fSendAtHome = false;
     protected float fWalkSpeed = 0.8f;
     protected Rotation fFrameConfig = Rotation.NONE;
-    
+    protected long fLivingTicks = 0;
     // profession specific?
-    protected int fCollectItemRadius = 8;
+    protected int fCollectItemRadius = 16;
     protected boolean fResetOnNight = true;
 
     public Settler(String aProfession) {
@@ -171,7 +171,7 @@ public class Settler {
     public Rotation getFrameConfig() {
         return fFrameConfig;
     }
-    
+
     public void setFrameConfig(Rotation aConfig) {
         fFrameConfig = aConfig;
     }
@@ -316,7 +316,8 @@ public class Settler {
         aValues.set("workEnd", fWorkEnd);
         aValues.set("sendAtHome", fSendAtHome);
         aValues.set("walkSpeed", fWalkSpeed);
-        aValues.set("frameConfig", getFrameConfig());
+        aValues.set("frameConfig", getFrameConfig().toString());
+        aValues.set("livingTicks", fLivingTicks);
     }
 
     protected ItemStack deserializeItemStack(YamlConfiguration aValues, String aName) {
@@ -367,6 +368,7 @@ public class Settler {
         fSendAtHome = aValues.getBoolean("sendAtHome", false);
         fWalkSpeed = (float) aValues.getDouble("walkSpeed", (double) fWalkSpeed);
         fFrameConfig = Rotation.valueOf(aValues.getString("frameConfig", Rotation.NONE.toString()));
+        fLivingTicks = aValues.getLong("livingTicks", fLivingTicks);
     }
 
     public boolean isWorkingTime() {
@@ -374,7 +376,7 @@ public class Settler {
         if (fWorkStart < fWorkEnd) {
             return fWorkStart <= lTime && lTime <= fWorkEnd;
         } else {
-            return fWorkEnd <= lTime && lTime <= fWorkStart;
+            return lTime >= fWorkStart || lTime <= fWorkEnd;
         }
     }
 
@@ -400,6 +402,7 @@ public class Settler {
         if (!hasEntity()) { // for testing?.. only settler working who have an entity
             return;
         }
+        fLivingTicks += SettlerPlugin.plugin.configSettlerTicks;
         if (!isWorkingTime()) { // no work time :-) we go sleeping
             if (!fSendAtHome) {
                 if (getBedPosition() != null && !getPosition().nearly(getBedPosition(), 2)) {
@@ -514,7 +517,7 @@ public class Settler {
             if (!lStates.isEmpty()) {
                 for (SettlerAccess.EntityState lState : lStates) {
                     if (InventoryHelper.canInsertItems(getInventory(), lState.item) > 0) {
-                        if (lState.pos.nearly(getPosition(), 1)) {
+                        if (lState.pos.nearly(getPosition(), 2)) {
                             addActivityForNow("CollectItems", new SettlerActivityCollectItems(fItemsToCollect));
                         } else if (canWalkTo(lState.pos)) {
                             if (!existsTaggedActivity("CollectItems.back")) {
@@ -650,10 +653,12 @@ public class Settler {
 
     public void activate() {
         fActive = true;
+        Framework.plugin.log("settler", "settler " + getSettlerName() + " activated.");
     }
 
     public void deactivate() {
         fActive = false;
+        Framework.plugin.log("settler", "settler " + getSettlerName() + " deactivated.");
     }
 
     public boolean isActive() {
@@ -838,7 +843,7 @@ public class Settler {
 
     public void dump() {
         Logger l = SettlerPlugin.plugin.getLogger();
-        l.info("Key:" + fKey);
+        l.info("Key:" + fKey + " livingTicks:" +fLivingTicks);
         l.info("HomeKey:" + fHomeKey);
         l.info("SettlerName:" + fSettlerName);
         l.info("Profession:" + fProfession);
@@ -848,7 +853,7 @@ public class Settler {
         l.info("Activity:" + getCurrentActivity());
         l.info("Workingtime:" + fWorkStart + " - " + fWorkEnd);
         l.info("Health:" + fHealth + " Food:" + fFoodLevel);
-        l.info("frameConfig:" + fFrameConfig);
+        l.info("frameConfig:" + fFrameConfig + " " + getFrameConfigName());
         l.info("Boots:" + fBoots);
         l.info("Leggings:" + fLeggings);
         l.info("Chestplate:" + fChestplate);
@@ -1182,5 +1187,9 @@ public class Settler {
             }
         }
         return ldead;
+    }
+
+    public String getFrameConfigName() {
+        return "";
     }
 }

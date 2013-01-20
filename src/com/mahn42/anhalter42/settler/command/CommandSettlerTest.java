@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.command;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerBuilding;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.anhalter42.settler.settler.SettlerActivityWalkToTarget;
@@ -73,7 +74,7 @@ public class CommandSettlerTest implements CommandExecutor {
             } else if (aStrings[0].equalsIgnoreCase("dump")) {
                 SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
                 Settler lSettler = null;
-                if (aStrings[1].charAt(0) >= '0' && aStrings[1].charAt(0) <= 'A') {
+                if (aStrings[1].charAt(0) >= '0' && aStrings[1].charAt(0) <= '9') {
                     lSettler = lAccess.getSettlerById(Integer.parseInt(aStrings[1]));
                 } else {
                     Collection<? extends Settler> lSettlers = lAccess.getSettlers();
@@ -88,6 +89,16 @@ public class CommandSettlerTest implements CommandExecutor {
                     lSettler.dump();
                 } else {
                     aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
+                }
+            } else if (aStrings[0].equalsIgnoreCase("settlers")) {
+                Block targetBlock = ((Player)aCommandSender).getTargetBlock(null, 20);
+                ArrayList<SettlerBuilding> buildings = SettlerPlugin.plugin.getSettlerBuildingDB(lWorld).getBuildings(new BlockPosition(targetBlock.getLocation()));
+                for(SettlerBuilding lB : buildings) {
+                    Collection<? extends Settler> settlers = lB.getSettlers();
+                    aCommandSender.sendMessage("B: " + settlers.size() + " " + lB.key);
+                    for(Settler lS : settlers) {
+                        aCommandSender.sendMessage("S: " + lS.getDisplayName());
+                    }
                 }
             } else if (aStrings[0].equalsIgnoreCase("time")) {
                 long ltime = lWorld.getTime();

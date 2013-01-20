@@ -61,7 +61,7 @@ class SettlerActivityCollectItems extends SettlerActivity {
 
     @Override
     public boolean run(SettlerAccess aAccess, Settler aSettler) {
-        Collection<EntityState> lItems = aAccess.getEntityStatesNearby(aSettler.getPosition(), 1, items);
+        Collection<EntityState> lItems = aAccess.getEntityStatesNearby(aSettler.getPosition(), 2, items);
         final ArrayList<Integer> lIds = new ArrayList<Integer>();
         for (EntityState lItem : lItems) {
             lIds.add(lItem.id);

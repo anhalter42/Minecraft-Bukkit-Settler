@@ -49,8 +49,10 @@ public class SettlerShepherd extends Settler {
             if (!existsTaggedActivity("FindSheep")) {
                 Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), 42, EntityType.SHEEP);
                 if (!lStates.isEmpty()) {
+                    boolean lFound = false;
                     for (SettlerAccess.EntityState lState : lStates) {
                         if ((Boolean) lState.props.get("isAdult") && !(Boolean) lState.props.get("isSheared")) {
+                            lFound = true;
                             if (lState.pos.nearly(getPosition(), 2)) {
                                 addActivityForNow(
                                         "FindSheep",
@@ -64,6 +66,10 @@ public class SettlerShepherd extends Settler {
                             break;
                         }
                     }
+                    if (!lFound) {
+                        // walk a bit
+                        addActivityForNow(new SettlerActivityFindRandomPath(10, 10, PositionCondition.None));
+                    }
                 } else {
                     // walk a bit
                     addActivityForNow(new SettlerActivityFindRandomPath(10, 10, PositionCondition.None));
@@ -74,5 +80,10 @@ public class SettlerShepherd extends Settler {
             }
         }
 
+    }
+
+    @Override
+    public String getFrameConfigName() {
+        return "shear sheeps";
     }
 }

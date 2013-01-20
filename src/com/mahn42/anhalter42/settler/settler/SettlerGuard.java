@@ -11,6 +11,7 @@ import com.mahn42.framework.BlockPosition;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.Material;
+import org.bukkit.Rotation;
 import org.bukkit.entity.EntityType;
 
 /**
@@ -74,7 +75,7 @@ public class SettlerGuard extends Settler {
 
     @Override
     protected void runInternal(SettlerAccess aAccess) {
-        if (!fActivityList.existsTag("Fight")) {
+        if (!existsTaggedActivity("Fight") && (fFrameConfig == Rotation.NONE || fFrameConfig == Rotation.COUNTER_CLOCKWISE)) {
             Collection<EntityState> lEnities = aAccess.getEntityStatesNearby(getPosition(), 20, monsters);
             if (!lEnities.isEmpty()) {
                 double dist = Double.MAX_VALUE;
@@ -102,15 +103,33 @@ public class SettlerGuard extends Settler {
             }
         }
         if (isWorkingTime() && getCurrentActivity() == null) {
-            addActivityForNow(new SettlerActivityFindRandomPath(getBedPosition(), 20, 10, PositionCondition.None));
+            if (fFrameConfig == Rotation.NONE || fFrameConfig == Rotation.CLOCKWISE) {
+                addActivityForNow(new SettlerActivityFindRandomPath(getBedPosition(), 20, 10, PositionCondition.None));
+            }
         }
         super.runInternal(aAccess);
     }
 
     @Override
     protected void runCheckDamage(SettlerAccess aAccess) {
-        if (!fActivityList.existsTag("Fight")) {
+        if (!existsTaggedActivity("Fight")) {
             super.runCheckDamage(aAccess);
+        }
+    }
+
+    @Override
+    public String getFrameConfigName() {
+        switch (fFrameConfig) {
+            case NONE:
+                return "Walk & Attack";
+            case COUNTER_CLOCKWISE:
+                return "Stay & Attack";
+            case FLIPPED:
+                return "Stay & Defense";
+            case CLOCKWISE:
+                return "Walk & Defense";
+            default:
+                return "";
         }
     }
 }

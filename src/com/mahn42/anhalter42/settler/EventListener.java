@@ -15,15 +15,12 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -149,7 +146,7 @@ public class EventListener implements Listener {
             ArrayList<SettlerBuilding> lBuildings = SettlerPlugin.plugin.settlerBuildingDB.getDB(aEvent.getPlayer().getWorld()).getBuildingsWithBlock(new BlockPosition(lEntity.getLocation()));
             if (lBuildings.size() == 1) {
                 Rotation rotation = ((ItemFrame)lEntity).getRotation();
-                lBuildings.get(0).setFrameConfig(rotation);
+                lBuildings.get(0).setFrameConfig(rotation.rotateClockwise());
             }
         } else if (lEntity instanceof NPCEntityPlayer) {
             Object lDataObject = ((NPCEntityPlayer)lEntity).getDataObject();
