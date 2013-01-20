@@ -12,6 +12,7 @@ import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityControl;
 import com.mahn42.framework.Framework;
+import com.mahn42.framework.Framework.ItemType;
 import com.mahn42.framework.InventoryHelper;
 import com.mahn42.framework.WorldScanner;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
@@ -30,6 +31,8 @@ import org.bukkit.Material;
 import org.bukkit.Rotation;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -37,6 +40,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -403,6 +407,7 @@ public class Settler {
             return;
         }
         fLivingTicks += SettlerPlugin.plugin.configSettlerTicks;
+        runCheckHealth(aAccess);
         if (!isWorkingTime()) { // no work time :-) we go sleeping
             if (!fSendAtHome) {
                 if (getBedPosition() != null && !getPosition().nearly(getBedPosition(), 2)) {
@@ -438,6 +443,7 @@ public class Settler {
                     fActivityList.remove(lAct);
                 }
             }
+            runCheckArmor(aAccess);
             runPutInChestItems(aAccess);
             runCollectItems(aAccess);
         }
@@ -474,6 +480,76 @@ public class Settler {
     }
 
     protected void runInternal(SettlerAccess aAccess) {
+    }
+    protected long fHealthTicks = 0;
+
+    protected void runCheckHealth(SettlerAccess aAccess) {
+        if (getHealth() < 20 && getFoodLevel() > 15) {
+            fHealthTicks += SettlerPlugin.plugin.configSettlerTicks;
+            if (fHealthTicks > 20) {
+                fHealthTicks = 0;
+                setHealth(getHealth() + 1);
+            }
+        }
+    }
+
+    protected void runCheckArmor(SettlerAccess aAccess) {
+        BlockPosition lPos = getPosition();
+        //TODO should be chest position
+        if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
+            List<BlockPosition> findChests = findBlocks(Material.CHEST, 4);
+            for (SettlerProfession.Item lItem : fProf.armor) {
+                for (BlockPosition lChestPos : findChests) {
+                    Chest lChest = (Chest) lChestPos.getBlock(getWorld()).getState();
+                    Inventory lInv = lChest.getInventory();
+                    if (InventoryHelper.hasAtleastItems(lInv, lItem.item.getType(), 1)) {
+                        ItemType itemType = Framework.plugin.getItemType(lItem.item.getType());
+                        switch (itemType) {
+                            case Boots:
+                                if (getBoots() == null) {
+                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
+                                    if (!lRemoved.isEmpty()) {
+                                        setBoots(lRemoved.get(0));
+                                    }
+                                }
+                                break;
+                            case Leggings:
+                                if (getLeggings() == null) {
+                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
+                                    if (!lRemoved.isEmpty()) {
+                                        setLeggings(lRemoved.get(0));
+                                    }
+                                }
+                                break;
+                            case Chestplate:
+                                if (getChestplate() == null) {
+                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
+                                    if (!lRemoved.isEmpty()) {
+                                        setChestplate(lRemoved.get(0));
+                                    }
+                                }
+                                break;
+                            case Helmet:
+                                if (getHelmet() == null) {
+                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
+                                    if (!lRemoved.isEmpty()) {
+                                        setHelmet(lRemoved.get(0));
+                                    }
+                                }
+                                break;
+                            case Tool:
+                                if (getItemInHand() == null) {
+                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
+                                    if (!lRemoved.isEmpty()) {
+                                        setItemInHand(lRemoved.get(0));
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     protected void runCheckDamage(SettlerAccess aAccess) {
@@ -843,7 +919,7 @@ public class Settler {
 
     public void dump() {
         Logger l = SettlerPlugin.plugin.getLogger();
-        l.info("Key:" + fKey + " livingTicks:" +fLivingTicks);
+        l.info("Key:" + fKey + " livingTicks:" + fLivingTicks);
         l.info("HomeKey:" + fHomeKey);
         l.info("SettlerName:" + fSettlerName);
         l.info("Profession:" + fProfession);

@@ -5,7 +5,13 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.framework.BlockPosition;
+import com.mahn42.framework.Framework;
+import com.mahn42.framework.WorldScanner;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
+import java.util.List;
+import org.bukkit.Material;
+import org.bukkit.World;
 
 /**
  *
@@ -14,7 +20,6 @@ import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 public class SettlerActivitySleep extends SettlerActivity {
 
     public static final String TYPE = "Sleep";
-    
     public boolean started = false;
 
     public SettlerActivitySleep() {
@@ -34,12 +39,24 @@ public class SettlerActivitySleep extends SettlerActivity {
             runTaskLater(new Runnable() {
                 @Override
                 public void run() {
-                    lPlayer.goSleep();
+                    World lWorld = lPlayer.getAsPlayer().getWorld();
+                    List<BlockPosition> findBlocks = WorldScanner.findBlocks(lWorld, new BlockPosition(lPlayer.getAsPlayer().getLocation()), Material.BED_BLOCK, 3);
+                    if (findBlocks.isEmpty()) {
+                        Framework.plugin.log("settler", "go sleep no bed found!");
+                        lPlayer.goSleep();
+                    } else {
+                        //Framework.plugin.log("settler", "go sleep bed found.");
+                        for (BlockPosition lPos : findBlocks) {
+                            if ((lPos.getBlock(lWorld).getData() & 0x8) != 0) {
+                                lPlayer.goSleep(lPos);
+                                break;
+                            }
+                        }
+                    }
                     started = true;
                 }
             });
         }
         return false;
     }
-    
 }

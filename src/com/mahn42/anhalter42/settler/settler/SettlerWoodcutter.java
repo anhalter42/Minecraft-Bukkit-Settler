@@ -59,7 +59,7 @@ public class SettlerWoodcutter extends Settler {
 
     @Override
     public void runCollectItems(SettlerAccess aAccess) {
-        if (!existsActivity(SettlerActivityWoodcutterBreakLog.class)) {
+        if (!existsTaggedActivity("BreakTree")) {
             super.runCollectItems(aAccess);
         }
     }
@@ -80,6 +80,7 @@ public class SettlerWoodcutter extends Settler {
                 if (!lTreePoss.isEmpty()) {
                     for(BlockPosition lP : lTreePoss) {
                         aSettler.addActivityForNow(
+                                "BreakTree",
                                 new SettlerActivitySwingArm(20),
                                 new SettlerActivityBreakBlock(lP));
                     }
