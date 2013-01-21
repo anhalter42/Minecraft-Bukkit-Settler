@@ -182,22 +182,28 @@ public class SettlerGeologist extends Settler {
                     lFound = true;
                 }
             } else {
-                BlockPosition lPos = aSettler.getPosition();
-                BlockPosition lBedPos = aSettler.getBedPosition();
-                if (lBedPos != null) {
-                    if (!lBedPos.nearly(lPos, 2)) {
-                        aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lBedPos));
-                    } else {
-                        if (((SettlerGeologist) aSettler).getSignFromChestCount > 0) {
-                            ((SettlerGeologist) aSettler).getSignFromChestCount = 0;
-                            ((SettlerGeologist) aSettler).dowalk = 5;
-                            //aSettler.addActivityForNext(new SettlerActivityNothing(20*60)); //1min
-                        } else {
-                            ((SettlerGeologist) aSettler).getSignFromChestCount++;
-                            aSettler.addActivityForNext(new SettlerActivityGetItemsFromChest(Material.SIGN, 10, 0));
-                        }
-                    }
+                if (((SettlerGeologist) aSettler).dowalk > 0) {
+                    ((SettlerGeologist) aSettler).dowalk--;
+                    aSettler.addActivityForNext(new SettlerActivityFindRandomPath(walkRadius, 10, PositionCondition.None));
                     lFound = true;
+                } else {
+                    BlockPosition lPos = aSettler.getPosition();
+                    BlockPosition lBedPos = aSettler.getBedPosition();
+                    if (lBedPos != null) {
+                        if (!lBedPos.nearly(lPos, 2)) {
+                            aSettler.addActivityForNext(new SettlerActivityWalkToTarget(lBedPos));
+                        } else {
+                            if (((SettlerGeologist) aSettler).getSignFromChestCount > 0) {
+                                ((SettlerGeologist) aSettler).getSignFromChestCount = 0;
+                                ((SettlerGeologist) aSettler).dowalk = 5;
+                                //aSettler.addActivityForNext(new SettlerActivityNothing(20*60)); //1min
+                            } else {
+                                ((SettlerGeologist) aSettler).getSignFromChestCount++;
+                                aSettler.addActivityForNext(new SettlerActivityGetItemsFromChest(Material.SIGN, 10, 0));
+                            }
+                        }
+                        lFound = true;
+                    }
                 }
             }
             return lFound;

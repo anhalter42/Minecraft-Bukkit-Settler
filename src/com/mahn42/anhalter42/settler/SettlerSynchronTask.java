@@ -26,11 +26,13 @@ public class SettlerSynchronTask implements Runnable {
                     try {
                         List<World> lWorlds = SettlerPlugin.plugin.getServer().getWorlds();
                         for (World lWorld : lWorlds) {
-                            SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
-                            lAccess.runSynchron();
-                            SettlerBuildingDB lDB = SettlerPlugin.plugin.settlerBuildingDB.getDB(lWorld);
-                            for (SettlerBuilding lBuilding : lDB) {
-                                lBuilding.runCheck();
+                            if (!lWorld.getPlayers().isEmpty()) {
+                                SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                                lAccess.runSynchron();
+                                SettlerBuildingDB lDB = SettlerPlugin.plugin.settlerBuildingDB.getDB(lWorld);
+                                for (SettlerBuilding lBuilding : lDB) {
+                                    lBuilding.runCheck();
+                                }
                             }
                         }
                     } catch (Exception ex) {
