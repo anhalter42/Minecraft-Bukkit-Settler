@@ -9,6 +9,7 @@ import com.mahn42.anhalter42.settler.SettlerAccess.SettlerDamage;
 import com.mahn42.anhalter42.settler.SettlerDBRecord;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
+import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityControl;
 import com.mahn42.framework.Framework;
@@ -31,7 +32,6 @@ import org.bukkit.Material;
 import org.bukkit.Rotation;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
@@ -59,6 +59,9 @@ public class Settler {
         SettlerGeologist.register();
         SettlerShepherd.register();
         SettlerGuard.register();
+        SettlerFarmer.register();
+        SettlerRancher.register();
+        SettlerWearer.register();
     }
 
     public static Class getSettlerClass(String aTypename) {
@@ -402,12 +405,12 @@ public class Settler {
         setEntityId(0);
     }
 
-    public void run(SettlerAccess aAccess) {
+    public void run(SettlerTask aTask, SettlerAccess aAccess) {
         if (!hasEntity()) { // for testing?.. only settler working who have an entity
             return;
         }
         fLivingTicks += SettlerPlugin.plugin.configSettlerTicks;
-        runCheckHealth(aAccess);
+        runCheckHealth(aTask, aAccess);
         if (!isWorkingTime()) { // no work time :-) we go sleeping
             if (!fSendAtHome) {
                 if (getBedPosition() != null && !getPosition().nearly(getBedPosition(), 2)) {
@@ -443,12 +446,12 @@ public class Settler {
                     fActivityList.remove(lAct);
                 }
             }
-            runCheckArmor(aAccess);
-            runPutInChestItems(aAccess);
-            runCollectItems(aAccess);
+            runCheckArmor(aTask, aAccess);
+            runPutInChestItems(aTask, aAccess);
+            runCollectItems(aTask, aAccess);
         }
-        runCheckDamage(aAccess);
-        runInternal(aAccess);
+        runCheckDamage(aTask, aAccess);
+        runInternal(aTask, aAccess);
         SettlerActivity lAct = getCurrentActivity();
         if (lAct != null) {
             boolean lRemove = true;
@@ -479,21 +482,28 @@ public class Settler {
         fDamages.clear();
     }
 
-    protected void runInternal(SettlerAccess aAccess) {
+    protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
     }
     protected long fHealthTicks = 0;
 
-    protected void runCheckHealth(SettlerAccess aAccess) {
-        if (getHealth() < 20 && getFoodLevel() > 15) {
+    protected void runCheckHealth(SettlerTask aTask, SettlerAccess aAccess) {
+        if (hasEntity() && getHealth() < 20 && getFoodLevel() > 15) {
             fHealthTicks += SettlerPlugin.plugin.configSettlerTicks;
             if (fHealthTicks > 20) {
                 fHealthTicks = 0;
                 setHealth(getHealth() + 1);
+                final Player lPlayer = fEntity.getAsPlayer();
+                SettlerPlugin.plugin.getServer().getScheduler().runTask(SettlerPlugin.plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        lPlayer.setHealth(lPlayer.getHealth() + 1);
+                    }
+                });
             }
         }
     }
 
-    protected void runCheckArmor(SettlerAccess aAccess) {
+    protected void runCheckArmor(SettlerTask aTask, SettlerAccess aAccess) {
         BlockPosition lPos = getPosition();
         //TODO should be chest position
         if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
@@ -552,7 +562,7 @@ public class Settler {
         }
     }
 
-    protected void runCheckDamage(SettlerAccess aAccess) {
+    protected void runCheckDamage(SettlerTask aTask, SettlerAccess aAccess) {
         if (fDamages.size() > 0) {
             for (SettlerDamage lDamage : fDamages) {
                 if (lDamage.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
@@ -569,7 +579,7 @@ public class Settler {
         }
     }
 
-    public void runPutInChestItems(SettlerAccess aAccess) {
+    public void runPutInChestItems(SettlerTask aTask, SettlerAccess aAccess) {
         BlockPosition lPos = getPosition();
         //TODO should be chest position
         if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
@@ -587,7 +597,7 @@ public class Settler {
         }
     }
 
-    public void runCollectItems(SettlerAccess aAccess) {
+    public void runCollectItems(SettlerTask aTask, SettlerAccess aAccess) {
         if (!existsTaggedActivity("CollectItems")) {
             Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), fCollectItemRadius, fItemsToCollect);
             if (!lStates.isEmpty()) {
@@ -620,9 +630,9 @@ public class Settler {
     public String getDisplayName() {
         String lRes = getSettlerName();
         if (lRes == null || lRes.isEmpty()) {
-            lRes = getProfession();
+            lRes = SettlerPlugin.plugin.getText(getProfession());
         } else {
-            lRes = getProfession() + " " + lRes;
+            lRes = SettlerPlugin.plugin.getText(getProfession()) + " " + lRes;
         }
         if (Framework.plugin.isDebugSet("settler")) {
             return hasEntity() ? "" + fEntityId : lRes;

@@ -6,7 +6,10 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
+import com.mahn42.anhalter42.settler.SettlerTask;
+import com.mahn42.framework.BlockPosition;
 import org.bukkit.Material;
+import org.bukkit.Rotation;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -41,9 +44,31 @@ public class SettlerForester extends Settler {
     protected int goWalkingCount = 0;
 
     @Override
-    public void runInternal(SettlerAccess aAccess) {
+    public void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
-            if (!hasAtleastItems(Material.SAPLING, 1)) {
+            BlockPosition lPos = getPosition();
+            if (getFrameConfig() == Rotation.FLIPPED) {
+                lPos = getBedPosition();
+            }
+            if (hasAtleastItems(Material.SAPLING, 1)) {
+                ItemStack lItem = getFirstItem(Material.SAPLING);
+                addActivityForNow(
+                        new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                        new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
+                        new SettlerActivityPlaceBlock());
+            } else if (hasAtleastItems(Material.RED_ROSE, 1)) {
+                ItemStack lItem = getFirstItem(Material.RED_ROSE);
+                addActivityForNow(
+                        new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                        new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
+                        new SettlerActivityPlaceBlock());
+            } else if (hasAtleastItems(Material.YELLOW_FLOWER, 1)) {
+                ItemStack lItem = getFirstItem(Material.YELLOW_FLOWER);
+                addActivityForNow(
+                        new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                        new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
+                        new SettlerActivityPlaceBlock());
+            } else {
                 if (goWalkingCount > 0) {
                     goWalkingCount--;
                     addActivityForNow(new SettlerActivityFindRandomPath(23, 10, PositionCondition.None));
@@ -56,19 +81,24 @@ public class SettlerForester extends Settler {
                             new SettlerActivityWalkToTarget(getBedPosition()),
                             new SettlerActivityGetItemsFromChest(Material.SAPLING, 10, 0));
                 }
-            } else {
-                ItemStack lItem = getFirstItem(Material.SAPLING);
-                addActivityForNow(
-                        new SettlerActivityFindRandomPath(23, 10, PositionCondition.GrassOrDirtAround),
-                        new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
-                        new SettlerActivityPlaceBlock());
             }
         }
-        super.runInternal(aAccess);
+        super.runInternal(aTask, aAccess);
     }
 
     @Override
     public String getFrameConfigName() {
-        return "plant seedlings";
+        switch (fFrameConfig) {
+            case NONE:
+                return "plant everywhere";
+            case COUNTER_CLOCKWISE:
+                return "plant everywhere";
+            case FLIPPED:
+                return "plant near home";
+            case CLOCKWISE:
+                return "plant everywhere";
+            default:
+                return "";
+        }
     }
 }

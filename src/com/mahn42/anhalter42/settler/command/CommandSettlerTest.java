@@ -144,6 +144,35 @@ public class CommandSettlerTest implements CommandExecutor {
                     }
                 }
                 aCommandSender.sendMessage("found: " + lFound);
+            } else if (aStrings[0].equalsIgnoreCase("unset")) {
+                SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                Settler lSettler = null;
+                if (aStrings[1].charAt(0) >= '0' && aStrings[1].charAt(0) <= '9') {
+                    lSettler = lAccess.getSettlerById(Integer.parseInt(aStrings[1]));
+                } else {
+                    Collection<? extends Settler> lSettlers = lAccess.getSettlers();
+                    for(Settler lS : lSettlers) {
+                        if (aStrings[1].equalsIgnoreCase(lS.getSettlerName())) {
+                            lSettler = lS;
+                            break;
+                        }
+                    }
+                }
+                if (lSettler != null) {
+                    if (aStrings[2].equalsIgnoreCase("boots")) {
+                        lSettler.setBoots(null);
+                    } else if (aStrings[2].equalsIgnoreCase("leggings")) {
+                        lSettler.setLeggings(null);
+                    } else if (aStrings[2].equalsIgnoreCase("chestplate")) {
+                        lSettler.setChestplate(null);
+                    } else if (aStrings[2].equalsIgnoreCase("helmet")) {
+                        lSettler.setHelmet(null);
+                    } else if (aStrings[2].equalsIgnoreCase("hand")) {
+                        lSettler.setItemInHand(null);
+                    } 
+                } else {
+                    aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
+                }
             } else {
                 aCommandSender.sendMessage("whats " + aStrings[0] + "?");
             }

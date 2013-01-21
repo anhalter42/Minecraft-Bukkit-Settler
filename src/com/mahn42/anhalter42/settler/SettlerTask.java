@@ -8,7 +8,6 @@ import com.mahn42.anhalter42.settler.SettlerAccess.ChunkLoad;
 import com.mahn42.anhalter42.settler.SettlerAccess.SettlerDamage;
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
-import com.mahn42.framework.Framework;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.World;
@@ -104,7 +103,7 @@ public class SettlerTask implements Runnable {
                             //if (getWorld().getName().equalsIgnoreCase("world")) {
                             //    Framework.plugin.log("settler", getClass().getSimpleName() + " settler " + lSettler.getSettlerName() + " " + getWorld().getName() + ".");
                             //}
-                            lSettler.run(fAccess);
+                            lSettler.run(this, fAccess);
                         }
                     } catch (Exception ex) {
                         SettlerPlugin.plugin.getLogger().throwing(getClass().getSimpleName(), null, ex);
@@ -122,6 +121,16 @@ public class SettlerTask implements Runnable {
                 //}
             }
         }
+    }
+    
+    public ArrayList<SettlerDamage> getNearestDamagedSettlers(BlockPosition aPos, int aRadius) {
+        ArrayList<SettlerDamage> lRes = new ArrayList<SettlerDamage>();
+        for(SettlerDamage lDamage : fDamagedSettlers) {
+            if (lDamage.entityPos != null && aPos.nearly(lDamage.entityPos, aRadius)) {
+                lRes.add(lDamage);
+            }
+        }
+        return lRes;
     }
 
     private ChunkChangeKind getChunkLoadKind(int x, int z) {

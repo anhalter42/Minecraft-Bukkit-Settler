@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -144,6 +145,7 @@ public class SettlerPlugin extends JavaPlugin {
     private void registerSettlerBuildings() {
         SettlerBuildingHandler lHandler = new SettlerBuildingHandler();
         registerSettlerBuildingLodge1(lHandler);
+        registerSettlerBuildingStorage(lHandler);
     }
     
     private void registerSettlerBuildingLodge1(SettlerBuildingHandler aHandler) {
@@ -168,30 +170,38 @@ public class SettlerPlugin extends JavaPlugin {
         lBDesc = lDesc.newBlockDescription("corner1_bottom");
         lBDesc.materials.add(lWallMats);
         lBDesc.detectSensible = true;
-        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner1_top");
+        //lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner1_top");
+        lRel = lBDesc.newRelatedTo(new Vector(0, 4, 0), "corner1_top");
         lRel.materials.add(lWallMats);
-        lRel = lBDesc.newRelatedTo(new Vector(3, 0, 0), "corner2_bottom");
+        //lRel = lBDesc.newRelatedTo(new Vector(3, 0, 0), "corner2_bottom");
+        lRel = lBDesc.newRelatedTo(new Vector(4, 0, 0), "corner2_bottom");
         lRel.materials.add(lWallMats);
-        lRel = lBDesc.newRelatedTo(new Vector(0, 0, 3), "corner4_bottom");
+        //lRel = lBDesc.newRelatedTo(new Vector(0, 0, 3), "corner4_bottom");
+        lRel = lBDesc.newRelatedTo(new Vector(0, 0, 4), "corner4_bottom");
         lRel.materials.add(lWallMats);
         lRel = lBDesc.newRelatedTo(new Vector(1, 0, 1), "bed");
         lRel = lBDesc.newRelatedTo(new Vector(1, 1, -1), "frame");
         lBDesc = lDesc.newBlockDescription("corner2_bottom");
         lBDesc.materials.add(lWallMats);
-        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner2_top");
+        //lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner2_top");
+        lRel = lBDesc.newRelatedTo(new Vector(0, 4, 0), "corner2_top");
         lRel.materials.add(lWallMats);
-        lRel = lBDesc.newRelatedTo(new Vector(0, 0, 3), "corner3_bottom");
+        //lRel = lBDesc.newRelatedTo(new Vector(0, 0, 3), "corner3_bottom");
+        lRel = lBDesc.newRelatedTo(new Vector(0, 0, 4), "corner3_bottom");
         lRel.materials.add(lWallMats);
         lBDesc = lDesc.newBlockDescription("corner3_bottom");
         lBDesc.materials.add(lWallMats);
-        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner3_top");
+        //lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner3_top");
+        lRel = lBDesc.newRelatedTo(new Vector(0, 4, 0), "corner3_top");
         lRel.materials.add(lWallMats);
-        lRel = lBDesc.newRelatedTo(new Vector(-3, 0, 0), "corner4_bottom");
+        //lRel = lBDesc.newRelatedTo(new Vector(-3, 0, 0), "corner4_bottom");
+        lRel = lBDesc.newRelatedTo(new Vector(-4, 0, 0), "corner4_bottom");
         lRel.materials.add(lWallMats);
         lRel = lBDesc.newRelatedTo(new Vector(-1, 0, -1), "chest");
         lBDesc = lDesc.newBlockDescription("corner4_bottom");
         lBDesc.materials.add(lWallMats);
-        lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner4_top");
+        //lRel = lBDesc.newRelatedTo(new Vector(0, 2, 0), "corner4_top");
+        lRel = lBDesc.newRelatedTo(new Vector(0, 4, 0), "corner4_top");
         lRel.materials.add(lWallMats);
         lBDesc = lDesc.newBlockDescription("corner1_top");
         lBDesc.materials.add(lTopMats);
@@ -210,6 +220,39 @@ public class SettlerPlugin extends JavaPlugin {
         lDesc.createAndActivateXZ(true);
     }
 
+    private void registerSettlerBuildingStorage(SettlerBuildingHandler aHandler) {
+        BuildingDetector lDetector = Framework.plugin.getBuildingDetector();
+        BuildingDescription lDesc;
+        BuildingDescription.BlockDescription lBDesc;
+        BuildingDescription.RelatedTo lRel;
+        lDesc = lDetector.newDescription("Settler.StorageShelf.1");
+        lDesc.typeName = "Shelf for storage";
+        lDesc.handler = aHandler;
+        lDesc.iconName = "Settler.Building.StorageShelf.1";
+        lBDesc = lDesc.newBlockDescription("shelf1.1");
+        lBDesc.materials.add(Material.WOOD_STAIRS);
+        lBDesc.materials.add(Material.WOOD_STEP);
+        lBDesc.detectSensible = true;
+        lRel = lBDesc.newRelatedTo(new Vector(1, 0, 0), "shelf1.2");
+        lRel = lBDesc.newRelatedTo(new Vector(0, 1, 0), "chest2.1");
+        lRel = lBDesc.newRelatedTo(new Vector(0,-1, 0), "chest1.1");
+        lBDesc = lDesc.newBlockDescription("shelf1.2");
+        lBDesc.materials.add(Material.WOOD_STAIRS);
+        lBDesc.materials.add(Material.WOOD_STEP);
+        lBDesc.detectSensible = true;
+        lRel = lBDesc.newRelatedTo(new Vector(0, 1, 0), "chest2.2");
+        lRel = lBDesc.newRelatedTo(new Vector(0,-1, 0), "chest1.2");
+        lBDesc = lDesc.newBlockDescription("chest1.1");
+        lBDesc.materials.add(Material.CHEST);
+        lBDesc = lDesc.newBlockDescription("chest1.2");
+        lBDesc.materials.add(Material.CHEST);
+        lBDesc = lDesc.newBlockDescription("chest2.1");
+        lBDesc.materials.add(Material.CHEST);
+        lBDesc = lDesc.newBlockDescription("chest2.2");
+        lBDesc.materials.add(Material.CHEST);
+        lDesc.createAndActivateXZ();
+    }
+    
     private void registerSettlerBuildingLodge2(SettlerBuildingHandler aHandler) {
         BuildingDetector lDetector = Framework.plugin.getBuildingDetector();
         BuildingDescription lDesc;
@@ -322,5 +365,17 @@ public class SettlerPlugin extends JavaPlugin {
     public String getRandomSettlerName() {
         Random lRnd = new Random();
         return names.get(lRnd.nextInt(names.size()));
+    }
+
+    public String getText(String aText, Object... aObjects) {
+        return getText((String)null, aText, aObjects);
+    }
+    
+    public String getText(CommandSender aPlayer, String aText, Object... aObjects) {
+        return getText(Framework.plugin.getPlayerLanguage(aPlayer.getName()), aText, aObjects);
+    }
+    
+    public String getText(String aLanguage, String aText, Object... aObjects) {
+        return Framework.plugin.getText(this, aLanguage, aText, aObjects);
     }
 }

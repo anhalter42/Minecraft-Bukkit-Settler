@@ -5,14 +5,10 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
-import com.mahn42.anhalter42.settler.SettlerBuilding;
-import com.mahn42.anhalter42.settler.SettlerBuildingDB;
-import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
+import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
-import com.mahn42.framework.BuildingBlock;
 import com.mahn42.framework.Framework;
-import com.mahn42.framework.InventoryHelper;
 import com.mahn42.framework.SyncBlockList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,9 +16,7 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -60,11 +54,11 @@ public class SettlerGeologist extends Settler {
     protected int getSignFromChestCount = 0;
 
     @Override
-    public void runInternal(SettlerAccess aAccess) {
+    public void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(new SettlerActivityGeologistThinking());
         }
-        super.runInternal(aAccess);
+        super.runInternal(aTask, aAccess);
     }
 
     public static class SettlerActivityGeologistPlaceSign extends SettlerActivity {

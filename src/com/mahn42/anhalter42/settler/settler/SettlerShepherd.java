@@ -6,6 +6,7 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
+import com.mahn42.anhalter42.settler.SettlerTask;
 import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -39,12 +40,12 @@ public class SettlerShepherd extends Settler {
     }
 
     @Override
-    protected void runInternal(SettlerAccess aAccess) {
-        super.runInternal(aAccess);
-        runFindSheep(aAccess);
+    protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
+        super.runInternal(aTask, aAccess);
+        runFindSheep(aTask, aAccess);
     }
 
-    public void runFindSheep(SettlerAccess aAccess) {
+    public void runFindSheep(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             if (!existsTaggedActivity("FindSheep")) {
                 Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), 42, EntityType.SHEEP);

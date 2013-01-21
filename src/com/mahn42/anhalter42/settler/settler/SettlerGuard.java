@@ -6,13 +6,16 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerAccess.EntityState;
+import com.mahn42.anhalter42.settler.SettlerAccess.SettlerDamage;
 import com.mahn42.anhalter42.settler.SettlerProfession;
+import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.Rotation;
 import org.bukkit.entity.EntityType;
+import org.bukkit.event.entity.EntityDamageEvent;
 
 /**
  *
@@ -74,7 +77,7 @@ public class SettlerGuard extends Settler {
     }
 
     @Override
-    protected void runInternal(SettlerAccess aAccess) {
+    protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (!existsTaggedActivity("Fight") && (fFrameConfig == Rotation.NONE || fFrameConfig == Rotation.COUNTER_CLOCKWISE)) {
             Collection<EntityState> lEnities = aAccess.getEntityStatesNearby(getPosition(), 20, monsters);
             if (!lEnities.isEmpty()) {
@@ -107,13 +110,41 @@ public class SettlerGuard extends Settler {
                 addActivityForNow(new SettlerActivityFindRandomPath(getBedPosition(), 20, 10, PositionCondition.None));
             }
         }
-        super.runInternal(aAccess);
+        super.runInternal(aTask, aAccess);
     }
 
     @Override
-    protected void runCheckDamage(SettlerAccess aAccess) {
+    protected void runCheckDamage(SettlerTask aTask, SettlerAccess aAccess) {
         if (!existsTaggedActivity("Fight")) {
-            super.runCheckDamage(aAccess);
+            super.runCheckDamage(aTask, aAccess);
+            if (!existsActivity(SettlerActivityFight.class)) {
+                ArrayList<SettlerDamage> lDamages = aTask.getNearestDamagedSettlers(getPosition(), 30);
+                BlockPosition lPos = getPosition();
+                double dist = Double.MAX_VALUE;
+                SettlerDamage lDam = null;
+                for(SettlerDamage lDamage : lDamages) {
+                    if (lDamage.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                            && lDamage.entityPos != null) {
+                        double ld = lPos.distance(lDamage.entityPos);
+                        if (ld < dist) {
+                            lDam = lDamage;
+                        }
+                    }
+                }
+                if (lDam != null) {
+                    if (dist < 4) {
+                        addActivityForNow(
+                                "Fight",
+                                new SettlerActivityFight(lDam.entityId, 20));
+
+                    } else {
+                        addActivityForNow(
+                                "Fight",
+                                new SettlerActivityWalkToTarget(lDam.entityPos, SettlerActivityWalkToTarget.WalkAction.Fight, lDam.entityId),
+                                new SettlerActivityFight(lDam.entityId, 20));
+                    }
+                }
+            }
         }
     }
 

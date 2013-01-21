@@ -6,10 +6,12 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
+import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.WorldScanner;
 import java.util.List;
 import org.bukkit.Material;
+import org.bukkit.Rotation;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -48,19 +50,23 @@ public class SettlerWoodcutter extends Settler {
     }
 
     @Override
-    protected void runInternal(SettlerAccess aAccess) {
+    protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
+            BlockPosition lPos = getPosition();
+            if (getFrameConfig() == Rotation.FLIPPED) {
+                lPos = getBedPosition();
+            }
             addActivityForNow(
-                    new SettlerActivityFindRandomPath(23, 10, PositionCondition.Tree),
+                    new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.Tree),
                     new SettlerActivityWoodcutterBreakLog());
         }
-        super.runInternal(aAccess);
+        super.runInternal(aTask, aAccess);
     }
 
     @Override
-    public void runCollectItems(SettlerAccess aAccess) {
+    public void runCollectItems(SettlerTask aTask, SettlerAccess aAccess) {
         if (!existsTaggedActivity("BreakTree")) {
-            super.runCollectItems(aAccess);
+            super.runCollectItems(aTask, aAccess);
         }
     }
 
@@ -78,7 +84,7 @@ public class SettlerWoodcutter extends Settler {
             for (BlockPosition lPos : lFindBlocks) {
                 List<BlockPosition> lTreePoss = WorldScanner.getTreePoss(aSettler.getWorld(), lPos);
                 if (!lTreePoss.isEmpty()) {
-                    for(BlockPosition lP : lTreePoss) {
+                    for (BlockPosition lP : lTreePoss) {
                         aSettler.addActivityForNow(
                                 "BreakTree",
                                 new SettlerActivitySwingArm(20),
@@ -95,6 +101,17 @@ public class SettlerWoodcutter extends Settler {
 
     @Override
     public String getFrameConfigName() {
-        return "chop down trees";
+        switch (fFrameConfig) {
+            case NONE:
+                return "chop down everywhere";
+            case COUNTER_CLOCKWISE:
+                return "chop down everywhere";
+            case FLIPPED:
+                return "chop down near home";
+            case CLOCKWISE:
+                return "chop down everywhere";
+            default:
+                return "";
+        }
     }
 }

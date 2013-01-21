@@ -42,7 +42,7 @@ public class SettlerBuildingHandler extends BuildingHandlerBase {
             lBuilding.name = lBuilding.basicProfession;
             String lParts[] = lBuilding.description.name.split("\\.");
             //Settler.Lodge.1.X1
-            if (lParts.length > 2) {
+            if (lParts.length > 2 && !lParts[2].isEmpty() && lParts[2].charAt(0) >= '0' && lParts[2].charAt(0) <= '9') {
                 int lCount = Integer.parseInt(lParts[2]);
                 lBuilding.settlerCount = lCount;
                 BuildingBlock lChestBlock = lBuilding.getBlock("chest");
@@ -58,17 +58,6 @@ public class SettlerBuildingHandler extends BuildingHandlerBase {
                         }
                     }
                 }
-                /*
-                for(int lIndex = 1; lIndex<=lCount; lIndex++) {
-                    BuildingBlock lBlock = lBuilding.getBlock("bed" + lIndex);
-                    if (lBlock == null && lIndex == 1) {
-                        lBlock = lBuilding.getBlock("bed");
-                    }
-                    if (lBlock != null) {
-                        
-                    }
-                }
-                */
             }
         }
         lDB.addRecord(lBuilding);

@@ -6,6 +6,7 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
+import com.mahn42.anhalter42.settler.SettlerTask;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -42,10 +43,10 @@ public class SettlerFisher extends Settler {
     }
 
     @Override
-    protected void runInternal(SettlerAccess aAccess) {
+    protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(new SettlerActivityFindRandomPath());
         }
-        super.runInternal(aAccess);
+        super.runInternal(aTask, aAccess);
     }
 }
