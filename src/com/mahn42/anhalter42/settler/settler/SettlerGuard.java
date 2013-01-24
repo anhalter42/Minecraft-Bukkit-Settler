@@ -102,6 +102,7 @@ public class SettlerGuard extends Settler {
                                 new SettlerActivityWalkToTarget(lmin.pos, SettlerActivityWalkToTarget.WalkAction.Fight, lmin.id),
                                 new SettlerActivityFight(lmin.id, 20));
                     }
+                    fSendAtHome = false;
                 }
             }
         }
@@ -143,6 +144,7 @@ public class SettlerGuard extends Settler {
                                 new SettlerActivityWalkToTarget(lDam.entityPos, SettlerActivityWalkToTarget.WalkAction.Fight, lDam.entityId),
                                 new SettlerActivityFight(lDam.entityId, 20));
                     }
+                    fSendAtHome = false;
                 }
             }
         }

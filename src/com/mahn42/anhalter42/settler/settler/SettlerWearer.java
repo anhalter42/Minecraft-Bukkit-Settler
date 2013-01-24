@@ -24,7 +24,7 @@ public class SettlerWearer extends Settler {
         profession.frameMaterial = Material.LEATHER_BOOTS;
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_HELMET, false));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_CHESTPLATE, false));
-        profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, true));
+        profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, false));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, true));
         register(profession);
     }

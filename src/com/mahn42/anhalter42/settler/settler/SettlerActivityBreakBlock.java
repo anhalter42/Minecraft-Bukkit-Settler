@@ -6,17 +6,15 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.framework.BlockPosition;
-import java.util.Map;
 import org.bukkit.block.Block;
 
 /**
  *
  * @author andre
  */
-public class SettlerActivityBreakBlock extends SettlerActivity {
+public class SettlerActivityBreakBlock extends SettlerActivityWithPosition {
 
     public static final String TYPE = "BreakBlock";
-    public BlockPosition target;
     
     protected boolean done = false;
 
@@ -27,26 +25,6 @@ public class SettlerActivityBreakBlock extends SettlerActivity {
     public SettlerActivityBreakBlock(BlockPosition aPos) {
         type = TYPE;
         target = aPos.clone();
-    }
-
-    @Override
-    public void serialize(Map<String, Object> aMap) {
-        super.serialize(aMap);
-        if (target != null) {
-            aMap.put("target", target.toCSV(","));
-        }
-    }
-
-    @Override
-    public void deserialize(Map<String, Object> aMap) {
-        super.deserialize(aMap);
-        Object lObj = aMap.get("target");
-        if (lObj != null) {
-            target = new BlockPosition();
-            target.fromCSV(lObj.toString(), "\\,");
-        } else {
-            target = null;
-        }
     }
 
     @Override
@@ -74,10 +52,5 @@ public class SettlerActivityBreakBlock extends SettlerActivity {
             done = true;
         }
         return done;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() + " " + target;
     }
 }

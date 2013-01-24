@@ -7,7 +7,6 @@ package com.mahn42.anhalter42.settler.settler;
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.SyncBlockList;
-import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -15,10 +14,9 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author andre
  */
-public class SettlerActivityPlaceBlock extends SettlerActivity {
+public class SettlerActivityPlaceBlock extends SettlerActivityWithPosition {
 
     public static final String TYPE = "WalkToTarget";
-    public BlockPosition target;
 
     public SettlerActivityPlaceBlock() {
         type = TYPE;
@@ -27,26 +25,6 @@ public class SettlerActivityPlaceBlock extends SettlerActivity {
     public SettlerActivityPlaceBlock(BlockPosition aPos) {
         type = TYPE;
         target = aPos.clone();
-    }
-
-    @Override
-    public void serialize(Map<String, Object> aMap) {
-        super.serialize(aMap);
-        if (target != null) {
-            aMap.put("target", target.toCSV(","));
-        }
-    }
-
-    @Override
-    public void deserialize(Map<String, Object> aMap) {
-        super.deserialize(aMap);
-        Object lObj = aMap.get("target");
-        if (lObj != null) {
-            target = new BlockPosition();
-            target.fromCSV(lObj.toString(), "\\,");
-        } else {
-            target = null;
-        }
     }
 
     @Override
@@ -77,10 +55,5 @@ public class SettlerActivityPlaceBlock extends SettlerActivity {
             control.success = false;
         }
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 }

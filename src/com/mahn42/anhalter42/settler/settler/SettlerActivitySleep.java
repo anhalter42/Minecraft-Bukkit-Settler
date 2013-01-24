@@ -59,4 +59,20 @@ public class SettlerActivitySleep extends SettlerActivity {
         }
         return false;
     }
+
+    @Override
+    public void deactivate(Settler aSettler) {
+        super.deactivate(aSettler);
+        if (started) {
+            if (aSettler.hasEntity()) {
+                final NPCEntityPlayer lPlayer = aSettler.fEntity;
+                runTaskLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        lPlayer.awake();
+                    }
+                });
+            }
+        }
+    }
 }

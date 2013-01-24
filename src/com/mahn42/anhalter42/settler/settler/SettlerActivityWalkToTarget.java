@@ -22,17 +22,16 @@ import org.bukkit.entity.Player;
  *
  * @author andre
  */
-public class SettlerActivityWalkToTarget extends SettlerActivity {
+public class SettlerActivityWalkToTarget extends SettlerActivityWithPosition {
 
     public enum WalkAction {
-
         None,
         SwingArm,
         Fight
     }
+
     public static final String TYPE = "WalkToTarget";
     // Meta
-    public BlockPosition target;
     public WalkAction action = WalkAction.None;
     public int entityId = 0;
     // Runtime
@@ -61,9 +60,6 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
     @Override
     public void serialize(Map<String, Object> aMap) {
         super.serialize(aMap);
-        if (target != null) {
-            aMap.put("target", target.toCSV(","));
-        }
         aMap.put("action", action.toString());
         aMap.put("entityId", entityId);
     }
@@ -71,14 +67,7 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
     @Override
     public void deserialize(Map<String, Object> aMap) {
         super.deserialize(aMap);
-        Object lObj = aMap.get("target");
-        if (lObj != null) {
-            target = new BlockPosition();
-            target.fromCSV(lObj.toString(), "\\,");
-        } else {
-            target = null;
-        }
-        lObj = aMap.get("action");
+        Object lObj = aMap.get("action");
         if (lObj != null) {
             action = WalkAction.valueOf(lObj.toString());
         }
@@ -206,10 +195,5 @@ public class SettlerActivityWalkToTarget extends SettlerActivity {
             }
             started = false;
         }
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() + " to:" + target;
     }
 }

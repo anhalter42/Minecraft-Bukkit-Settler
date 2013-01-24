@@ -5,16 +5,10 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
-import com.mahn42.anhalter42.settler.SettlerPlugin;
+import com.mahn42.framework.Framework;
 import java.util.List;
-import java.util.Random;
-import org.bukkit.Material;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Sheep;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wool;
 
 /**
  *
@@ -47,6 +41,9 @@ public class SettlerActivityShearSheep extends SettlerActivity {
                         if (lEntity instanceof Sheep) {
                             Sheep lSheep = (Sheep) lEntity;
                             if (!lSheep.isSheared()) {
+                                Framework.plugin.shearSheep(lSheep);
+                                //lSettler.fEntity.shearSheep(lSheep);
+                                /*
                                 lSheep.setSheared(true);
                                 Wool lW = new Wool(lSheep.getColor());
                                 int lCount = 1 + (new Random()).nextInt(3);

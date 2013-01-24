@@ -6,13 +6,7 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
-import com.mahn42.framework.Framework;
-import com.mahn42.framework.npc.entity.NPCEntityPlayer;
-import java.util.List;
 import java.util.Map;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *

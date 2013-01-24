@@ -503,64 +503,54 @@ public class Settler {
         }
     }
 
+    public ItemStack getArmor(ItemType aType) {
+        switch (aType) {
+            case Boots:
+                return getBoots();
+            case Leggings:
+                return getLeggings();
+            case Chestplate:
+                return getChestplate();
+            case Helmet:
+                return getHelmet();
+            case Tool:
+                return getItemInHand();
+            default:
+                return null;
+        }
+    }
+
     protected void runCheckArmor(SettlerTask aTask, SettlerAccess aAccess) {
         BlockPosition lPos = getPosition();
         //TODO should be chest position
         if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
-            List<BlockPosition> findChests = findBlocks(Material.CHEST, 4);
+            boolean lEmpty = false;
             for (SettlerProfession.Item lItem : fProf.armor) {
-                for (BlockPosition lChestPos : findChests) {
-                    Chest lChest = (Chest) lChestPos.getBlock(getWorld()).getState();
-                    Inventory lInv = lChest.getInventory();
-                    if (InventoryHelper.hasAtleastItems(lInv, lItem.item.getType(), 1)) {
-                        ItemType itemType = Framework.plugin.getItemType(lItem.item.getType());
-                        switch (itemType) {
-                            case Boots:
-                                if (getBoots() == null) {
-                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
-                                    if (!lRemoved.isEmpty()) {
-                                        setBoots(lRemoved.get(0));
-                                    }
+                if (getArmor(Framework.plugin.getItemType(lItem.item.getType())) == null) {
+                    lEmpty = true;
+                    break;
+                }
+            }
+            if (lEmpty) {
+                List<BlockPosition> findChests = findBlocks(Material.CHEST, 4);
+                for (SettlerProfession.Item lItem : fProf.armor) {
+                    if (getArmor(Framework.plugin.getItemType(lItem.item.getType())) == null) {
+                        for (BlockPosition lChestPos : findChests) {
+                            Chest lChest = (Chest) lChestPos.getBlock(getWorld()).getState();
+                            Inventory lInv = lChest.getInventory();
+                            if (InventoryHelper.hasAtleastItems(lInv, lItem.item.getType(), 1)) {
+                                List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
+                                if (!lRemoved.isEmpty()) {
+                                    setArmor(lRemoved.get(0));
                                 }
-                                break;
-                            case Leggings:
-                                if (getLeggings() == null) {
-                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
-                                    if (!lRemoved.isEmpty()) {
-                                        setLeggings(lRemoved.get(0));
-                                    }
-                                }
-                                break;
-                            case Chestplate:
-                                if (getChestplate() == null) {
-                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
-                                    if (!lRemoved.isEmpty()) {
-                                        setChestplate(lRemoved.get(0));
-                                    }
-                                }
-                                break;
-                            case Helmet:
-                                if (getHelmet() == null) {
-                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
-                                    if (!lRemoved.isEmpty()) {
-                                        setHelmet(lRemoved.get(0));
-                                    }
-                                }
-                                break;
-                            case Tool:
-                                if (getItemInHand() == null) {
-                                    List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
-                                    if (!lRemoved.isEmpty()) {
-                                        setItemInHand(lRemoved.get(0));
-                                    }
-                                }
-                                break;
+                            }
                         }
                     }
                 }
             }
         }
     }
+    
 
     protected void runCheckDamage(SettlerTask aTask, SettlerAccess aAccess) {
         if (fDamages.size() > 0) {
@@ -574,6 +564,7 @@ public class Settler {
                     } else {
                         addActivityForNow(new SettlerActivityFight(lDamage.entityId, 20));
                     }
+                    fSendAtHome = false;
                 }
             }
         }
@@ -1078,7 +1069,8 @@ public class Settler {
         None,
         NaturalBlocksAround,
         GrassOrDirtAround,
-        Tree
+        Tree,
+        FarmingAround,
     }
     public static ArrayList<Material> grassOrDirt = new ArrayList<Material>();
 
@@ -1105,6 +1097,20 @@ public class Settler {
         naturalBlocks.add(Material.SNOW);
         naturalBlocks.add(Material.LEAVES);
         naturalBlocks.add(Material.LOG);
+    }
+    public static ArrayList<Material> farmingBlocks = new ArrayList<Material>();
+
+    {
+        farmingBlocks.add(Material.WHEAT);
+        farmingBlocks.add(Material.CROPS);
+        farmingBlocks.add(Material.CARROT);
+        farmingBlocks.add(Material.SPECKLED_MELON);
+        farmingBlocks.add(Material.PUMPKIN);
+        farmingBlocks.add(Material.MELON);
+        farmingBlocks.add(Material.MELON_BLOCK);
+        farmingBlocks.add(Material.POTATO);
+        farmingBlocks.add(Material.SOIL);
+        farmingBlocks.add(Material.COCOA);
     }
 
     public BlockPosition findRandomWalkToPosition(Random aRandom, int aRadius, int aAttempts, PositionCondition aCondition) {
@@ -1180,6 +1186,28 @@ public class Settler {
                                     }
                                 }
                                 break;
+                            case FarmingAround:
+                                lFound = false;
+                                for (int x = -2; x <= 2; x++) {
+                                    for (int z = -2; z <= 2; z++) {
+                                        BlockPosition lP = lPos.clone();
+                                        lP.add(x, 0, z);
+                                        lP.y = getWorld().getHighestBlockYAt(lPos.x, lPos.z);
+                                        Material lMat = lP.getBlockType(getWorld());
+                                        while (lMat.equals(Material.AIR)) {
+                                            lP.y--;
+                                            lMat = lP.getBlockType(getWorld());
+                                        }
+                                        if (farmingBlocks.contains(lMat)) {
+                                            lFound = true;
+                                            break;
+                                        }
+                                    }
+                                    if (lFound) {
+                                        break;
+                                    }
+                                }
+                                break;
                             case Tree:
                                 List<BlockPosition> lPoss = WorldScanner.findBlocks(getWorld(), lPos, Material.LOG, 3);
                                 if (lPoss.size() > 0) {
@@ -1230,7 +1258,11 @@ public class Settler {
     }
 
     public List<BlockPosition> findBlocks(Material aMaterial, int aRadius) {
-        return WorldScanner.findBlocks(getWorld(), getPosition(), aMaterial, aRadius);
+        return WorldScanner.findBlocks(getWorld(), getPosition(), aMaterial, aRadius, true);
+    }
+
+    public List<BlockPosition> findBlocks(Material aMaterial, byte aData, int aRadius) {
+        return WorldScanner.findBlocks(getWorld(), getPosition(), aMaterial, aData, true, aRadius, true);
     }
 
     public ItemStack getFirstItem(Material aMaterial) {

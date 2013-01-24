@@ -235,6 +235,24 @@ public class SettlerAccess {
             }
         }
     }
+
+    public void removeAllSettlerEntities() {
+        List<Entity> lEntities = world.getEntities();
+        synchronized (settlersForEntity) {
+            settlersForEntity.clear();
+        }
+        synchronized (entitiyStates) {
+            entitiyStates.clear();
+        }
+        synchronized (settlers) {
+            settlersByEntityId.clear();
+            for (Entity lEntity : lEntities) {
+                if (lEntity instanceof NPCEntityPlayer && ((NPCEntityPlayer) lEntity).getDataObject() instanceof Settler) {
+                    lEntity.remove();
+                }
+            }
+        }
+    }
     final protected ArrayList<Settler> diedSettler = new ArrayList<Settler>();
 
     public void addSettlerDied(Settler aSettler) {

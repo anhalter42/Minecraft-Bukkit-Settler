@@ -169,7 +169,9 @@ public class CommandSettlerTest implements CommandExecutor {
                         lSettler.setHelmet(null);
                     } else if (aStrings[2].equalsIgnoreCase("hand")) {
                         lSettler.setItemInHand(null);
-                    } 
+                    } else {
+                        aCommandSender.sendMessage("unknown " + aStrings[2] + "!");
+                    }
                 } else {
                     aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
                 }
