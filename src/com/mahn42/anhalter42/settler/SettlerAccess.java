@@ -200,7 +200,10 @@ public class SettlerAccess {
         }
     }
 
+    public boolean shouldRun = false;
+    
     public void runSynchron() {
+        shouldRun = true;
         List<Entity> lEntities = world.getEntities();
         synchronized (settlersForEntity) {
             for (Settler lSettler : settlersForEntity) {
@@ -237,6 +240,7 @@ public class SettlerAccess {
     }
 
     public void removeAllSettlerEntities() {
+        shouldRun = false;
         List<Entity> lEntities = world.getEntities();
         synchronized (settlersForEntity) {
             settlersForEntity.clear();

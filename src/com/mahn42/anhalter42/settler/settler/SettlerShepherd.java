@@ -7,8 +7,10 @@ package com.mahn42.anhalter42.settler.settler;
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.anhalter42.settler.SettlerTask;
+import com.mahn42.framework.BlockPosition;
 import java.util.Collection;
 import org.bukkit.Material;
+import org.bukkit.Rotation;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
@@ -47,6 +49,12 @@ public class SettlerShepherd extends Settler {
 
     public void runFindSheep(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
+            BlockPosition lPos = getPosition();
+            int lRadius = 10;
+            if (getFrameConfig() == Rotation.FLIPPED) {
+                lPos = getBedPosition();
+                lRadius = 23;
+            }
             if (!existsTaggedActivity("FindSheep")) {
                 Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), 42, EntityType.SHEEP);
                 if (!lStates.isEmpty()) {
@@ -69,15 +77,15 @@ public class SettlerShepherd extends Settler {
                     }
                     if (!lFound) {
                         // walk a bit
-                        addActivityForNow(new SettlerActivityFindRandomPath(10, 10, PositionCondition.None));
+                        addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, 10, PositionCondition.None));
                     }
                 } else {
                     // walk a bit
-                    addActivityForNow(new SettlerActivityFindRandomPath(10, 10, PositionCondition.None));
+                    addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, 10, PositionCondition.None));
                 }
             } else {
                 // walk a bit
-                addActivityForNow(new SettlerActivityFindRandomPath(10, 10, PositionCondition.None));
+                addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, 10, PositionCondition.None));
             }
         }
 
@@ -85,6 +93,17 @@ public class SettlerShepherd extends Settler {
 
     @Override
     public String getFrameConfigName() {
-        return "shear sheeps";
+        switch (fFrameConfig) {
+            case NONE:
+                return "shear sheeps";
+            case COUNTER_CLOCKWISE:
+                return "shear sheeps";
+            case FLIPPED:
+                return "shear sheeps nearly";
+            case CLOCKWISE:
+                return "shear sheeps";
+            default:
+                return "";
+        }
     }
 }

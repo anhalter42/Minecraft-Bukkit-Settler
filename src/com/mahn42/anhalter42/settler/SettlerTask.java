@@ -48,10 +48,11 @@ public class SettlerTask implements Runnable {
             //    Framework.plugin.log("settler", getClass().getSimpleName() + " started " + getWorld().getName() + ".");
             //}
             try {
-                if (!getWorld().getPlayers().isEmpty()) {
-                    if (fAccess == null) {
-                        fAccess = SettlerPlugin.plugin.getSettlerAccess(fWorld);
-                    }
+                if (fAccess == null) {
+                    fAccess = SettlerPlugin.plugin.getSettlerAccess(fWorld);
+                }
+                if (fAccess.shouldRun && !getWorld().getPlayers().isEmpty()) {
+                    fAccess.shouldRun = false;
                     fDiedSettlers = fAccess.retrieveDiedSettlers();
                     for (Settler lSettler : fDiedSettlers) {
                         fAccess.removeSettler(lSettler);

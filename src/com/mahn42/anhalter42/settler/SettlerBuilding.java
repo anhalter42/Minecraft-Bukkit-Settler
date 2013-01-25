@@ -25,10 +25,11 @@ public class SettlerBuilding extends Building {
     public int settlerCount = 1;
     public String basicProfession;
     public Rotation frameConfig = Rotation.NONE;
-
     //Runtime
     public int taskCheckCount = 0;
-    
+    public int runCheckCount = 0;
+    public boolean frameConfigChanged = true;
+
     @Override
     protected void toCSVInternal(ArrayList aCols) {
         super.toCSVInternal(aCols);
@@ -88,6 +89,7 @@ public class SettlerBuilding extends Building {
         for (Settler lSettler : lSettlers) {
             lSettler.setFrameConfig(frameConfig);
         }
+        frameConfigChanged = true;
     }
 
     public Collection<? extends Settler> getSettlers() {
@@ -96,43 +98,48 @@ public class SettlerBuilding extends Building {
     }
 
     public void runCheck() {
-        BlockPosition lSignPos = getSign();
-        Collection<? extends Settler> lSettlers;
-        lSettlers = getSettlers();
-        if (lSignPos != null) {
-            Sign lSign = (Sign) lSignPos.getBlock(world).getState();
-            lSign.setLine(0, basicProfession);
-            lSign.setLine(1, "");
-            lSign.setLine(2, "");
-            lSign.setLine(3, "");
-            if (lSettlers.isEmpty()) {
-                lSign.setLine(1, "no settler!");
-            } else {
-                if (settlerCount == 1) {
+        runCheckCount--;
+        if (runCheckCount <= 0 || frameConfigChanged) {
+            runCheckCount = 10;
+            frameConfigChanged = false;
+            BlockPosition lSignPos = getSign();
+            Collection<? extends Settler> lSettlers;
+            lSettlers = getSettlers();
+            if (lSignPos != null) {
+                Sign lSign = (Sign) lSignPos.getBlock(world).getState();
+                lSign.setLine(0, basicProfession);
+                lSign.setLine(1, "");
+                lSign.setLine(2, "");
+                lSign.setLine(3, "");
+                if (lSettlers.isEmpty()) {
+                    lSign.setLine(1, "no settler!");
+                } else {
+                    if (settlerCount == 1) {
+                        for (Settler lSettler : lSettlers) {
+                            lSign.setLine(1, lSettler.getSettlerName());
+                            break;
+                        }
+                    } else {
+                        if (settlerCount == lSettlers.size()) {
+                            lSign.setLine(1, "all settlers alive");
+                        } else {
+                            lSign.setLine(1, lSettlers.size() + " settlers of " + settlerCount);
+                        }
+                    }
+                }
+                if (!lSettlers.isEmpty()) {
                     for (Settler lSettler : lSettlers) {
-                        lSign.setLine(1, lSettler.getSettlerName());
+                        lSign.setLine(2, lSettler.getFrameConfigName());
                         break;
                     }
-                } else {
-                    if (settlerCount == lSettlers.size()) {
-                        lSign.setLine(1, "all settlers alive");
-                    } else {
-                        lSign.setLine(1, lSettlers.size() + " settlers of " + settlerCount);
-                    }
                 }
+                lSign.update();
             }
-            if (!lSettlers.isEmpty()) {
-                for (Settler lSettler : lSettlers) {
-                    lSign.setLine(2, lSettler.getFrameConfigName());
-                    break;
-                }
+            taskCheckCount--;
+            if (taskCheckCount <= 0 && lSettlers.size() != settlerCount) {
+                taskCheckCount = 10;
+                SettlerPlugin.plugin.getServer().getScheduler().runTaskAsynchronously(SettlerPlugin.plugin, new SettlerBuildingTask(SettlerBuildingTask.Kind.Check, this));
             }
-            lSign.update();
-        }
-        taskCheckCount--;
-        if (taskCheckCount <= 0 && lSettlers.size() != settlerCount) {
-            taskCheckCount = 10;
-            SettlerPlugin.plugin.getServer().getScheduler().runTaskAsynchronously(SettlerPlugin.plugin, new SettlerBuildingTask(SettlerBuildingTask.Kind.Check, this));
         }
     }
 }
