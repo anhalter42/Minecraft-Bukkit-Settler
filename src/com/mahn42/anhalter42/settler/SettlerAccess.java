@@ -294,6 +294,20 @@ public class SettlerAccess {
         }
     }
 
+    protected boolean fEnabled = true;
+    
+    public boolean isEnabled() {
+        return fEnabled;
+    }
+    
+    public void enable() {
+        fEnabled = true;
+    }
+
+    public void disable() {
+        fEnabled = false;
+    }
+
     public static class SettlerDamage {
 
         public Settler settler;

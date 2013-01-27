@@ -10,6 +10,7 @@ import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.anhalter42.settler.settler.SettlerActivityWalkToTarget;
 import com.mahn42.framework.BlockPosition;
+import com.mahn42.framework.Framework;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.Material;
@@ -175,6 +176,45 @@ public class CommandSettlerTest implements CommandExecutor {
                 } else {
                     aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
                 }
+            } else if (aStrings[0].equalsIgnoreCase("set")) {
+                SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                Settler lSettler = null;
+                if (aStrings[1].charAt(0) >= '0' && aStrings[1].charAt(0) <= '9') {
+                    lSettler = lAccess.getSettlerById(Integer.parseInt(aStrings[1]));
+                } else {
+                    Collection<? extends Settler> lSettlers = lAccess.getSettlers();
+                    for(Settler lS : lSettlers) {
+                        if (aStrings[1].equalsIgnoreCase(lS.getSettlerName())) {
+                            lSettler = lS;
+                            break;
+                        }
+                    }
+                }
+                if (lSettler != null) {
+                    if (aStrings[2].equalsIgnoreCase("boots")) {
+                        lSettler.setBoots(new ItemStack(Material.LEATHER_BOOTS));
+                    } else if (aStrings[2].equalsIgnoreCase("leggings")) {
+                        lSettler.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+                    } else if (aStrings[2].equalsIgnoreCase("chestplate")) {
+                        lSettler.setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+                    } else if (aStrings[2].equalsIgnoreCase("helmet")) {
+                        lSettler.setHelmet(new ItemStack(Material.LEATHER_HELMET));
+                    } else if (aStrings[2].equalsIgnoreCase("hand")) {
+                        lSettler.setItemInHand(new ItemStack(Material.IRON_SWORD));
+                    } else {
+                        aCommandSender.sendMessage("unknown " + aStrings[2] + "!");
+                    }
+                } else {
+                    aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
+                }
+            } else if (aStrings[0].equalsIgnoreCase("stop")) {
+                SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                lAccess.disable();
+                aCommandSender.sendMessage("settler for world '" + lWorld.getName() + " disabled.");
+            } else if (aStrings[0].equalsIgnoreCase("start")) {
+                SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                lAccess.enable();
+                aCommandSender.sendMessage("settler for world '" + lWorld.getName() + " enabled.");
             } else {
                 aCommandSender.sendMessage("whats " + aStrings[0] + "?");
             }

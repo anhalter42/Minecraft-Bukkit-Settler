@@ -8,6 +8,7 @@ import com.mahn42.anhalter42.settler.SettlerAccess.ChunkLoad;
 import com.mahn42.anhalter42.settler.SettlerAccess.SettlerDamage;
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
+import com.mahn42.framework.Framework;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.World;
@@ -51,7 +52,8 @@ public class SettlerTask implements Runnable {
                 if (fAccess == null) {
                     fAccess = SettlerPlugin.plugin.getSettlerAccess(fWorld);
                 }
-                if (fAccess.shouldRun && !getWorld().getPlayers().isEmpty()) {
+                if (fAccess.isEnabled() && fAccess.shouldRun && !getWorld().getPlayers().isEmpty()) {
+                    long lprofstart = Framework.plugin.getProfiler().beginProfile("settler.task");
                     fAccess.shouldRun = false;
                     fDiedSettlers = fAccess.retrieveDiedSettlers();
                     for (Settler lSettler : fDiedSettlers) {
@@ -83,6 +85,7 @@ public class SettlerTask implements Runnable {
                                 }
                             }
                             if (lSettler.isActive()) {
+                                long lsetprofstart = Framework.plugin.getProfiler().beginProfile("settler." + lSettler.getProfession());
                                 BlockPosition lPos = lSettler.getPosition();
                                 ChunkChangeKind changeKind = getChunkLoadKind(lPos.x >> 4, lPos.z >> 4);
                                 switch (changeKind) {
@@ -106,6 +109,7 @@ public class SettlerTask implements Runnable {
                                 //    Framework.plugin.log("settler", getClass().getSimpleName() + " settler " + lSettler.getSettlerName() + " " + getWorld().getName() + ".");
                                 //}
                                 lSettler.run(this, fAccess);
+                                Framework.plugin.getProfiler().endProfile("settler." + lSettler.getProfession(), lsetprofstart);
                             }
                         } catch (Exception ex) {
                             SettlerPlugin.plugin.getLogger().throwing(getClass().getSimpleName(), null, ex);
@@ -116,6 +120,7 @@ public class SettlerTask implements Runnable {
                     fReachedTargetSettlers = null;
                     fDamagedSettlers = null;
                     fDiedSettlers = null;
+                    Framework.plugin.getProfiler().endProfile("settler.task", lprofstart);
                 }
             } finally {
                 fIsRunning = false;
