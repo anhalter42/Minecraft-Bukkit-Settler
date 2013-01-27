@@ -52,7 +52,7 @@ public class SettlerShepherd extends Settler {
             BlockPosition lPos = getPosition();
             int lRadius = 10;
             if (getFrameConfig() == Rotation.FLIPPED) {
-                lPos = getBedPosition();
+                lPos = getWorkPosition();
                 lRadius = 23;
             }
             if (!existsTaggedActivity("FindSheep")) {

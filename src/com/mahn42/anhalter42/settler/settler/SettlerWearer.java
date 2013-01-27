@@ -37,7 +37,7 @@ public class SettlerWearer extends Settler {
     protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(
-                    new SettlerActivityFindRandomPath(getBedPosition(), 23, 10, PositionCondition.None));
+                    new SettlerActivityFindRandomPath(getWorkPosition(), 23, 10, PositionCondition.None));
         }
         super.runInternal(aTask, aAccess);
     }

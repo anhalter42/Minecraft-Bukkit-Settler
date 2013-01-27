@@ -32,6 +32,9 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
@@ -42,6 +45,8 @@ import org.bukkit.util.Vector;
 public class SettlerPlugin extends JavaPlugin {
 
     public int configSettlerTicks = 10;  // first a little bit slower
+    
+    public float configSettlerSpeed = 0.88f;
     
     public static SettlerPlugin plugin;
     protected WorldDBList<SettlerDB> settlerDB;
@@ -71,6 +76,7 @@ public class SettlerPlugin extends JavaPlugin {
         SettlerActivity.register();
         loadNames();
         readSettlerConfig();
+        registerCraftingRecipes();
         registerSettlerBuildings();
         registerSettlerCommands();
         settlerDB = new WorldDBList<SettlerDB>(SettlerDB.class, "Settler", this);
@@ -377,5 +383,43 @@ public class SettlerPlugin extends JavaPlugin {
     
     public String getText(String aLanguage, String aText, Object... aObjects) {
         return Framework.plugin.getText(this, aLanguage, aText, aObjects);
+    }
+
+    private void registerCraftingRecipes() {
+        ItemStack lItemStack = new ItemStack(Material.CHAINMAIL_HELMET);
+        ShapedRecipe lShapeRecipe = new ShapedRecipe(lItemStack);
+        lShapeRecipe.shape("AAA",
+                           "B B",
+                           "   ");
+        lShapeRecipe.setIngredient('A', Material.IRON_INGOT);
+        lShapeRecipe.setIngredient('B', Material.STRING);
+        getServer().addRecipe(lShapeRecipe);
+
+        lItemStack = new ItemStack(Material.CHAINMAIL_CHESTPLATE);
+        lShapeRecipe = new ShapedRecipe(lItemStack);
+        lShapeRecipe.shape("B B",
+                           "AAA",
+                           "AAA");
+        lShapeRecipe.setIngredient('A', Material.IRON_INGOT);
+        lShapeRecipe.setIngredient('B', Material.STRING);
+        getServer().addRecipe(lShapeRecipe);
+
+        lItemStack = new ItemStack(Material.CHAINMAIL_LEGGINGS);
+        lShapeRecipe = new ShapedRecipe(lItemStack);
+        lShapeRecipe.shape("AAA",
+                           "A A",
+                           "B B");
+        lShapeRecipe.setIngredient('A', Material.IRON_INGOT);
+        lShapeRecipe.setIngredient('B', Material.STRING);
+        getServer().addRecipe(lShapeRecipe);
+
+        lItemStack = new ItemStack(Material.CHAINMAIL_BOOTS);
+        lShapeRecipe = new ShapedRecipe(lItemStack);
+        lShapeRecipe.shape("   ",
+                           "A A",
+                           "B B");
+        lShapeRecipe.setIngredient('A', Material.IRON_INGOT);
+        lShapeRecipe.setIngredient('B', Material.STRING);
+        getServer().addRecipe(lShapeRecipe);
     }
 }

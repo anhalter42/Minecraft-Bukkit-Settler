@@ -54,7 +54,7 @@ public class SettlerWoodcutter extends Settler {
         if (isWorkingTime() && getCurrentActivity() == null) {
             BlockPosition lPos = getPosition();
             if (getFrameConfig() == Rotation.FLIPPED) {
-                lPos = getBedPosition();
+                lPos = getWorkPosition();
             }
             addActivityForNow(
                     new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.Tree),

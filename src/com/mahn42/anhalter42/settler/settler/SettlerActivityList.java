@@ -136,4 +136,14 @@ public class SettlerActivityList {
     public void clear() {
         fActivities.clear();
     }
+
+    public void removeTagged(String aTag) {
+        ArrayList<SettlerActivity> ltoremove = new ArrayList<SettlerActivity>();
+        for(SettlerActivity lAct : fActivities) {
+            if (lAct.control.tag == aTag) {
+                ltoremove.add(lAct);
+            }
+        }
+        fActivities.removeAll(ltoremove);
+    }
 }

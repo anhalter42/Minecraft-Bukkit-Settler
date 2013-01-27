@@ -48,7 +48,7 @@ public class SettlerForester extends Settler {
         if (isWorkingTime() && getCurrentActivity() == null) {
             BlockPosition lPos = getPosition();
             if (getFrameConfig() == Rotation.FLIPPED) {
-                lPos = getBedPosition();
+                lPos = getWorkPosition();
             }
             if (hasAtleastItems(Material.SAPLING, 1)) {
                 ItemStack lItem = getFirstItem(Material.SAPLING);

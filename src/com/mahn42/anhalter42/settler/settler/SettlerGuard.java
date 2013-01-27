@@ -108,7 +108,7 @@ public class SettlerGuard extends Settler {
         }
         if (isWorkingTime() && getCurrentActivity() == null) {
             if (fFrameConfig == Rotation.NONE || fFrameConfig == Rotation.CLOCKWISE) {
-                addActivityForNow(new SettlerActivityFindRandomPath(getBedPosition(), 20, 10, PositionCondition.None));
+                addActivityForNow(new SettlerActivityFindRandomPath(getWorkPosition(), 20, 10, PositionCondition.None));
             }
         }
         super.runInternal(aTask, aAccess);

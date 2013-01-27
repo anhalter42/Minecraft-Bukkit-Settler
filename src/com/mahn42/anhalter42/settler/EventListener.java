@@ -7,17 +7,22 @@ package com.mahn42.anhalter42.settler;
 import com.mahn42.anhalter42.settler.settler.Settler;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityReachedPathItemEvent;
+import com.mahn42.framework.Framework;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 import java.util.ArrayList;
+import java.util.Collection;
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.Rotation;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -25,8 +30,10 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -137,7 +144,7 @@ public class EventListener implements Listener {
             //lEntity.remove();
         }
     }
-
+    
     @EventHandler
     public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent aEvent) {
         //SettlerPlugin.plugin.getLogger().info(aEvent.getPlayer().getDisplayName() + aEvent.getRightClicked().toString() + aEvent.getClass().getName());
@@ -152,8 +159,38 @@ public class EventListener implements Listener {
             Object lDataObject = ((NPCEntityPlayer)lEntity).getDataObject();
             if (lDataObject instanceof Settler) {
                 //TODO configure settler
-                ((Settler)lDataObject).dump();
+                Settler lSettler = ((Settler)lDataObject);
+                lSettler.dump();
                 aEvent.getPlayer().sendMessage("health: " + ((Settler)lDataObject).getHealth() + " food: " + ((Settler)lDataObject).getFoodLevel());
+                ItemStack itemInHand = aEvent.getPlayer().getItemInHand();
+                if (itemInHand != null && itemInHand.getType().equals(Material.STICK)) {
+                    lSettler.setTarget(aEvent.getPlayer());
+                }
+            }
+        }
+    }
+    
+    @EventHandler
+    public void playerInteract(PlayerInteractEvent event) {
+        Player lPlayer = event.getPlayer();
+        World lWorld = lPlayer.getWorld();
+        Material lInHand = null;
+        if (event.hasItem()) {
+            lInHand = event.getItem().getType();
+        }
+        if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            if (event.hasItem() && lInHand.equals(Material.STICK)) {
+                Block lBlock = event.getClickedBlock();
+                if (lBlock != null) {
+                    SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                    Collection<? extends Settler> settlers = lAccess.getSettlers();
+                    for(Settler lSettler : settlers) {
+                        if (lSettler.getTargetId() == lPlayer.getEntityId()) {
+                            lSettler.setWorkPosition(new BlockPosition(lBlock.getLocation()));
+                            lSettler.setTarget(null);
+                        }
+                    }
+                }
             }
         }
     }

@@ -4,7 +4,6 @@
  */
 package com.mahn42.anhalter42.settler;
 
-import com.mahn42.framework.Framework;
 import java.util.List;
 import org.bukkit.World;
 

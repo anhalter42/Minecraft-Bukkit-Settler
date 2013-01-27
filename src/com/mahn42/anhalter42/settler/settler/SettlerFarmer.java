@@ -101,7 +101,7 @@ public class SettlerFarmer extends Settler {
     protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(
-                    new SettlerActivityFindRandomPath(getBedPosition(), 23, 10, PositionCondition.FarmingAround),
+                    new SettlerActivityFindRandomPath(getWorkPosition(), 23, 10, PositionCondition.FarmingAround),
                     new SettlerActivityFarmerBreakBlock());
         }
         super.runInternal(aTask, aAccess);
@@ -157,10 +157,13 @@ public class SettlerFarmer extends Settler {
                             lPlayer.swingArm();
                         }
                     });
-                    lList.add(lPos, Material.SOIL, (byte) 0, true);
+                    if (!Material.COCOA.equals(material)) {
+                        lList.add(lPos, Material.SOIL, (byte) 0, true);
+                    }
                 }
                 if (material != null) {
                     Material lMat = material;
+                    byte data = (byte)0;
                     if (lMat.equals(Material.CROPS)) {
                         lMat = Material.SEEDS;
                     } else if (lMat.equals(Material.CARROT)) {
@@ -169,10 +172,21 @@ public class SettlerFarmer extends Settler {
                         lMat = Material.POTATO_ITEM;
                     } else if (lMat.equals(Material.COCOA)) {
                         lMat = Material.INK_SACK;
+                        List<BlockPosition> findBlocks = aSettler.findBlocks(Material.LOG, (byte)0x3, 1);
+                        if (!findBlocks.isEmpty()) {
+                            BlockPosition lLPos = findBlocks.get(0);
+                            if (target.x < lLPos.x) {
+                                data = (byte)3; // west
+                            } else if (target.x > lLPos.x) {
+                                data = (byte)1; // east
+                            } else if (target.z > lLPos.z) {
+                                data = (byte)2; // south
+                            }
+                        }
                     }
                     if (aSettler.hasAtleastItems(lMat, 1)) {
                         if (aSettler.removeItems(lMat, 1) > 0) {
-                            lList.add(target, material, (byte)0, true);
+                            lList.add(target, material, data, true);
                         }
                     }
                 }
@@ -208,7 +222,13 @@ public class SettlerFarmer extends Settler {
             }
             if (!lFound) {
                 for (Material lMat : farmingFruitsWithSeed) {
-                    List<BlockPosition> lFindBlocks = aSettler.findBlocks(lMat, (byte) 7, 5);
+                    byte data = (byte)7;
+                    byte mask = (byte)0xF;
+                    if (lMat.equals(Material.COCOA)) {
+                        data = (byte)0x8;
+                        mask = (byte)0xC;
+                    }
+                    List<BlockPosition> lFindBlocks = aSettler.findBlocks(lMat, (byte) data, (byte) mask, 5);
                     if (!lFindBlocks.isEmpty()) {
                         for (BlockPosition lPos : lFindBlocks) {
                             aSettler.addActivityForNow(

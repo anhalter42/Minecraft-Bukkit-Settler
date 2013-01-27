@@ -129,6 +129,7 @@ public class Settler {
     protected float fWalkSpeed = 0.8f;
     protected Rotation fFrameConfig = Rotation.NONE;
     protected long fLivingTicks = 0;
+    protected BlockPosition fWorkPosition = null;
     // profession specific?
     protected int fCollectItemRadius = 16;
     protected boolean fResetOnNight = true;
@@ -325,6 +326,9 @@ public class Settler {
         aValues.set("walkSpeed", fWalkSpeed);
         aValues.set("frameConfig", getFrameConfig().toString());
         aValues.set("livingTicks", fLivingTicks);
+        if (fWorkPosition != null) {
+            aValues.set("workPosition", fWorkPosition.toCSV(","));
+        }
     }
 
     protected ItemStack deserializeItemStack(YamlConfiguration aValues, String aName) {
@@ -376,6 +380,13 @@ public class Settler {
         fWalkSpeed = (float) aValues.getDouble("walkSpeed", (double) fWalkSpeed);
         fFrameConfig = Rotation.valueOf(aValues.getString("frameConfig", Rotation.NONE.toString()));
         fLivingTicks = aValues.getLong("livingTicks", fLivingTicks);
+        lObj = aValues.get("workPosition");
+        if (lObj != null) {
+            fWorkPosition = new BlockPosition();
+            fWorkPosition.fromCSV(lObj.toString(), "\\,");
+        } else {
+            fWorkPosition = null;
+        }
     }
 
     public boolean isWorkingTime() {
@@ -412,7 +423,7 @@ public class Settler {
         fLivingTicks += SettlerPlugin.plugin.configSettlerTicks;
         runCheckHealth(aTask, aAccess);
         if (!isWorkingTime()) { // no work time :-) we go sleeping
-            if (!fSendAtHome) {
+            if (!fSendAtHome && !existsTaggedActivity("Night")) {
                 if (getBedPosition() != null && !getPosition().nearly(getBedPosition(), 2)) {
                     fSendAtHome = true;
                     BlockPosition lBed = getBedPosition().clone();
@@ -424,12 +435,14 @@ public class Settler {
                         }
                         fActivityList.clear();
                         addActivityForNow(
+                                "Night",
                                 new SettlerActivityWalkToTarget(getBedPosition()),
                                 new SettlerActivityTeleport(lBed),
                                 new SettlerActivitySleep(),
                                 new SettlerActivityAwake());
                     } else {
                         addActivityForNow(
+                                "Night",
                                 new SettlerActivityWalkToTarget(getBedPosition()),
                                 new SettlerActivityTeleport(lBed),
                                 new SettlerActivitySleep(),
@@ -489,7 +502,7 @@ public class Settler {
     protected void runCheckHealth(SettlerTask aTask, SettlerAccess aAccess) {
         if (hasEntity() && getHealth() < 20 && getFoodLevel() > 15) {
             fHealthTicks += SettlerPlugin.plugin.configSettlerTicks;
-            if (fHealthTicks > 20) {
+            if (fHealthTicks > 30) {
                 fHealthTicks = 0;
                 setHealth(getHealth() + 1);
                 final Player lPlayer = fEntity.getAsPlayer();
@@ -550,19 +563,19 @@ public class Settler {
             }
         }
     }
-    
 
     protected void runCheckDamage(SettlerTask aTask, SettlerAccess aAccess) {
-        if (fDamages.size() > 0) {
+        if (fDamages.size() > 0 && !existsTaggedActivity("Fight")) {
             for (SettlerDamage lDamage : fDamages) {
                 if (lDamage.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
                         && lDamage.entityPos != null) {
                     if (!lDamage.entityPos.nearly(getPosition(), 2)) {
                         addActivityForNow(
+                                "Fight",
                                 new SettlerActivityWalkToTarget(lDamage.entityPos, SettlerActivityWalkToTarget.WalkAction.Fight, lDamage.entityId),
                                 new SettlerActivityFight(lDamage.entityId, 20));
                     } else {
-                        addActivityForNow(new SettlerActivityFight(lDamage.entityId, 20));
+                        addActivityForNow("Fight", new SettlerActivityFight(lDamage.entityId, 20));
                     }
                     fSendAtHome = false;
                 }
@@ -674,7 +687,7 @@ public class Settler {
         lPlayer.setHealth(getHealth());
         lPlayer.setSaturation(getSaturation());
         lPlayer.setCanPickupItems(true);
-        lPlayer.setWalkSpeed(getWalkSpeed());
+        lPlayer.setWalkSpeed(getWalkSpeed() * SettlerPlugin.plugin.configSettlerSpeed);
         aEntity.setDataObject(this);
     }
 
@@ -740,6 +753,18 @@ public class Settler {
 
     public boolean isActive() {
         return fActive;
+    }
+
+    public void setWorkPosition(BlockPosition aPosition) {
+        if (aPosition != null) {
+            fWorkPosition = aPosition.clone();
+        } else {
+            fWorkPosition = null;
+        }
+    }
+
+    public BlockPosition getWorkPosition() {
+        return fWorkPosition != null ? fWorkPosition.clone() : (getBedPosition() != null ? getBedPosition() : null);
     }
 
     public ItemStack getLeggings() {
@@ -1265,6 +1290,10 @@ public class Settler {
         return WorldScanner.findBlocks(getWorld(), getPosition(), aMaterial, aData, true, aRadius, true);
     }
 
+    public List<BlockPosition> findBlocks(Material aMaterial, byte aData, byte aMask, int aRadius) {
+        return WorldScanner.findBlocks(getWorld(), getPosition(), aMaterial, aData, aMask, true, aRadius, true);
+    }
+
     public ItemStack getFirstItem(Material aMaterial) {
         for (int i = 0; i < getInventory().length; i++) {
             ItemStack lItem = getInventory()[i];
@@ -1305,6 +1334,24 @@ public class Settler {
             }
         }
         return ldead;
+    }
+    protected int fTargetId;
+
+    public void setTarget(Player aPlayer) {
+        fTargetId = 0;
+        removeTaggedActivity("Target");
+        if (aPlayer != null) {
+            fTargetId = aPlayer.getEntityId();
+            addActivityForNow("Target", new SettlerActivityFollowTarget(aPlayer.getEntityId()));
+        }
+    }
+
+    public int getTargetId() {
+        return fTargetId;
+    }
+
+    public void removeTaggedActivity(String aTag) {
+        fActivityList.removeTagged(aTag);
     }
 
     public String getFrameConfigName() {
