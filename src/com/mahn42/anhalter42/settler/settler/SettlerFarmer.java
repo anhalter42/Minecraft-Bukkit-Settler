@@ -44,6 +44,9 @@ public class SettlerFarmer extends Settler {
         profession.output.add(new ItemStack(Material.MELON));
         profession.output.add(new ItemStack(Material.MELON_SEEDS));
         profession.output.add(new ItemStack(Material.POTATO));
+        profession.output.add(new ItemStack(Material.POISONOUS_POTATO));
+        profession.output.add(new ItemStack(Material.SUGAR_CANE));
+        profession.output.add(new ItemStack(Material.INK_SACK));
         register(profession);
         SettlerActivity.registerActivity(SettlerActivityFarmerBreakBlock.TYPE, SettlerActivityFarmerBreakBlock.class);
         SettlerActivity.registerActivity(SettlerActivityFarmerSow.TYPE, SettlerActivityFarmerSow.class);
@@ -55,6 +58,7 @@ public class SettlerFarmer extends Settler {
         farmingFruits.add(Material.SPECKLED_MELON);
         farmingFruits.add(Material.PUMPKIN);
         farmingFruits.add(Material.MELON_BLOCK);
+        farmingFruits.add(Material.SUGAR_CANE_BLOCK);
     }
     public static ArrayList<Material> farmingFruitsWithSeed = new ArrayList<Material>();
 
@@ -78,9 +82,11 @@ public class SettlerFarmer extends Settler {
         fItemsToCollect.add(Material.MELON);
         fItemsToCollect.add(Material.MELON_SEEDS);
         fItemsToCollect.add(Material.POTATO);
+        fItemsToCollect.add(Material.POISONOUS_POTATO);
         fItemsToCollect.add(Material.POTATO_ITEM);
         fItemsToCollect.add(Material.COCOA);
         fItemsToCollect.add(Material.INK_SACK);
+        fItemsToCollect.add(Material.SUGAR_CANE);
         fPutInChestItems.add(new PutInChestItem(Material.WHEAT, 0));
         fPutInChestItems.add(new PutInChestItem(Material.SEEDS, 10));
         fPutInChestItems.add(new PutInChestItem(Material.APPLE, 0));
@@ -92,9 +98,11 @@ public class SettlerFarmer extends Settler {
         fPutInChestItems.add(new PutInChestItem(Material.MELON, 10));
         fPutInChestItems.add(new PutInChestItem(Material.MELON_SEEDS, 10));
         fPutInChestItems.add(new PutInChestItem(Material.POTATO, 10));
+        fPutInChestItems.add(new PutInChestItem(Material.POISONOUS_POTATO, 0));
         fPutInChestItems.add(new PutInChestItem(Material.POTATO_ITEM, 10));
         fPutInChestItems.add(new PutInChestItem(Material.COCOA, 10));
         fPutInChestItems.add(new PutInChestItem(Material.INK_SACK, 10));
+        fPutInChestItems.add(new PutInChestItem(Material.SUGAR_CANE, 0));
     }
 
     @Override
@@ -163,7 +171,7 @@ public class SettlerFarmer extends Settler {
                 }
                 if (material != null) {
                     Material lMat = material;
-                    byte data = (byte)0;
+                    byte data = (byte) 0;
                     if (lMat.equals(Material.CROPS)) {
                         lMat = Material.SEEDS;
                     } else if (lMat.equals(Material.CARROT)) {
@@ -172,15 +180,15 @@ public class SettlerFarmer extends Settler {
                         lMat = Material.POTATO_ITEM;
                     } else if (lMat.equals(Material.COCOA)) {
                         lMat = Material.INK_SACK;
-                        List<BlockPosition> findBlocks = aSettler.findBlocks(Material.LOG, (byte)0x3, 1);
+                        List<BlockPosition> findBlocks = aSettler.findBlocks(Material.LOG, (byte) 0x3, 1);
                         if (!findBlocks.isEmpty()) {
                             BlockPosition lLPos = findBlocks.get(0);
                             if (target.x < lLPos.x) {
-                                data = (byte)3; // west
+                                data = (byte) 3; // west
                             } else if (target.x > lLPos.x) {
-                                data = (byte)1; // east
+                                data = (byte) 1; // east
                             } else if (target.z > lLPos.z) {
-                                data = (byte)2; // south
+                                data = (byte) 2; // south
                             }
                         }
                     }
@@ -211,22 +219,25 @@ public class SettlerFarmer extends Settler {
                 List<BlockPosition> lFindBlocks = aSettler.findBlocks(lMat, 5);
                 if (!lFindBlocks.isEmpty()) {
                     for (BlockPosition lPos : lFindBlocks) {
-                        aSettler.addActivityForNow(
-                                "Farming",
-                                new SettlerActivityWalkToTarget(lPos),
-                                new SettlerActivitySwingArm(20),
-                                new SettlerActivityBreakBlock(lPos));
+                        if (!lMat.equals(Material.SUGAR_CANE_BLOCK)
+                                || lPos.getBlockAt(aSettler.getWorld(), 0, -1, 0).getType().equals(Material.SUGAR_CANE_BLOCK)) {
+                            aSettler.addActivityForNow(
+                                    "Farming",
+                                    new SettlerActivityWalkToTarget(lPos),
+                                    new SettlerActivitySwingArm(20),
+                                    new SettlerActivityBreakBlock(lPos));
+                            lFound = true;
+                        }
                     }
-                    lFound = true;
                 }
             }
             if (!lFound) {
                 for (Material lMat : farmingFruitsWithSeed) {
-                    byte data = (byte)7;
-                    byte mask = (byte)0xF;
+                    byte data = (byte) 7;
+                    byte mask = (byte) 0xF;
                     if (lMat.equals(Material.COCOA)) {
-                        data = (byte)0x8;
-                        mask = (byte)0xC;
+                        data = (byte) 0x8;
+                        mask = (byte) 0xC;
                     }
                     List<BlockPosition> lFindBlocks = aSettler.findBlocks(lMat, (byte) data, (byte) mask, 5);
                     if (!lFindBlocks.isEmpty()) {

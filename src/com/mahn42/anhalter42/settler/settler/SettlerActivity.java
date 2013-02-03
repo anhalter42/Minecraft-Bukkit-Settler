@@ -131,7 +131,7 @@ public abstract class SettlerActivity {
 
     @Override
     public String toString() {
-        return type + " " + (maxTicks - runningTicks);
+        return (control.tag == null ? "" : control.tag + " ") + type + " " + (maxTicks - runningTicks);
     }
 
     public abstract boolean run(SettlerAccess aAccess, Settler aSettler);

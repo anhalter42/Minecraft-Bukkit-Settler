@@ -28,6 +28,7 @@ public class SettlerFisher extends Settler {
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, false));
         profession.inventory.add(new SettlerProfession.Item(Material.BOAT, true));
         profession.output.add(new ItemStack(Material.RAW_FISH));
+        profession.output.add(new ItemStack(Material.COOKED_FISH));
         register(profession);
     }
     

@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.framework.Framework;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -66,6 +67,8 @@ public class SettlerActivityTakeInHand extends SettlerActivity {
         }
         if (aSettler.removeItems(lNew) >= 1) {
             aSettler.setItemInHand(lNew);
+        } else {
+            Framework.plugin.log("settler","settler " + aSettler.getSettlerName() + " could not take " + material + " in hand! (" + lNew.toString() + " " + lNew.getData().getData() + ")");
         }
         return true;
     }

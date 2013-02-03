@@ -147,6 +147,9 @@ public class SettlerBuildingTask implements Runnable {
     private void destroyBuilding() {
         Collection<? extends Settler> lSettlers = fAccess.getSettlersForHomeKey(building.key);
         for (Settler lSettler : lSettlers) {
+            lSettler.dropAllArmor();
+            lSettler.dropInventory();
+            lSettler.removeEntity();
             fAccess.removeSettler(lSettler);
         }
     }

@@ -207,6 +207,28 @@ public class CommandSettlerTest implements CommandExecutor {
                 } else {
                     aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
                 }
+            } else if (aStrings[0].equalsIgnoreCase("recreate")) {
+                SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
+                Settler lSettler = null;
+                if (aStrings[1].charAt(0) >= '0' && aStrings[1].charAt(0) <= '9') {
+                    lSettler = lAccess.getSettlerById(Integer.parseInt(aStrings[1]));
+                } else {
+                    Collection<? extends Settler> lSettlers = lAccess.getSettlers();
+                    for(Settler lS : lSettlers) {
+                        if (aStrings[1].equalsIgnoreCase(lS.getSettlerName())) {
+                            lSettler = lS;
+                            break;
+                        }
+                    }
+                }
+                if (lSettler != null) {
+                    if (lSettler.hasEntity()) {
+                        lSettler.removeEntity();
+                    }
+                    lSettler.createEntity();
+                } else {
+                    aCommandSender.sendMessage("Settler with Id " + aStrings[1] + " not found!");
+                }
             } else if (aStrings[0].equalsIgnoreCase("stop")) {
                 SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
                 lAccess.disable();

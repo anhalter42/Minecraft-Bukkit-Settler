@@ -5,9 +5,11 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
+import java.util.Random;
 import org.bukkit.Material;
 import org.bukkit.Rotation;
 import org.bukkit.inventory.ItemStack;
@@ -45,6 +47,22 @@ public class SettlerForester extends Settler {
 
     @Override
     public void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
+        /*
+        SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, new Runnable() {
+            @Override
+            public void run() {
+                int r = (new Random().nextInt(3));
+                if (r == 0) {
+                    setItemInHand(new ItemStack(Material.WOOD_DOOR, 1));
+                } else if (r == 1) {
+                    setItemInHand(new ItemStack(Material.WOOD_AXE, 1));
+                } else if (r == 2) {
+                    setItemInHand(new ItemStack(Material.APPLE, 1));
+                }
+                updateToEntity(fEntity);
+            }
+        }, 1);
+        */
         if (isWorkingTime() && getCurrentActivity() == null) {
             BlockPosition lPos = getPosition();
             if (getFrameConfig() == Rotation.FLIPPED) {

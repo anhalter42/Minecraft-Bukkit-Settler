@@ -438,14 +438,14 @@ public class Settler {
                                 "Night",
                                 new SettlerActivityWalkToTarget(getBedPosition()),
                                 new SettlerActivityTeleport(lBed),
-                                new SettlerActivitySleep(),
+                                new SettlerActivitySleep(24000),
                                 new SettlerActivityAwake());
                     } else {
                         addActivityForNow(
                                 "Night",
                                 new SettlerActivityWalkToTarget(getBedPosition()),
                                 new SettlerActivityTeleport(lBed),
-                                new SettlerActivitySleep(),
+                                new SettlerActivitySleep(24000),
                                 new SettlerActivityAwake(),
                                 new SettlerActivityWalkToTarget(getPosition()));
                     }
@@ -455,7 +455,8 @@ public class Settler {
             fSendAtHome = false;
             SettlerActivity lAct = getCurrentActivity();
             if (lAct != null) {
-                if (lAct instanceof SettlerActivitySleep) {//(lAct.type.equals(SettlerActivitySleep.TYPE)) {
+                if (lAct instanceof SettlerActivitySleep && "Night".equals(lAct.control.tag)) {//(lAct.type.equals(SettlerActivitySleep.TYPE)) {
+                    lAct.deactivate(this);
                     fActivityList.remove(lAct);
                 }
             }
@@ -480,7 +481,7 @@ public class Settler {
                     if (lNext != null) {
                         lNext.control.previous_success = lAct.control.success;
                     }
-                    Framework.plugin.log("settler", "settler " + getSettlerName() + " activity poped " + lAct);
+                    Framework.plugin.log("settler_x", "settler " + getSettlerName() + " activity poped " + lAct);
                 }
             } else {
                 lAct.deactivate(this);
@@ -489,7 +490,7 @@ public class Settler {
                 if (lNext != null) {
                     lNext.control.previous_success = lAct.control.success;
                 }
-                Framework.plugin.log("settler", "settler " + getSettlerName() + " activity skipped " + lAct);
+                Framework.plugin.log("settler_x", "settler " + getSettlerName() + " activity skipped " + lAct);
             }
         }
         fDamages.clear();
@@ -584,16 +585,18 @@ public class Settler {
     }
 
     public void runPutInChestItems(SettlerTask aTask, SettlerAccess aAccess) {
-        BlockPosition lPos = getPosition();
-        //TODO should be chest position
-        if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
-            for (PutInChestItem lpItem : fPutInChestItems) {
-                if (hasAtleastItems(lpItem.material, lpItem.keep + 1)) {
-                    for (ItemStack lItem : getInventory()) {
-                        if (lItem != null && lItem.getType().equals(lpItem.material)) {
-                            addActivityForNow(
-                                    "PutInChestItems",
-                                    new SettlerActivityPutItemsInChest(lpItem.material, lItem.getData().getData(), -1, lpItem.keep));
+        if (!existsTaggedActivity("PutInChestItems")) {
+            BlockPosition lPos = getPosition();
+            //TODO should be chest position
+            if (getBedPosition() != null && lPos.nearly(getBedPosition(), 4)) {
+                for (PutInChestItem lpItem : fPutInChestItems) {
+                    if (hasAtleastItems(lpItem.material, lpItem.keep + 1)) {
+                        for (ItemStack lItem : getInventory()) {
+                            if (lItem != null && lItem.getType().equals(lpItem.material)) {
+                                addActivityForNow(
+                                        "PutInChestItems",
+                                        new SettlerActivityPutItemsInChest(lpItem.material, lItem.getData().getData(), -1, lpItem.keep));
+                            }
                         }
                     }
                 }
@@ -672,11 +675,30 @@ public class Settler {
         PlayerInventory lInv = lPlayer.getInventory();
         lInv.clear();
         lInv.setContents(fInventory);
+        ItemStack[] lArmor = new ItemStack[4];
+        lArmor[0] = fBoots;
+        lArmor[1] = fLeggings;
+        lArmor[2] = fChestplate;
+        lArmor[3] = fHelmet;
+        lInv.setArmorContents(lArmor);
+        /*
+        fEntity.setEquipment(0, fBoots);
+        fEntity.setEquipment(1, fLeggings);
+        fEntity.setEquipment(2, fChestplate);
+        fEntity.setEquipment(3, fHelmet);
+         */
+        //fEntity.setEquipment(4, fItemInHand);
+        //int lheldItemSlot = lInv.getHeldItemSlot();
+        lInv.setItemInHand(fItemInHand);
+
+        /*
         lInv.setBoots(fBoots);
+        lInv.setLeggings(fLeggings);
         lInv.setChestplate(fChestplate);
         lInv.setHelmet(fHelmet);
-        lInv.setLeggings(fLeggings);
         lInv.setItemInHand(fItemInHand);
+        //lPlayer.updateInventory();
+        //lPlayer.setItemInHand(fItemInHand);
         /*
          ItemStack[] lItems = getInventory();
          for(int i = 0; i<lItems.length; i++) {
@@ -805,6 +827,7 @@ public class Settler {
 
     public void setItemInHand(ItemStack aItemStack) {
         fItemInHand = aItemStack;
+        getInventory()[0] = fItemInHand;
     }
 
     public SettlerProfession getProf() {
@@ -891,7 +914,7 @@ public class Settler {
         }
     }
 
-    private void dropAllArmor() {
+    public void dropAllArmor() {
         Location lLoc = getPosition().getLocation(getWorld());
         ItemStack lItem;
         lItem = getBoots();
@@ -916,7 +939,7 @@ public class Settler {
         }
     }
 
-    private void dropInventory() {
+    public void dropInventory() {
         Location lLoc = getPosition().getLocation(getWorld());
         ItemStack[] lInv = getInventory();
         for (ItemStack lItem : lInv) {
@@ -945,25 +968,31 @@ public class Settler {
 
     public void dump() {
         Logger l = SettlerPlugin.plugin.getLogger();
+        Player lPlayer = null;
+        if (hasEntity()) {
+            lPlayer = fEntity.getAsPlayer();
+        }
         l.info("Key:" + fKey + " livingTicks:" + fLivingTicks);
         l.info("HomeKey:" + fHomeKey);
         l.info("SettlerName:" + fSettlerName);
         l.info("Profession:" + fProfession);
         l.info("PlayerName:" + fPlayerName);
-        l.info("Position:" + fPosition);
-        l.info("BedPosition:" + fBedPosition);
+        l.info("Position:" + fPosition + " BedPosition:" + fBedPosition);
+        l.info("WorkPosition:" + fWorkPosition);
         l.info("Activity:" + getCurrentActivity());
         l.info("Workingtime:" + fWorkStart + " - " + fWorkEnd);
         l.info("Health:" + fHealth + " Food:" + fFoodLevel);
         l.info("frameConfig:" + fFrameConfig + " " + getFrameConfigName());
-        l.info("Boots:" + fBoots);
-        l.info("Leggings:" + fLeggings);
-        l.info("Chestplate:" + fChestplate);
-        l.info("Helmet:" + fHelmet);
-        l.info("ItemInHand:" + fItemInHand);
+        l.info("Boots:" + fBoots + " (" + (lPlayer != null ? lPlayer.getInventory().getBoots() : "-") + ")");
+        l.info("Leggings:" + fLeggings + " (" + (lPlayer != null ? lPlayer.getInventory().getLeggings() : "-") + ")");
+        l.info("Chestplate:" + fChestplate + " (" + (lPlayer != null ? lPlayer.getInventory().getChestplate() : "-") + ")");
+        l.info("Helmet:" + fHelmet + " (" + (lPlayer != null ? lPlayer.getInventory().getHelmet() : "-") + ")");
+        l.info("ItemInHand:" + fItemInHand + " (" + (lPlayer != null ? lPlayer.getInventory().getItemInHand() : "-") + ")");
+        int lIndex = -1;
         for (ItemStack i : fInventory) {
+            lIndex++;
             if (i != null) {
-                l.info("Inv:" + i);
+                l.info("Inv("+lIndex+") " + i + " " + i.getData());
             }
         }
         fActivityList.dump(l);
@@ -995,7 +1024,7 @@ public class Settler {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
             fActivityList.push(lAct);
-            Framework.plugin.log("settler", "settler " + getSettlerName() + " activity pushed now " + lAct);
+            Framework.plugin.log("settler_x", "settler " + getSettlerName() + " activity pushed now " + lAct);
         }
     }
 
@@ -1007,7 +1036,7 @@ public class Settler {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
             fActivityList.add(lAct);
-            Framework.plugin.log("settler", "settler " + getSettlerName() + " activity pushed later " + lAct);
+            Framework.plugin.log("settler_x", "settler " + getSettlerName() + " activity pushed later " + lAct);
         }
     }
 
@@ -1019,7 +1048,7 @@ public class Settler {
         for (int i = aActivities.length - 1; i >= 0; i--) {
             SettlerActivity lAct = aActivities[i];
             fActivityList.addAsNext(lAct);
-            Framework.plugin.log("settler", "settler " + getSettlerName() + " activity pushed next " + lAct);
+            Framework.plugin.log("settler_x", "settler " + getSettlerName() + " activity pushed next " + lAct);
         }
     }
 
@@ -1082,11 +1111,11 @@ public class Settler {
     }
 
     public int removeItems(ItemStack aItem) {
-        return InventoryHelper.removeItems(getInventory(), aItem);
+        return InventoryHelper.removeItems(getInventory(), aItem, 0); // exclude item in hand at pos 0
     }
 
     public int insertItems(ItemStack aItem) {
-        return InventoryHelper.insertItems(getInventory(), aItem);
+        return InventoryHelper.insertItems(getInventory(), aItem, 0); // exclude item in hand at pos 0
     }
 
     public enum PositionCondition {
@@ -1095,8 +1124,7 @@ public class Settler {
         NaturalBlocksAround,
         GrassOrDirtAround,
         Tree,
-        FarmingAround,
-    }
+        FarmingAround,}
     public static ArrayList<Material> grassOrDirt = new ArrayList<Material>();
 
     {

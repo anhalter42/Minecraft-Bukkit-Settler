@@ -70,6 +70,7 @@ public class SettlerActivitySleep extends SettlerActivity {
                     @Override
                     public void run() {
                         lPlayer.awake();
+                        started = false;
                     }
                 });
             }

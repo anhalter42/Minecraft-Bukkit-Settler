@@ -20,7 +20,7 @@ public class SettlerRancher extends Settler {
     public static final SettlerProfession profession = new SettlerProfession();
 
     public static void register() {
-        profession.settlerClass = SettlerFarmer.class;
+        profession.settlerClass = SettlerRancher.class;
         profession.name = typeName;
         profession.frameMaterial = Material.FENCE;
         profession.armor.add(new SettlerProfession.Item(Material.IRON_HOE, true));
