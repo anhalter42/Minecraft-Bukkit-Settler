@@ -6,6 +6,7 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerAccess.SettlerDamage;
+import com.mahn42.anhalter42.settler.SettlerBuilding;
 import com.mahn42.anhalter42.settler.SettlerDBRecord;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
@@ -1384,5 +1385,9 @@ public class Settler {
 
     public String getFrameConfigName() {
         return "";
+    }
+    
+    public SettlerBuilding getHomeBuilding() {
+        return SettlerPlugin.plugin.getSettlerBuildingDB(getWorld()).getRecord(getHomeKey());
     }
 }

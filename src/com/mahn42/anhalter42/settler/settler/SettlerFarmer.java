@@ -38,12 +38,14 @@ public class SettlerFarmer extends Settler {
         profession.output.add(new ItemStack(Material.SEEDS));
         profession.output.add(new ItemStack(Material.APPLE));
         profession.output.add(new ItemStack(Material.CARROT));
+        profession.output.add(new ItemStack(Material.CARROT_ITEM));
         profession.output.add(new ItemStack(Material.SPECKLED_MELON));
         profession.output.add(new ItemStack(Material.PUMPKIN));
         profession.output.add(new ItemStack(Material.PUMPKIN_SEEDS));
         profession.output.add(new ItemStack(Material.MELON));
         profession.output.add(new ItemStack(Material.MELON_SEEDS));
         profession.output.add(new ItemStack(Material.POTATO));
+        profession.output.add(new ItemStack(Material.POTATO_ITEM));
         profession.output.add(new ItemStack(Material.POISONOUS_POTATO));
         profession.output.add(new ItemStack(Material.SUGAR_CANE));
         profession.output.add(new ItemStack(Material.INK_SACK));
@@ -51,6 +53,10 @@ public class SettlerFarmer extends Settler {
         SettlerActivity.registerActivity(SettlerActivityFarmerBreakBlock.TYPE, SettlerActivityFarmerBreakBlock.class);
         SettlerActivity.registerActivity(SettlerActivityFarmerSow.TYPE, SettlerActivityFarmerSow.class);
 
+    }
+
+    public SettlerFarmer(String aProfession) {
+        super(aProfession);
     }
     public static ArrayList<Material> farmingFruits = new ArrayList<Material>();
 

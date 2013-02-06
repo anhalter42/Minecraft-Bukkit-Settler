@@ -55,7 +55,7 @@ public class SettlerActivityPlaceBlock extends SettlerActivityWithPosition {
                     control.success = false;
                 }
             } else {
-                Framework.plugin.log("settler", "settler " + aSettler.getSettlerName() + " can only place a block on air and so on!");
+                Framework.plugin.log("settler", "settler " + aSettler.getSettlerName() + " can only place a block on air and so on! (" + lType + ")");
                 control.success = false;
             }
         } else {

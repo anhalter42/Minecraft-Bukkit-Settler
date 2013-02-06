@@ -19,6 +19,11 @@ public class SettlerActivitySitDown extends SettlerActivity {
         type = TYPE;
     }
 
+    public SettlerActivitySitDown(int aMaxTicks) {
+        type = TYPE;
+        maxTicks = aMaxTicks;
+    }
+
     @Override
     public boolean run(SettlerAccess aAccess, Settler aSettler) {
         if (aSettler.hasEntity()) {
@@ -30,7 +35,21 @@ public class SettlerActivitySitDown extends SettlerActivity {
                 }
             });
         }
-        return true;
+        return false;
+    }
+
+    @Override
+    public void deactivate(Settler aSettler) {
+        super.deactivate(aSettler);
+        if (aSettler.hasEntity()) {
+            final NPCEntityPlayer lPlayer = aSettler.fEntity;
+            runTaskLater(new Runnable() {
+                @Override
+                public void run() {
+                    lPlayer.standUp();
+                }
+            });
+        }
     }
     
 }

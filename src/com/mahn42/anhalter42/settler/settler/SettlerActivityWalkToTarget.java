@@ -130,7 +130,7 @@ public class SettlerActivityWalkToTarget extends SettlerActivityWithPosition {
             }
             BlockPosition lPos = aSettler.getPosition();
             if (lastPos != null) {
-                if (lastPos.equals(lPos) && !lPos.nearly(target, 3)) {
+                if (lastPos.equals(lPos) && !lPos.nearly(target, 2)) {
                     samePosTicks += SettlerPlugin.plugin.configSettlerTicks;
                     if (!doorOpened && samePosTicks > (20 * 2)) { // 2s
                         doorOpened = true;
@@ -152,7 +152,7 @@ public class SettlerActivityWalkToTarget extends SettlerActivityWithPosition {
                                         lDoor.getWorld().playSound(lDoor.getLocation(), Sound.DOOR_CLOSE, 0, 0);
                                         lDoor.setData((byte) (lDoor.getData() & ~0x4), true);
                                     }
-                                }, 20);
+                                }, 40);
                             }
                         }
                     }

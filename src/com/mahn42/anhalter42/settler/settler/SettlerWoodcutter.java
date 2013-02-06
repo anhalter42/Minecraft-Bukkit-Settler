@@ -84,6 +84,11 @@ public class SettlerWoodcutter extends Settler {
             for (BlockPosition lPos : lFindBlocks) {
                 List<BlockPosition> lTreePoss = WorldScanner.getTreePoss(aSettler.getWorld(), lPos);
                 if (!lTreePoss.isEmpty()) {
+                    aSettler.addActivityForNow(
+                            new SettlerActivityNothing(lTreePoss.size()*20)
+                            //new SettlerActivitySitDown(lTreePoss.size()*20),
+                            //new SettlerActivityStandUp()
+                            );
                     for (BlockPosition lP : lTreePoss) {
                         aSettler.addActivityForNow(
                                 "BreakTree",

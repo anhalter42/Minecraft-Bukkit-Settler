@@ -307,6 +307,17 @@ public class SettlerAccess {
         fEnabled = false;
     }
 
+    public Collection<Settler> getSettlers(String aName) {
+        ArrayList<Settler> lRes = new ArrayList<Settler>();
+        Collection<? extends Settler> lSettlers = getSettlers();
+        for(Settler lSettler : lSettlers) {
+            if (aName.equalsIgnoreCase(lSettler.getSettlerName())) {
+                lRes.add(lSettler);
+            }
+        }
+        return lRes;
+    }
+
     public static class SettlerDamage {
 
         public Settler settler;

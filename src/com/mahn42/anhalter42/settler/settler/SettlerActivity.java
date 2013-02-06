@@ -6,6 +6,7 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerPlugin;
+import com.mahn42.framework.Framework;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -147,6 +148,15 @@ public abstract class SettlerActivity {
     }
 
     public void runTaskLater(Runnable aRunnable, int aTicks) {
-        SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, aRunnable, aTicks);
+        final Runnable lRun = aRunnable;
+        final String aName = "Settler.Activity.runTaskLater." + getClass().getSimpleName();
+        SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, new Runnable() {
+            @Override
+            public void run() {
+                Framework.plugin.getProfiler().beginProfile(aName);
+                lRun.run();
+                Framework.plugin.getProfiler().endProfile(aName);
+            }
+        }, aTicks);
     }
 }

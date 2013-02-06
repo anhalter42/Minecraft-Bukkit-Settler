@@ -9,10 +9,13 @@ import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.Building;
 import com.mahn42.framework.BuildingBlock;
 import com.mahn42.framework.Framework;
+import com.mahn42.framework.InventoryHelper;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.Rotation;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 
 /**
@@ -141,5 +144,36 @@ public class SettlerBuilding extends Building {
                 SettlerPlugin.plugin.getServer().getScheduler().runTaskAsynchronously(SettlerPlugin.plugin, new SettlerBuildingTask(SettlerBuildingTask.Kind.Check, this));
             }
         }
+    }
+    
+    public boolean hasChestWith(Material aMaterial, int aCount) {
+        boolean lFound = false;
+        ArrayList<BuildingBlock> lBlocks = getBlocks(Material.CHEST);
+        for(BuildingBlock lBlock : lBlocks) {
+            BlockState lState = lBlock.position.getBlock(world).getState();
+            if (lState instanceof Chest) {
+                Chest lChest = (Chest) lState;
+                lFound = InventoryHelper.hasAtleastItems(lChest.getInventory(), aMaterial, aCount);
+                if (lFound) {
+                    break;
+                }
+            }
+        }
+        return lFound;
+    }
+
+    public ArrayList<Chest> getChestsWith(Material aMaterial, int aCount) {
+        ArrayList<Chest> lChests = new ArrayList<Chest>();
+        ArrayList<BuildingBlock> lBlocks = getBlocks(Material.CHEST);
+        for(BuildingBlock lBlock : lBlocks) {
+            BlockState lState = lBlock.position.getBlock(world).getState();
+            if (lState instanceof Chest) {
+                Chest lChest = (Chest) lState;
+                if (InventoryHelper.hasAtleastItems(lChest.getInventory(), aMaterial, aCount)) {
+                    lChests.add(lChest);
+                }
+            }
+        }
+        return lChests;
     }
 }

@@ -30,6 +30,8 @@ public class SettlerForester extends Settler {
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, false));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, false));
         profession.input.add(new ItemStack(Material.SAPLING));
+        profession.input.add(new ItemStack(Material.RED_ROSE));
+        profession.input.add(new ItemStack(Material.YELLOW_FLOWER));
         register(profession);
     }
 
@@ -41,63 +43,64 @@ public class SettlerForester extends Settler {
         fItemsToCollect.add(Material.RED_ROSE);
         fItemsToCollect.add(Material.YELLOW_FLOWER);
         fItemsToCollect.add(Material.LONG_GRASS);
+        fPutInChestItems.add(new PutInChestItem(Material.SAPLING, 10));
+        fPutInChestItems.add(new PutInChestItem(Material.LEAVES, 10));
+        fPutInChestItems.add(new PutInChestItem(Material.RED_ROSE, 10));
+        fPutInChestItems.add(new PutInChestItem(Material.YELLOW_FLOWER, 10));
+        fPutInChestItems.add(new PutInChestItem(Material.LONG_GRASS, 10));
     }
     protected int getSaplingsCount = 0;
     protected int goWalkingCount = 0;
 
     @Override
     public void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
-        /*
-        SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, new Runnable() {
-            @Override
-            public void run() {
-                int r = (new Random().nextInt(3));
-                if (r == 0) {
-                    setItemInHand(new ItemStack(Material.WOOD_DOOR, 1));
-                } else if (r == 1) {
-                    setItemInHand(new ItemStack(Material.WOOD_AXE, 1));
-                } else if (r == 2) {
-                    setItemInHand(new ItemStack(Material.APPLE, 1));
-                }
-                updateToEntity(fEntity);
-            }
-        }, 1);
-        */
         if (isWorkingTime() && getCurrentActivity() == null) {
             BlockPosition lPos = getPosition();
             if (getFrameConfig() == Rotation.FLIPPED) {
                 lPos = getWorkPosition();
             }
-            if (hasAtleastItems(Material.SAPLING, 1)) {
-                ItemStack lItem = getFirstItem(Material.SAPLING);
-                addActivityForNow(
-                        new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
-                        new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
-                        new SettlerActivityPlaceBlock());
-            } else if (hasAtleastItems(Material.RED_ROSE, 1)) {
-                ItemStack lItem = getFirstItem(Material.RED_ROSE);
-                addActivityForNow(
-                        new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
-                        new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
-                        new SettlerActivityPlaceBlock());
-            } else if (hasAtleastItems(Material.YELLOW_FLOWER, 1)) {
-                ItemStack lItem = getFirstItem(Material.YELLOW_FLOWER);
-                addActivityForNow(
-                        new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
-                        new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
-                        new SettlerActivityPlaceBlock());
-            } else {
+            boolean lDone = false;
+            int lCount = 0;
+            do {
+                int lRnd = aAccess.random.nextInt(3);
+                if (lRnd == 0 && hasAtleastItems(Material.SAPLING, 1)) {
+                    ItemStack lItem = getFirstItem(Material.SAPLING);
+                    addActivityForNow(
+                            new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                            new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
+                            new SettlerActivityPlaceBlock());
+                    lDone = true;
+                } else if (lRnd == 1 && hasAtleastItems(Material.RED_ROSE, 1)) {
+                    ItemStack lItem = getFirstItem(Material.RED_ROSE);
+                    addActivityForNow(
+                            new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                            new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
+                            new SettlerActivityPlaceBlock());
+                    lDone = true;
+                } else if (lRnd == 2 && hasAtleastItems(Material.YELLOW_FLOWER, 1)) {
+                    ItemStack lItem = getFirstItem(Material.YELLOW_FLOWER);
+                    addActivityForNow(
+                            new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                            new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
+                            new SettlerActivityPlaceBlock());
+                    lDone = true;
+                }
+                lCount++;
+            } while (!lDone && lCount <= 6);
+            if (!lDone) {
                 if (goWalkingCount > 0) {
                     goWalkingCount--;
                     addActivityForNow(new SettlerActivityFindRandomPath(23, 10, PositionCondition.None));
                 } else if (getSaplingsCount > 0) {
-                    goWalkingCount = 5;
+                    goWalkingCount = 10;
                     getSaplingsCount = 0;
                 } else {
                     getSaplingsCount++;
                     addActivityForNow(
                             new SettlerActivityWalkToTarget(getBedPosition()),
-                            new SettlerActivityGetItemsFromChest(Material.SAPLING, 10, 0));
+                            new SettlerActivityGetItemsFromChest(Material.SAPLING, 10, 0),
+                            new SettlerActivityGetItemsFromChest(Material.RED_ROSE, 10, 0),
+                            new SettlerActivityGetItemsFromChest(Material.YELLOW_FLOWER, 10, 0));
                 }
             }
         }

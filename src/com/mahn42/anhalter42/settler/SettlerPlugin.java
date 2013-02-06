@@ -83,8 +83,9 @@ public class SettlerPlugin extends JavaPlugin {
         settlerSyncTask = new SettlerSynchronTask();
         Framework.plugin.registerSaver(settlerDB);
         Framework.plugin.registerSaver(settlerBuildingDB);
+        Framework.plugin.registerMarkerStorage(new MarkerStorage());
         getServer().getPluginManager().registerEvents(new EventListener(), this);
-        getServer().getScheduler().runTaskTimerAsynchronously(this, new DynMapSettlerRenderer(), 40, 40);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new DynMapSettlerRenderer(), 40, 400);
         getServer().getScheduler().runTaskTimer(this, settlerSyncTask, 10, configSettlerTicks);
         List<World> lWorlds = getServer().getWorlds();
         for (World lWorld : lWorlds) {
