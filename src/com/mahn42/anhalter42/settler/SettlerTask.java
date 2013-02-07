@@ -11,6 +11,7 @@ import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.Framework;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import org.bukkit.World;
 
 /**
@@ -30,11 +31,12 @@ public class SettlerTask implements Runnable {
         return fWorld;
     }
     protected ArrayList<ChunkLoad> fChunkLoads;
-    protected Collection<? extends Settler> fSettlers;
+    protected List<? extends Settler> fSettlers;
     protected ArrayList<Settler> fDiedSettlers;
     protected ArrayList<Settler> fReachedTargetSettlers;
     protected ArrayList<SettlerDamage> fDamagedSettlers;
     protected boolean fIsRunning = false;
+    public long timeOffset = 0;
 
     protected enum ChunkChangeKind {
 
@@ -54,20 +56,28 @@ public class SettlerTask implements Runnable {
                 }
                 if (fAccess.isEnabled() && fAccess.shouldRun && !getWorld().getPlayers().isEmpty()) {
                     long lprofstart = Framework.plugin.getProfiler().beginProfile("settler.task");
-                    fAccess.shouldRun = false;
+                    //fAccess.shouldRun = false;
                     fDiedSettlers = fAccess.retrieveDiedSettlers();
                     for (Settler lSettler : fDiedSettlers) {
                         fAccess.removeSettler(lSettler);
+                        fSettlers.remove(lSettler);
                         lSettler.died();
                     }
-                    fSettlers = fAccess.getSettlers();
-                    fChunkLoads = fAccess.retrieveChunkLoads();
-                    fReachedTargetSettlers = fAccess.retrieveReachedTargetSettlers();
-                    fDamagedSettlers = fAccess.retrieveDamagedSettlers();
+                    if (fSettlers == null || fSettlers.isEmpty()) {
+                        timeOffset = 0;
+                        fSettlers = fAccess.getSettlers();
+                        fChunkLoads = fAccess.retrieveChunkLoads();
+                        fReachedTargetSettlers = fAccess.retrieveReachedTargetSettlers();
+                        fDamagedSettlers = fAccess.retrieveDamagedSettlers();
+                    }
+                    timeOffset += SettlerPlugin.plugin.configSettlerTicks;
+                    fAccess.timeOffset = timeOffset;
                     //if (getWorld().getName().equalsIgnoreCase("world")) {
                     //    Framework.plugin.log("settler", getClass().getSimpleName() + " settler count " + fSettlers.size() + " " + getWorld().getName() + ".");
                     //}
-                    for (Settler lSettler : fSettlers) {
+                    while (!fSettlers.isEmpty()) {
+                        Settler lSettler = fSettlers.get(0);
+                        fSettlers.remove(0);
                         try {
                             /*
                              if (fDiedSettlers.contains(lSettler)) {
@@ -115,7 +125,7 @@ public class SettlerTask implements Runnable {
                             SettlerPlugin.plugin.getLogger().throwing(getClass().getSimpleName(), null, ex);
                         }
                     }
-                    fSettlers = null;
+                    //fSettlers = null;
                     fChunkLoads = null;
                     fReachedTargetSettlers = null;
                     fDamagedSettlers = null;

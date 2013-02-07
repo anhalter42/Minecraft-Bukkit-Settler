@@ -421,7 +421,8 @@ public class Settler {
         if (!hasEntity()) { // for testing?.. only settler working who have an entity
             return;
         }
-        fLivingTicks += SettlerPlugin.plugin.configSettlerTicks;
+        long lBeginProfile = Framework.plugin.getProfiler().beginProfile(getClass().getSimpleName());
+        fLivingTicks += aTask.timeOffset; //SettlerPlugin.plugin.configSettlerTicks;
         runCheckHealth(aTask, aAccess);
         if (!isWorkingTime()) { // no work time :-) we go sleeping
             if (!fSendAtHome && !existsTaggedActivity("Night")) {
@@ -474,7 +475,7 @@ public class Settler {
                     || (lAct.control.condition == SettlerActivity.RunCondition.IfPreviousFaild && !lAct.control.previous_success)
                     || (lAct.control.condition == SettlerActivity.RunCondition.Always)) {
                 lRemove = lAct.run(aAccess, this);
-                lAct.runningTicks += SettlerPlugin.plugin.configSettlerTicks;
+                lAct.runningTicks += aTask.timeOffset; // SettlerPlugin.plugin.configSettlerTicks;
                 if (lRemove || lAct.runningTicks > lAct.maxTicks) {
                     lAct.deactivate(this);
                     fActivityList.remove(lAct);
@@ -495,6 +496,7 @@ public class Settler {
             }
         }
         fDamages.clear();
+        Framework.plugin.getProfiler().endProfile(getClass().getSimpleName(), lBeginProfile);
     }
 
     protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
@@ -503,7 +505,7 @@ public class Settler {
 
     protected void runCheckHealth(SettlerTask aTask, SettlerAccess aAccess) {
         if (hasEntity() && getHealth() < 20 && getFoodLevel() > 15) {
-            fHealthTicks += SettlerPlugin.plugin.configSettlerTicks;
+            fHealthTicks += aTask.timeOffset; // SettlerPlugin.plugin.configSettlerTicks;
             if (fHealthTicks > 30) {
                 fHealthTicks = 0;
                 setHealth(getHealth() + 1);
@@ -944,7 +946,9 @@ public class Settler {
         Location lLoc = getPosition().getLocation(getWorld());
         ItemStack[] lInv = getInventory();
         for (ItemStack lItem : lInv) {
-            getWorld().dropItem(lLoc, lItem);
+            if (lItem != null) {
+                getWorld().dropItem(lLoc, lItem);
+            }
         }
         for (int i = 0; i < lInv.length; i++) {
             lInv[i] = null;

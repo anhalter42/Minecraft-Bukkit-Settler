@@ -43,6 +43,8 @@ public class SettlerActivityFindRandomPath extends SettlerActivity {
     public boolean started = false;
     public boolean found = false;
     public Settler.PositionCondition condition = Settler.PositionCondition.None;
+    
+    protected int currentAttempt = 0;
 
     @Override
     public void serialize(Map<String, Object> aMap) {
@@ -79,14 +81,18 @@ public class SettlerActivityFindRandomPath extends SettlerActivity {
 
     @Override
     public boolean run(SettlerAccess aAccess, Settler aSettler) {
-        if (!started && aSettler.hasEntity()) {
+        if (!started && aSettler.hasEntity() && currentAttempt <= attempts) {
             final Settler lSettler = aSettler;
             final SettlerAccess lAccess = aAccess;
             started = true;
             runTaskLater(new Runnable() {
                 @Override
                 public void run() {
-                    position = lSettler.findRandomWalkToPosition(startPos, lAccess.random, radius, attempts, condition);
+                    currentAttempt++;
+                    position = lSettler.findRandomWalkToPosition(startPos, lAccess.random, radius, 1, condition);
+                    if (position == null) {
+                        started = false;
+                    }
                     found = true;
                 }
             });

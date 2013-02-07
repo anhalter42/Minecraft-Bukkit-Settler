@@ -40,7 +40,7 @@ public class SettlerActivityJump extends SettlerActivity {
             });
             waitTicks = 10;
         } else {
-            waitTicks -= SettlerPlugin.plugin.configSettlerTicks;
+            waitTicks -= aAccess.timeOffset; //SettlerPlugin.plugin.configSettlerTicks;
         }
         return false;
     }

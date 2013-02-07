@@ -131,7 +131,7 @@ public class SettlerActivityWalkToTarget extends SettlerActivityWithPosition {
             BlockPosition lPos = aSettler.getPosition();
             if (lastPos != null) {
                 if (lastPos.equals(lPos) && !lPos.nearly(target, 2)) {
-                    samePosTicks += SettlerPlugin.plugin.configSettlerTicks;
+                    samePosTicks += aAccess.timeOffset; //SettlerPlugin.plugin.configSettlerTicks;
                     if (!doorOpened && samePosTicks > (20 * 2)) { // 2s
                         doorOpened = true;
                         List<BlockPosition> lDoorPoss = aSettler.findBlocks(Material.WOODEN_DOOR, 2);

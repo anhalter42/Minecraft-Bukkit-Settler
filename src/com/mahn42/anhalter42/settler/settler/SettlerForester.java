@@ -66,14 +66,14 @@ public class SettlerForester extends Settler {
                 if (lRnd == 0 && hasAtleastItems(Material.SAPLING, 1)) {
                     ItemStack lItem = getFirstItem(Material.SAPLING);
                     addActivityForNow(
-                            new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                            new SettlerActivityFindRandomPath(lPos, 10, 10, PositionCondition.GrassOrDirtAround),
                             new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
                             new SettlerActivityPlaceBlock());
                     lDone = true;
                 } else if (lRnd == 1 && hasAtleastItems(Material.RED_ROSE, 1)) {
                     ItemStack lItem = getFirstItem(Material.RED_ROSE);
                     addActivityForNow(
-                            new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                            new SettlerActivityFindRandomPath(lPos, 12, 10, PositionCondition.GrassOrDirtAround),
                             new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
                             new SettlerActivityPlaceBlock());
                     lDone = true;

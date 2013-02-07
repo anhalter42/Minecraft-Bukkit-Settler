@@ -88,7 +88,7 @@ public class SettlerActivityFight extends SettlerActivity {
                     }
                 });
             } else {
-                waitTicks -= SettlerPlugin.plugin.configSettlerTicks;
+                waitTicks -= aAccess.timeOffset; // SettlerPlugin.plugin.configSettlerTicks;
             }
         }
         return entityDead;

@@ -40,12 +40,13 @@ public class SettlerAccess {
     //protected HashMap<BlockPosition, Settler> settlersByPosition  = new HashMap<BlockPosition, Settler>();
     protected HashMap<Integer, Settler> settlersByEntityId = new HashMap<Integer, Settler>();
     protected HashMap<String, Settler> settlersByKey = new HashMap<String, Settler>();
+    public long timeOffset;
 
     public SettlerAccess(World aWorld) {
         world = aWorld;
     }
 
-    public Collection<? extends Settler> getSettlers() {
+    public List<? extends Settler> getSettlers() {
         ArrayList<Settler> lResult = new ArrayList<Settler>();
         initialize();
         synchronized (settlers) {
