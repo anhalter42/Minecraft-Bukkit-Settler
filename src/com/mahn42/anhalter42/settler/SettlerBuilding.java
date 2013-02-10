@@ -57,7 +57,7 @@ public class SettlerBuilding extends Building {
         if (basicProfession != null && !basicProfession.isEmpty()) {
             return (super.getIconName() + "." + basicProfession).toLowerCase();
         } else {
-            return super.getIconName();
+            return super.getIconName().toLowerCase();
         }
     }
 

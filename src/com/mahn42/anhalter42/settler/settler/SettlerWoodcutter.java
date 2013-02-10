@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
@@ -57,7 +58,7 @@ public class SettlerWoodcutter extends Settler {
                 lPos = getWorkPosition();
             }
             addActivityForNow(
-                    new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.Tree),
+                    new SettlerActivityFindRandomPath(lPos, SettlerPlugin.plugin.configDefaultPathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.Tree),
                     new SettlerActivityWoodcutterBreakLog());
         }
         super.runInternal(aTask, aAccess);

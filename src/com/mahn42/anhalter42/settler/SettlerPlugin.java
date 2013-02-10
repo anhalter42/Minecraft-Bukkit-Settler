@@ -46,6 +46,16 @@ public class SettlerPlugin extends JavaPlugin {
     public int configSettlerTicks = 10;  // first a little bit slower
     
     public float configSettlerSpeed = 0.88f;
+    public int configDefaultPathRadius = 15;
+    public int configMiddlePathRadius = 10;
+    public int configWidePathRadius = 23;
+    
+    public int configDefaultPathAttempts = 10;
+    public int configDefaultCollectItemRadius = 10;
+    public int configWideCollectItemRadius = 23;
+    public int configDefaultFindEntityRadius = 42;
+    
+    public int configSettlersPerRun = 2;
     
     public static SettlerPlugin plugin;
     protected WorldDBList<SettlerDB> settlerDB;

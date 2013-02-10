@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
@@ -53,10 +54,10 @@ public class SettlerShepherd extends Settler {
             int lRadius = 10;
             if (getFrameConfig() == Rotation.FLIPPED) {
                 lPos = getWorkPosition();
-                lRadius = 23;
+                lRadius = SettlerPlugin.plugin.configDefaultPathRadius;
             }
             if (!existsTaggedActivity("FindSheep")) {
-                Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), 42, EntityType.SHEEP);
+                Collection<SettlerAccess.EntityState> lStates = aAccess.getEntityStatesNearby(getPosition(), SettlerPlugin.plugin.configDefaultFindEntityRadius, EntityType.SHEEP);
                 if (!lStates.isEmpty()) {
                     boolean lFound = false;
                     for (SettlerAccess.EntityState lState : lStates) {
@@ -77,15 +78,15 @@ public class SettlerShepherd extends Settler {
                     }
                     if (!lFound) {
                         // walk a bit
-                        addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, 10, PositionCondition.None));
+                        addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
                     }
                 } else {
                     // walk a bit
-                    addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, 10, PositionCondition.None));
+                    addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
                 }
             } else {
                 // walk a bit
-                addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, 10, PositionCondition.None));
+                addActivityForNow(new SettlerActivityFindRandomPath(lPos, lRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
             }
         }
 

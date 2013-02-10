@@ -75,7 +75,9 @@ public class SettlerTask implements Runnable {
                     //if (getWorld().getName().equalsIgnoreCase("world")) {
                     //    Framework.plugin.log("settler", getClass().getSimpleName() + " settler count " + fSettlers.size() + " " + getWorld().getName() + ".");
                     //}
-                    while (!fSettlers.isEmpty()) {
+                    int lCount = 0;
+                    while (!fSettlers.isEmpty() && lCount < SettlerPlugin.plugin.configSettlersPerRun) {
+                        lCount++;
                         Settler lSettler = fSettlers.get(0);
                         fSettlers.remove(0);
                         try {
@@ -85,7 +87,7 @@ public class SettlerTask implements Runnable {
                              fDiedSettlers.remove(lSettler);
                              }
                              */
-                            if (fReachedTargetSettlers.contains(lSettler)) {
+                            if (fReachedTargetSettlers != null && fReachedTargetSettlers.contains(lSettler)) {
                                 lSettler.targetReached(fAccess);
                                 fReachedTargetSettlers.remove(lSettler);
                             }
@@ -126,10 +128,10 @@ public class SettlerTask implements Runnable {
                         }
                     }
                     //fSettlers = null;
-                    fChunkLoads = null;
-                    fReachedTargetSettlers = null;
-                    fDamagedSettlers = null;
-                    fDiedSettlers = null;
+                    //fChunkLoads = null;
+                    //fReachedTargetSettlers = null;
+                    //fDamagedSettlers = null;
+                    //fDiedSettlers = null;
                     Framework.plugin.getProfiler().endProfile("settler.task", lprofstart);
                 }
             } finally {

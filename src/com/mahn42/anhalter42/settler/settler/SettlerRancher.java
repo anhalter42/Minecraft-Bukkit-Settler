@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.anhalter42.settler.SettlerTask;
 import org.bukkit.Material;
@@ -42,7 +43,7 @@ public class SettlerRancher extends Settler {
     protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(
-                    new SettlerActivityFindRandomPath(getWorkPosition(), 23, 10, PositionCondition.None));
+                    new SettlerActivityFindRandomPath(getWorkPosition(), SettlerPlugin.plugin.configDefaultPathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
         }
         super.runInternal(aTask, aAccess);
     }

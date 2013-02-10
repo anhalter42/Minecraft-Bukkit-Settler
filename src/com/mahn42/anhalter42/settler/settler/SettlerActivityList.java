@@ -122,7 +122,7 @@ public class SettlerActivityList {
 
     public boolean existsTag(String aTag) {
         for(SettlerActivity lAct : fActivities) {
-            if (lAct.control.tag == aTag) {
+            if (lAct.control.tag != null && lAct.control.tag.equalsIgnoreCase(aTag)) {
                 return true;
             }
         }

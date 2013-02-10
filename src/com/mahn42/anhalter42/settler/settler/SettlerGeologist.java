@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
@@ -156,7 +157,7 @@ public class SettlerGeologist extends Settler {
         public SettlerActivityGeologistThinking() {
             type = TYPE;
         }
-        public int walkRadius = 23;
+        public int walkRadius = SettlerPlugin.plugin.configDefaultPathRadius;
 
         @Override
         public boolean run(SettlerAccess aAccess, Settler aSettler) {
@@ -166,7 +167,7 @@ public class SettlerGeologist extends Settler {
                     if (((SettlerGeologist) aSettler).dowalk > 0) {
                         ((SettlerGeologist) aSettler).dowalk--;
                     }
-                    aSettler.addActivityForNext(new SettlerActivityFindRandomPath(walkRadius, 10, PositionCondition.NaturalBlocksAround));
+                    aSettler.addActivityForNext(new SettlerActivityFindRandomPath(walkRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.NaturalBlocksAround));
                     lFound = true;
                 } else {
                     ((SettlerGeologist) aSettler).dowalk = 2;

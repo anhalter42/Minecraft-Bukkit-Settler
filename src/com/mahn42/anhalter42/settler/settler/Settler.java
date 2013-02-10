@@ -421,7 +421,7 @@ public class Settler {
         if (!hasEntity()) { // for testing?.. only settler working who have an entity
             return;
         }
-        long lBeginProfile = Framework.plugin.getProfiler().beginProfile(getClass().getSimpleName());
+        long lBeginProfile = Framework.plugin.getProfiler().beginProfile("settler." + getProfession() + ".run");
         fLivingTicks += aTask.timeOffset; //SettlerPlugin.plugin.configSettlerTicks;
         runCheckHealth(aTask, aAccess);
         if (!isWorkingTime()) { // no work time :-) we go sleeping
@@ -496,7 +496,7 @@ public class Settler {
             }
         }
         fDamages.clear();
-        Framework.plugin.getProfiler().endProfile(getClass().getSimpleName(), lBeginProfile);
+        Framework.plugin.getProfiler().endProfile("settler." + getProfession() + ".run", lBeginProfile);
     }
 
     protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {

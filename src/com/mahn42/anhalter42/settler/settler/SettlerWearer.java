@@ -87,7 +87,7 @@ public class SettlerWearer extends Settler {
             if (lLodges.isEmpty()) {
                 Framework.plugin.log("settler", "wearer " + getSettlerName() + " can not find a lodge!");
                 addActivityForNow(
-                        new SettlerActivityFindRandomPath(getWorkPosition(), 23, 10, PositionCondition.None));
+                        new SettlerActivityFindRandomPath(getWorkPosition(), SettlerPlugin.plugin.configDefaultPathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
             } else {
                 boolean lFound = false;
                 do {
@@ -143,6 +143,8 @@ public class SettlerWearer extends Settler {
                                     if (!lMats.isEmpty()) {
                                         lFound = false;
                                         ArrayList<ChestCollector> lFroms = new ArrayList<ChestCollector>();
+                                        lShelfs.add(getHomeBuilding());
+                                        /*
                                         if (lShelfs.isEmpty()) {
                                             SettlerBuilding lHome = getHomeBuilding();
                                             ChestCollector lCol = new ChestCollector(lHome, lHome.getBlock("chest").position);
@@ -154,7 +156,7 @@ public class SettlerWearer extends Settler {
                                             if (!lCol.materials.isEmpty()) {
                                                 lFroms.add(lCol);
                                             }
-                                        } else {
+                                        } else {*/
                                             for (SettlerBuilding lShelf : lShelfs) {
                                                 ChestCollector lCol = new ChestCollector(lShelf, lShelf.edge1.getMidPoint(lShelf.edge2));
                                                 for (Material lMat : lMats) {
@@ -166,7 +168,7 @@ public class SettlerWearer extends Settler {
                                                     lFroms.add(lCol);
                                                 }
                                             }
-                                        }
+                                        //}
                                         if (!lFroms.isEmpty()) {
                                             lFound = true;
                                             for (Material lMat : lMats) {
@@ -214,7 +216,7 @@ public class SettlerWearer extends Settler {
                 if (!lFound) {
                     Framework.plugin.log("settler", "wearer " + getSettlerName() + " can not find a lodge with in/output!");
                     addActivityForNow(
-                            new SettlerActivityFindRandomPath(getWorkPosition(), 23, 10, PositionCondition.None));
+                            new SettlerActivityFindRandomPath(getWorkPosition(), SettlerPlugin.plugin.configDefaultPathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
                 }
             }
         }

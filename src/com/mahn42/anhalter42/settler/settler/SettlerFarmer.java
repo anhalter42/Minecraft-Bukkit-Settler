@@ -5,6 +5,7 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
+import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.anhalter42.settler.SettlerProfession;
 import com.mahn42.anhalter42.settler.SettlerTask;
 import com.mahn42.framework.BlockPosition;
@@ -115,7 +116,7 @@ public class SettlerFarmer extends Settler {
     protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(
-                    new SettlerActivityFindRandomPath(getWorkPosition(), 23, 10, PositionCondition.FarmingAround),
+                    new SettlerActivityFindRandomPath(getWorkPosition(), SettlerPlugin.plugin.configDefaultPathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.FarmingAround),
                     new SettlerActivityFarmerBreakBlock());
         }
         super.runInternal(aTask, aAccess);

@@ -37,7 +37,7 @@ public class SettlerForester extends Settler {
 
     public SettlerForester() {
         super(typeName);
-        fCollectItemRadius = 23;
+        fCollectItemRadius = SettlerPlugin.plugin.configWideCollectItemRadius;
         fItemsToCollect.add(Material.SAPLING);
         fItemsToCollect.add(Material.LEAVES);
         fItemsToCollect.add(Material.RED_ROSE);
@@ -66,21 +66,21 @@ public class SettlerForester extends Settler {
                 if (lRnd == 0 && hasAtleastItems(Material.SAPLING, 1)) {
                     ItemStack lItem = getFirstItem(Material.SAPLING);
                     addActivityForNow(
-                            new SettlerActivityFindRandomPath(lPos, 10, 10, PositionCondition.GrassOrDirtAround),
+                            new SettlerActivityFindRandomPath(lPos, SettlerPlugin.plugin.configMiddlePathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.GrassOrDirtAround),
                             new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
                             new SettlerActivityPlaceBlock());
                     lDone = true;
                 } else if (lRnd == 1 && hasAtleastItems(Material.RED_ROSE, 1)) {
                     ItemStack lItem = getFirstItem(Material.RED_ROSE);
                     addActivityForNow(
-                            new SettlerActivityFindRandomPath(lPos, 12, 10, PositionCondition.GrassOrDirtAround),
+                            new SettlerActivityFindRandomPath(lPos, SettlerPlugin.plugin.configMiddlePathRadius + 2, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.GrassOrDirtAround),
                             new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
                             new SettlerActivityPlaceBlock());
                     lDone = true;
                 } else if (lRnd == 2 && hasAtleastItems(Material.YELLOW_FLOWER, 1)) {
                     ItemStack lItem = getFirstItem(Material.YELLOW_FLOWER);
                     addActivityForNow(
-                            new SettlerActivityFindRandomPath(lPos, 23, 10, PositionCondition.GrassOrDirtAround),
+                            new SettlerActivityFindRandomPath(lPos, SettlerPlugin.plugin.configDefaultPathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.GrassOrDirtAround),
                             new SettlerActivityTakeInHand(lItem.getType(), lItem.getData().getData()),
                             new SettlerActivityPlaceBlock());
                     lDone = true;
@@ -90,7 +90,7 @@ public class SettlerForester extends Settler {
             if (!lDone) {
                 if (goWalkingCount > 0) {
                     goWalkingCount--;
-                    addActivityForNow(new SettlerActivityFindRandomPath(23, 10, PositionCondition.None));
+                    addActivityForNow(new SettlerActivityFindRandomPath(SettlerPlugin.plugin.configDefaultPathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
                 } else if (getSaplingsCount > 0) {
                     goWalkingCount = 10;
                     getSaplingsCount = 0;
