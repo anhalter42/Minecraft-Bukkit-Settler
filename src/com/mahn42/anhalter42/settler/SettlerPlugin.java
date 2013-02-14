@@ -113,6 +113,16 @@ public class SettlerPlugin extends JavaPlugin {
 
     private void readSettlerConfig() {
         FileConfiguration lConfig = getConfig();
+        configSettlerTicks = lConfig.getInt("settlerTicks", configSettlerTicks);
+        configSettlersPerRun = lConfig.getInt("settlersPerRun", configSettlersPerRun);
+        configSettlerSpeed = (float) lConfig.getDouble("settlerSpeed", configSettlerSpeed);
+        configDefaultPathRadius = lConfig.getInt("defaultPathRadius", configDefaultPathRadius);
+        configMiddlePathRadius = lConfig.getInt("middlePathRadius", configMiddlePathRadius);
+        configWidePathRadius = lConfig.getInt("widePathRadius", configWidePathRadius);
+        configDefaultPathAttempts = lConfig.getInt("defaultPathAttempts", configDefaultPathAttempts);
+        configDefaultCollectItemRadius = lConfig.getInt("defaultCollectItemRadius", configDefaultCollectItemRadius);
+        configWideCollectItemRadius = lConfig.getInt("wideCollectItemRadius", configWideCollectItemRadius);
+        configDefaultFindEntityRadius = lConfig.getInt("defaultFindEntityRadius", configDefaultFindEntityRadius);
     }
 
     public SettlerAccess getSettlerAccess(World aWorld) {

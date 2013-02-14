@@ -109,34 +109,37 @@ public class SettlerBuilding extends Building {
             Collection<? extends Settler> lSettlers;
             lSettlers = getSettlers();
             if (lSignPos != null) {
-                Sign lSign = (Sign) lSignPos.getBlock(world).getState();
-                lSign.setLine(0, basicProfession);
-                lSign.setLine(1, "");
-                lSign.setLine(2, "");
-                lSign.setLine(3, "");
-                if (lSettlers.isEmpty()) {
-                    lSign.setLine(1, "no settler!");
-                } else {
-                    if (settlerCount == 1) {
+                BlockState lState = lSignPos.getBlock(world).getState();
+                if (lState instanceof Sign) {
+                    Sign lSign = (Sign) lState;
+                    lSign.setLine(0, basicProfession);
+                    lSign.setLine(1, "");
+                    lSign.setLine(2, "");
+                    lSign.setLine(3, "");
+                    if (lSettlers.isEmpty()) {
+                        lSign.setLine(1, "no settler!");
+                    } else {
+                        if (settlerCount == 1) {
+                            for (Settler lSettler : lSettlers) {
+                                lSign.setLine(1, lSettler.getSettlerName());
+                                break;
+                            }
+                        } else {
+                            if (settlerCount == lSettlers.size()) {
+                                lSign.setLine(1, "all settlers alive");
+                            } else {
+                                lSign.setLine(1, lSettlers.size() + " settlers of " + settlerCount);
+                            }
+                        }
+                    }
+                    if (!lSettlers.isEmpty()) {
                         for (Settler lSettler : lSettlers) {
-                            lSign.setLine(1, lSettler.getSettlerName());
+                            lSign.setLine(2, lSettler.getFrameConfigName());
                             break;
                         }
-                    } else {
-                        if (settlerCount == lSettlers.size()) {
-                            lSign.setLine(1, "all settlers alive");
-                        } else {
-                            lSign.setLine(1, lSettlers.size() + " settlers of " + settlerCount);
-                        }
                     }
+                    lSign.update();
                 }
-                if (!lSettlers.isEmpty()) {
-                    for (Settler lSettler : lSettlers) {
-                        lSign.setLine(2, lSettler.getFrameConfigName());
-                        break;
-                    }
-                }
-                lSign.update();
             }
             taskCheckCount--;
             if (taskCheckCount <= 0 && lSettlers.size() != settlerCount) {
@@ -145,11 +148,11 @@ public class SettlerBuilding extends Building {
             }
         }
     }
-    
+
     public boolean hasChestWith(Material aMaterial, int aCount) {
         boolean lFound = false;
         ArrayList<BuildingBlock> lBlocks = getBlocks(Material.CHEST);
-        for(BuildingBlock lBlock : lBlocks) {
+        for (BuildingBlock lBlock : lBlocks) {
             BlockState lState = lBlock.position.getBlock(world).getState();
             if (lState instanceof Chest) {
                 Chest lChest = (Chest) lState;
@@ -165,7 +168,7 @@ public class SettlerBuilding extends Building {
     public ArrayList<Chest> getChestsWith(Material aMaterial, int aCount) {
         ArrayList<Chest> lChests = new ArrayList<Chest>();
         ArrayList<BuildingBlock> lBlocks = getBlocks(Material.CHEST);
-        for(BuildingBlock lBlock : lBlocks) {
+        for (BuildingBlock lBlock : lBlocks) {
             BlockState lState = lBlock.position.getBlock(world).getState();
             if (lState instanceof Chest) {
                 Chest lChest = (Chest) lState;

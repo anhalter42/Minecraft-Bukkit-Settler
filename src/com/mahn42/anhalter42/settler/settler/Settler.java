@@ -555,7 +555,7 @@ public class Settler {
                         for (BlockPosition lChestPos : findChests) {
                             Chest lChest = (Chest) lChestPos.getBlock(getWorld()).getState();
                             Inventory lInv = lChest.getInventory();
-                            if (InventoryHelper.hasAtleastItems(lInv, lItem.item.getType(), 1)) {
+                            if (lInv != null && InventoryHelper.hasAtleastItems(lInv, lItem.item.getType(), 1)) {
                                 List<ItemStack> lRemoved = InventoryHelper.removeItemsByMaterial(lInv, lItem.item.getType(), 1);
                                 if (!lRemoved.isEmpty()) {
                                     setArmor(lRemoved.get(0));

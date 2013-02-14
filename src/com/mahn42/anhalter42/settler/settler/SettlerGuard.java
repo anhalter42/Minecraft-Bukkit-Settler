@@ -50,6 +50,11 @@ public class SettlerGuard extends Settler {
         fItemsToCollect.add(Material.LEATHER_HELMET);
         fItemsToCollect.add(Material.LEATHER_CHESTPLATE);
         fItemsToCollect.add(Material.LEATHER_LEGGINGS);
+        fItemsToCollect.add(Material.BONE);
+        fItemsToCollect.add(Material.ENDER_PEARL);
+        fItemsToCollect.add(Material.STRING);
+        fItemsToCollect.add(Material.EGG);
+        fItemsToCollect.add(Material.BOW);
         fPutInChestItems.add(new PutInChestItem(Material.IRON_SWORD, 0));
         fPutInChestItems.add(new PutInChestItem(Material.IRON_BOOTS, 0));
         fPutInChestItems.add(new PutInChestItem(Material.IRON_HELMET, 0));
@@ -60,6 +65,11 @@ public class SettlerGuard extends Settler {
         fPutInChestItems.add(new PutInChestItem(Material.LEATHER_HELMET, 0));
         fPutInChestItems.add(new PutInChestItem(Material.LEATHER_CHESTPLATE, 0));
         fPutInChestItems.add(new PutInChestItem(Material.LEATHER_LEGGINGS, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.BONE, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.ENDER_PEARL, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.STRING, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.EGG, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.BOW, 0));
         fWorkStart = 12000; // 20:00
         fWorkEnd = 0; // 08:00
     }

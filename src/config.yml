@@ -1,0 +1,13 @@
+## YAML Template.
+---
+settlerTicks: 10
+settlersPerRun: 2
+settlerSpeed: 0.88
+defaultPathRadius: 15
+middlePathRadius: 10
+widePathRadius: 23
+defaultPathAttempts: 10
+defaultCollectItemRadius: 10
+wideCollectItemRadius: 23
+defaultFindEntityRadius: 42
+    
