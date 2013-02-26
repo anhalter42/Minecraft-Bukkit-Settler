@@ -29,14 +29,24 @@ public class SettlerRancher extends Settler {
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_CHESTPLATE, false));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, true));
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, true));
+        profession.input.add(new ItemStack(Material.WHEAT));
+        profession.input.add(new ItemStack(Material.CARROT_ITEM));
         profession.output.add(new ItemStack(Material.APPLE));
+        profession.output.add(new ItemStack(Material.RAW_BEEF));
+        profession.output.add(new ItemStack(Material.LEATHER));
         register(profession);
     }
 
     public SettlerRancher() {
         super(typeName);
+        fItemsToCollect.add(Material.WHEAT);
+        fItemsToCollect.add(Material.CARROT_ITEM);
         fItemsToCollect.add(Material.APPLE);
+        fItemsToCollect.add(Material.RAW_BEEF);
+        fItemsToCollect.add(Material.LEATHER);
         fPutInChestItems.add(new PutInChestItem(Material.APPLE, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.RAW_BEEF, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.LEATHER, 0));
     }
 
     @Override

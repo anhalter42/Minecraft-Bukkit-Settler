@@ -96,13 +96,13 @@ public class SettlerShepherd extends Settler {
     public String getFrameConfigName() {
         switch (fFrameConfig) {
             case NONE:
-                return "shear sheeps";
+                return "everywhere";
             case COUNTER_CLOCKWISE:
-                return "shear sheeps";
+                return "everywhere";
             case FLIPPED:
-                return "shear sheeps nearly";
+                return "nearly";
             case CLOCKWISE:
-                return "shear sheeps";
+                return "everywhere";
             default:
                 return "";
         }

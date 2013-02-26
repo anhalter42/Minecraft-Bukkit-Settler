@@ -109,13 +109,13 @@ public class SettlerWoodcutter extends Settler {
     public String getFrameConfigName() {
         switch (fFrameConfig) {
             case NONE:
-                return "chop down everywhere";
+                return "everywhere";
             case COUNTER_CLOCKWISE:
-                return "chop down everywhere";
+                return "everywhere";
             case FLIPPED:
-                return "chop down near home";
+                return "nearly";
             case CLOCKWISE:
-                return "chop down everywhere";
+                return "everywhere";
             default:
                 return "";
         }

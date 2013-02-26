@@ -62,7 +62,7 @@ public class SettlerForester extends Settler {
             boolean lDone = false;
             int lCount = 0;
             do {
-                int lRnd = aAccess.random.nextInt(3);
+                int lRnd = aAccess.random.nextInt(4);
                 if (lRnd == 0 && hasAtleastItems(Material.SAPLING, 1)) {
                     ItemStack lItem = getFirstItem(Material.SAPLING);
                     addActivityForNow(
@@ -111,13 +111,13 @@ public class SettlerForester extends Settler {
     public String getFrameConfigName() {
         switch (fFrameConfig) {
             case NONE:
-                return "plant everywhere";
+                return "everywhere";
             case COUNTER_CLOCKWISE:
-                return "plant everywhere";
+                return "everywhere";
             case FLIPPED:
-                return "plant near home";
+                return "near home";
             case CLOCKWISE:
-                return "plant everywhere";
+                return "everywhere";
             default:
                 return "";
         }

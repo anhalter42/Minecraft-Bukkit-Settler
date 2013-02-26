@@ -262,4 +262,9 @@ public class SettlerFarmer extends Settler {
             return true;
         }
     }
+
+    @Override
+    public String getFrameConfigName() {
+        return "farming";
+    }
 }

@@ -179,14 +179,27 @@ public class SettlerAccess {
 
     public Collection<EntityState> getEntityStatesNearby(BlockPosition aPos, int aRadius, Collection<Material> aMats) {
         ArrayList<EntityState> lRes = new ArrayList<EntityState>();
+        ArrayList<EntityState> lFounds = new ArrayList<EntityState>();
         synchronized (entitiyStates) {
             for (EntityState lState : entitiyStates.values()) {
                 if (lState.type.equals(EntityType.DROPPED_ITEM)
                         && (aMats == null || aMats.contains(lState.material))
                         && lState.pos.nearly(aPos, aRadius)) {
-                    lRes.add(lState);
+                    lFounds.add(lState);
                 }
             }
+        }
+        while (!lFounds.isEmpty()) {
+            double lDist = Double.MAX_VALUE;
+            EntityState lStateNear = lFounds.get(0);
+            for (EntityState lState : lFounds) {
+                double distance = aPos.distance(lState.pos);
+                if (distance < lDist) {
+                    lStateNear = lState;
+                }
+            }
+            lRes.add(lStateNear);
+            lFounds.remove(lStateNear);
         }
         return lRes;
     }
@@ -199,9 +212,8 @@ public class SettlerAccess {
             }
         }
     }
-
     public boolean shouldRun = false;
-    
+
     public void runSynchron() {
         shouldRun = true;
         List<Entity> lEntities = world.getEntities();
@@ -293,13 +305,12 @@ public class SettlerAccess {
             }
         }
     }
-
     protected boolean fEnabled = true;
-    
+
     public boolean isEnabled() {
         return fEnabled;
     }
-    
+
     public void enable() {
         fEnabled = true;
     }
@@ -311,7 +322,7 @@ public class SettlerAccess {
     public Collection<Settler> getSettlers(String aName) {
         ArrayList<Settler> lRes = new ArrayList<Settler>();
         Collection<? extends Settler> lSettlers = getSettlers();
-        for(Settler lSettler : lSettlers) {
+        for (Settler lSettler : lSettlers) {
             if (aName.equalsIgnoreCase(lSettler.getSettlerName())) {
                 lRes.add(lSettler);
             }
