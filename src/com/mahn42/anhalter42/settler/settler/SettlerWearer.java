@@ -118,9 +118,14 @@ public class SettlerWearer extends Settler {
                                             addActivityForNow(
                                                     new SettlerActivityWalkToTarget(getBedPosition()));
                                         } else {
-                                            addActivityForNow(
-                                                    new SettlerActivityWalkToTarget(
-                                                    lShelfs.get(aAccess.random.nextInt(lShelfs.size())).getBlock("chest1.1").position));
+                                            BuildingBlock lChestblock = lShelfs.get(aAccess.random.nextInt(lShelfs.size())).getBlock("chest1.1");
+                                            if (lChestblock != null) {
+                                                addActivityForNow(
+                                                        new SettlerActivityWalkToTarget(lChestblock.position));
+                                            } else {
+                                                addActivityForNow(
+                                                        new SettlerActivityWalkToTarget(getBedPosition()));
+                                            }
                                         }
                                         for (Material lMat : lMats) {
                                             addActivityForNow(
@@ -145,29 +150,29 @@ public class SettlerWearer extends Settler {
                                         ArrayList<ChestCollector> lFroms = new ArrayList<ChestCollector>();
                                         lShelfs.add(getHomeBuilding());
                                         /*
-                                        if (lShelfs.isEmpty()) {
-                                            SettlerBuilding lHome = getHomeBuilding();
-                                            ChestCollector lCol = new ChestCollector(lHome, lHome.getBlock("chest").position);
+                                         if (lShelfs.isEmpty()) {
+                                         SettlerBuilding lHome = getHomeBuilding();
+                                         ChestCollector lCol = new ChestCollector(lHome, lHome.getBlock("chest").position);
+                                         for (Material lMat : lMats) {
+                                         if (lHome.hasChestWith(lMat, 1)) {
+                                         lCol.materials.add(lMat);
+                                         }
+                                         }
+                                         if (!lCol.materials.isEmpty()) {
+                                         lFroms.add(lCol);
+                                         }
+                                         } else {*/
+                                        for (SettlerBuilding lShelf : lShelfs) {
+                                            ChestCollector lCol = new ChestCollector(lShelf, lShelf.edge1.getMidPoint(lShelf.edge2));
                                             for (Material lMat : lMats) {
-                                                if (lHome.hasChestWith(lMat, 1)) {
+                                                if (lShelf.hasChestWith(lMat, 1)) {
                                                     lCol.materials.add(lMat);
                                                 }
                                             }
                                             if (!lCol.materials.isEmpty()) {
                                                 lFroms.add(lCol);
                                             }
-                                        } else {*/
-                                            for (SettlerBuilding lShelf : lShelfs) {
-                                                ChestCollector lCol = new ChestCollector(lShelf, lShelf.edge1.getMidPoint(lShelf.edge2));
-                                                for (Material lMat : lMats) {
-                                                    if (lShelf.hasChestWith(lMat, 1)) {
-                                                        lCol.materials.add(lMat);
-                                                    }
-                                                }
-                                                if (!lCol.materials.isEmpty()) {
-                                                    lFroms.add(lCol);
-                                                }
-                                            }
+                                        }
                                         //}
                                         if (!lFroms.isEmpty()) {
                                             lFound = true;

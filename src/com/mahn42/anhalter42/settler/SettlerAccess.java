@@ -268,6 +268,15 @@ public class SettlerAccess {
                 }
             }
         }
+        synchronized (diedSettler) {
+            diedSettler.clear();
+        }
+        synchronized (reachedTargetSettler) {
+            reachedTargetSettler.clear();
+        }
+        synchronized (entitiyStates) {
+            entitiyStates.clear();
+        }
     }
     final protected ArrayList<Settler> diedSettler = new ArrayList<Settler>();
 
@@ -398,60 +407,61 @@ public class SettlerAccess {
         }
     }
 
-    protected static class ChunkLoad {
+    /*
+     protected static class ChunkLoad {
 
-        public enum Kind {
+     public enum Kind {
 
-            Loaded,
-            Unloaded
-        }
-        public int x;
-        public int z;
-        public Kind kind = Kind.Loaded;
+     Loaded,
+     Unloaded
+     }
+     public int x;
+     public int z;
+     public Kind kind = Kind.Loaded;
 
-        public ChunkLoad(int aX, int aZ, Kind aKind) {
-            x = aX;
-            z = aZ;
-            kind = aKind;
-        }
-    }
-    final protected ArrayList<ChunkLoad> chunkLoads = new ArrayList<ChunkLoad>();
+     public ChunkLoad(int aX, int aZ, Kind aKind) {
+     x = aX;
+     z = aZ;
+     kind = aKind;
+     }
+     }
+     final protected ArrayList<ChunkLoad> chunkLoads = new ArrayList<ChunkLoad>();
 
-    public void addChunkUnLoad(int aX, int aZ) {
-        //SettlerPlugin.plugin.getLogger().info("chunk unloaded " + aX + " " + aZ);
-        synchronized (chunkLoads) {
-            for (ChunkLoad lLoad : chunkLoads) {
-                if (lLoad.x == aX && lLoad.z == aZ) {
-                    lLoad.kind = ChunkLoad.Kind.Unloaded;
-                    return;
-                }
-            }
-            chunkLoads.add(new ChunkLoad(aX, aZ, ChunkLoad.Kind.Unloaded));
-        }
-    }
+     public void addChunkUnLoad(int aX, int aZ) {
+     //SettlerPlugin.plugin.getLogger().info("chunk unloaded " + aX + " " + aZ);
+     synchronized (chunkLoads) {
+     for (ChunkLoad lLoad : chunkLoads) {
+     if (lLoad.x == aX && lLoad.z == aZ) {
+     lLoad.kind = ChunkLoad.Kind.Unloaded;
+     return;
+     }
+     }
+     chunkLoads.add(new ChunkLoad(aX, aZ, ChunkLoad.Kind.Unloaded));
+     }
+     }
 
-    public void addChunkLoad(int aX, int aZ) {
-        //SettlerPlugin.plugin.getLogger().info("chunk loaded " + aX + " " + aZ);
-        synchronized (chunkLoads) {
-            for (ChunkLoad lLoad : chunkLoads) {
-                if (lLoad.x == aX && lLoad.z == aZ) {
-                    lLoad.kind = ChunkLoad.Kind.Loaded;
-                    return;
-                }
-            }
-            chunkLoads.add(new ChunkLoad(aX, aZ, ChunkLoad.Kind.Loaded));
-        }
-    }
+     public void addChunkLoad(int aX, int aZ) {
+     //SettlerPlugin.plugin.getLogger().info("chunk loaded " + aX + " " + aZ);
+     synchronized (chunkLoads) {
+     for (ChunkLoad lLoad : chunkLoads) {
+     if (lLoad.x == aX && lLoad.z == aZ) {
+     lLoad.kind = ChunkLoad.Kind.Loaded;
+     return;
+     }
+     }
+     chunkLoads.add(new ChunkLoad(aX, aZ, ChunkLoad.Kind.Loaded));
+     }
+     }
 
-    public ArrayList<ChunkLoad> retrieveChunkLoads() {
-        ArrayList<ChunkLoad> lLoads = new ArrayList<ChunkLoad>();
-        synchronized (chunkLoads) {
-            lLoads.addAll(chunkLoads);
-            chunkLoads.clear();
-        }
-        return lLoads;
-    }
-
+     public ArrayList<ChunkLoad> retrieveChunkLoads() {
+     ArrayList<ChunkLoad> lLoads = new ArrayList<ChunkLoad>();
+     synchronized (chunkLoads) {
+     lLoads.addAll(chunkLoads);
+     chunkLoads.clear();
+     }
+     return lLoads;
+     }
+     */
     public ArrayList<Settler> retrieveDiedSettlers() {
         ArrayList<Settler> lSettlers = new ArrayList<Settler>();
         synchronized (diedSettler) {

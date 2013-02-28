@@ -44,6 +44,7 @@ public class EventListener implements Listener {
     /*
      * World events
      */
+        /*
     @EventHandler
     public void chunkLoad(ChunkLoadEvent aEvent) {
         World lWorld = aEvent.getWorld();
@@ -59,6 +60,7 @@ public class EventListener implements Listener {
         SettlerAccess lAccess = SettlerPlugin.plugin.getSettlerAccess(lWorld);
         lAccess.addChunkUnLoad(lChunk.getX(), lChunk.getZ());
     }
+        */
 
     /*
      @EventHandler(ignoreCancelled = true)
@@ -118,6 +120,7 @@ public class EventListener implements Listener {
         }
     }
 
+    /*
     @EventHandler
     public void onEntityDeath(EntityDeathEvent aEvent) {
         //SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + aEvent.getClass().getName());
@@ -132,6 +135,7 @@ public class EventListener implements Listener {
     public void onEntityTarget(EntityTargetEvent aEvent) {
         //SettlerPlugin.plugin.getLogger().info(aEvent.getEntityType() + aEvent.getClass().getName());
     }
+    */
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent aEvent) {
