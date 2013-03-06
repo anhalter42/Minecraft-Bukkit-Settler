@@ -15,37 +15,38 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author andre
  */
-public class SettlerRancher extends Settler {
+public class SettlerCarpenter extends Settler {
     
-    public static final String typeName = "Rancher";
+    public static final String typeName = "Charcoalburner";
     public static final SettlerProfession profession = new SettlerProfession();
 
     public static void register() {
-        profession.settlerClass = SettlerRancher.class;
+        profession.settlerClass = SettlerCharcoalburner.class;
         profession.name = typeName;
-        profession.frameMaterial = Material.FENCE;
+        profession.frameMaterial = Material.WOOD;
         profession.armor.add(new SettlerProfession.Item(Material.LEATHER_HELMET, false));
-        profession.armor.add(new SettlerProfession.Item(Material.LEATHER_CHESTPLATE, false));
-        profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, true));
-        profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, true));
-        profession.input.add(new ItemStack(Material.WHEAT));
-        profession.input.add(new ItemStack(Material.CARROT_ITEM));
+        profession.armor.add(new SettlerProfession.Item(Material.LEATHER_CHESTPLATE, true));
+        profession.armor.add(new SettlerProfession.Item(Material.LEATHER_LEGGINGS, false));
+        profession.armor.add(new SettlerProfession.Item(Material.LEATHER_BOOTS, false));
+        profession.input.add(new ItemStack(Material.LOG));
         profession.output.add(new ItemStack(Material.APPLE));
-        profession.output.add(new ItemStack(Material.RAW_BEEF));
-        profession.output.add(new ItemStack(Material.LEATHER));
+        profession.output.add(new ItemStack(Material.WOOD));
+        profession.output.add(new ItemStack(Material.WOOD_STEP));
+        profession.output.add(new ItemStack(Material.WOOD_STAIRS));
+        profession.output.add(new ItemStack(Material.SPRUCE_WOOD_STAIRS));
+        profession.output.add(new ItemStack(Material.BIRCH_WOOD_STAIRS));
+        profession.output.add(new ItemStack(Material.JUNGLE_WOOD_STAIRS));
         register(profession);
     }
 
-    public SettlerRancher() {
+    public SettlerCarpenter() {
         super(typeName);
-        fItemsToCollect.add(Material.WHEAT);
-        fItemsToCollect.add(Material.CARROT_ITEM);
         fItemsToCollect.add(Material.APPLE);
-        fItemsToCollect.add(Material.RAW_BEEF);
-        fItemsToCollect.add(Material.LEATHER);
+        fItemsToCollect.add(Material.WOOD);
+        fItemsToCollect.add(Material.LOG);
         fPutInChestItems.add(new PutInChestItem(Material.APPLE, 0));
-        fPutInChestItems.add(new PutInChestItem(Material.RAW_BEEF, 0));
-        fPutInChestItems.add(new PutInChestItem(Material.LEATHER, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.WOOD, 0));
+        fPutInChestItems.add(new PutInChestItem(Material.LOG, 0));
     }
 
     @Override

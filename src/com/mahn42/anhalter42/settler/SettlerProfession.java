@@ -16,6 +16,7 @@ public class SettlerProfession {
     public String name;
     public Material frameMaterial;
     public Class settlerClass;
+    public String buildingDescriptionPattern = null;
     
     public static class Item {
         public ItemStack item;

@@ -38,22 +38,28 @@ public class SettlerBuildingHandler extends BuildingHandlerBase {
             if (lProf == null) {
                 return null;
             }
-            lBuilding.basicProfession = lProf.name;
-            lBuilding.name = lBuilding.basicProfession;
-            String lParts[] = lBuilding.description.name.split("\\.");
-            //Settler.Lodge.1.X1
-            if (lParts.length > 2 && !lParts[2].isEmpty() && lParts[2].charAt(0) >= '0' && lParts[2].charAt(0) <= '9') {
-                int lCount = Integer.parseInt(lParts[2]);
-                lBuilding.settlerCount = lCount;
-                BuildingBlock lChestBlock = lBuilding.getBlock("chest");
-                if (lChestBlock != null) {
-                    Chest lChest = (Chest)lChestBlock.position.getBlock(lBuilding.world).getState();
-                    Inventory lChestInv = lChest.getInventory();
-                    for(SettlerProfession.Item lItem : lProf.armor) {
-                        if (lItem.needed) {
-                            if (!InventoryHelper.hasAtleastItems(lChestInv, lItem.item.getType(), lItem.item.getAmount())) {
-                                lBuilding.sendToPlayer("&cYou need at least %d of %s!", lItem.item.getAmount(), lItem.item.getType().toString());
-                                return null;
+            if (lProf.buildingDescriptionPattern != null
+                    && !lBuilding.description.name.matches(lProf.buildingDescriptionPattern)) {
+                lBuilding.sendToPlayer("&cProfession %s need a building like %s!", lProf.name, lProf.buildingDescriptionPattern);
+                return null;
+            } else {
+                lBuilding.basicProfession = lProf.name;
+                lBuilding.name = lBuilding.basicProfession;
+                String lParts[] = lBuilding.description.name.split("\\.");
+                //Settler.Lodge.1.X1
+                if (lParts.length > 2 && !lParts[2].isEmpty() && lParts[2].charAt(0) >= '0' && lParts[2].charAt(0) <= '9') {
+                    int lCount = Integer.parseInt(lParts[2]);
+                    lBuilding.settlerCount = lCount;
+                    BuildingBlock lChestBlock = lBuilding.getBlock("chest");
+                    if (lChestBlock != null) {
+                        Chest lChest = (Chest) lChestBlock.position.getBlock(lBuilding.world).getState();
+                        Inventory lChestInv = lChest.getInventory();
+                        for (SettlerProfession.Item lItem : lProf.armor) {
+                            if (lItem.needed) {
+                                if (!InventoryHelper.hasAtleastItems(lChestInv, lItem.item.getType(), lItem.item.getAmount())) {
+                                    lBuilding.sendToPlayer("&cYou need at least %d of %s!", lItem.item.getAmount(), lItem.item.getType().toString());
+                                    return null;
+                                }
                             }
                         }
                     }

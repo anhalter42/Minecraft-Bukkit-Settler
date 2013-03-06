@@ -63,6 +63,8 @@ public class Settler {
         SettlerFarmer.register();
         SettlerRancher.register();
         SettlerWearer.register();
+        SettlerCharcoalburner.register();
+        SettlerCarpenter.register();
     }
 
     public static Class getSettlerClass(String aTypename) {
