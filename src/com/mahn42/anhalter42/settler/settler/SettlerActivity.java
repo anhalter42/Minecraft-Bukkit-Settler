@@ -48,7 +48,6 @@ public abstract class SettlerActivity {
             condition = aCondition;
         }
     }
-    
     public static HashMap<String, Class> activityTypes = new HashMap<String, Class>();
 
     public static void register() {
@@ -150,13 +149,19 @@ public abstract class SettlerActivity {
     public void runTaskLater(Runnable aRunnable, int aTicks) {
         final Runnable lRun = aRunnable;
         final String aName = "Settler.Activity.runTaskLater." + getClass().getSimpleName();
-        SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, new Runnable() {
-            @Override
-            public void run() {
-                Framework.plugin.getProfiler().beginProfile(aName);
-                lRun.run();
-                Framework.plugin.getProfiler().endProfile(aName);
-            }
-        }, aTicks);
+        if (!SettlerPlugin.plugin.configRunInSync) {
+            SettlerPlugin.plugin.getServer().getScheduler().runTaskLater(SettlerPlugin.plugin, new Runnable() {
+                @Override
+                public void run() {
+                    Framework.plugin.getProfiler().beginProfile(aName);
+                    lRun.run();
+                    Framework.plugin.getProfiler().endProfile(aName);
+                }
+            }, aTicks);
+        } else {
+            Framework.plugin.getProfiler().beginProfile(aName);
+            lRun.run();
+            Framework.plugin.getProfiler().endProfile(aName);
+        }
     }
 }

@@ -53,7 +53,7 @@ public class SettlerCarpenter extends Settler {
     protected void runInternal(SettlerTask aTask, SettlerAccess aAccess) {
         if (isWorkingTime() && getCurrentActivity() == null) {
             addActivityForNow(
-                    new SettlerActivityFindRandomPath(getWorkPosition(), SettlerPlugin.plugin.configDefaultPathRadius, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
+                    new SettlerActivityFindRandomPath(getWorkPosition(), 2, SettlerPlugin.plugin.configDefaultPathAttempts, PositionCondition.None));
         }
         super.runInternal(aTask, aAccess);
     }

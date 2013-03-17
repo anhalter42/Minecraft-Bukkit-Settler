@@ -44,19 +44,16 @@ import org.bukkit.util.Vector;
 public class SettlerPlugin extends JavaPlugin {
 
     public int configSettlerTicks = 5;  // first a little bit slower
-    
     public float configSettlerSpeed = 0.88f;
     public int configDefaultPathRadius = 12;
     public int configMiddlePathRadius = 8;
     public int configWidePathRadius = 23;
-    
     public int configDefaultPathAttempts = 10;
     public int configDefaultCollectItemRadius = 8;
     public int configWideCollectItemRadius = 12;
     public int configDefaultFindEntityRadius = 23;
-    
     public int configSettlersPerRun = 1;
-    
+    public boolean configRunInSync = false;
     public static SettlerPlugin plugin;
     protected WorldDBList<SettlerDB> settlerDB;
     protected WorldDBList<SettlerBuildingDB> settlerBuildingDB;
@@ -65,7 +62,7 @@ public class SettlerPlugin extends JavaPlugin {
     protected SettlerSynchronTask settlerSyncTask;
     protected ArrayList<String> names = new ArrayList<String>();
     protected ArrayList<SettlerProfession> professions = new ArrayList<SettlerProfession>();
-    
+
     public static void main(String[] args) {
         SettlerActivity.register();
         SettlerActivityList lList = new SettlerActivityList(null);
@@ -101,8 +98,11 @@ public class SettlerPlugin extends JavaPlugin {
         for (World lWorld : lWorlds) {
             SettlerTask lTask = new SettlerTask(lWorld);
             worldTasks.put(lWorld.getName(), lTask);
-            //getServer().getScheduler().runTaskTimer(this, lTask, 10 + (configSettlerTicks / 2), configSettlerTicks);
-            getServer().getScheduler().runTaskTimerAsynchronously(this, lTask, 10 + (configSettlerTicks / 2), configSettlerTicks);
+            if (configRunInSync) {
+                getServer().getScheduler().runTaskTimer(this, lTask, 10 + (configSettlerTicks / 2), configSettlerTicks);
+            } else {
+                getServer().getScheduler().runTaskTimerAsynchronously(this, lTask, 10 + (configSettlerTicks / 2), configSettlerTicks);
+            }
         }
     }
 
@@ -154,16 +154,16 @@ public class SettlerPlugin extends JavaPlugin {
     public SettlerSynchronTask getSettlerSynchronTask() {
         return settlerSyncTask;
     }
-    
+
     public SettlerProfession getProfessionFromFrame(BuildingDescription aDesc, Material aMat) {
-        for(SettlerProfession lProf : professions) {
+        for (SettlerProfession lProf : professions) {
             if (aMat.equals(lProf.frameMaterial)) {
                 return lProf;
             }
         }
         return null;
     }
-    
+
     public void registerProfession(SettlerProfession aProfession) {
         professions.add(aProfession);
     }
@@ -175,7 +175,7 @@ public class SettlerPlugin extends JavaPlugin {
         registerSettlerBuildingFurnanceLodge1(lHandler);
         registerSettlerBuildingStorage(lHandler);
     }
-    
+
     private void registerSettlerBuildingLodge1(SettlerBuildingHandler aHandler) {
         BuildingDetector lDetector = Framework.plugin.getBuildingDetector();
         BuildingDescription lDesc;
@@ -258,7 +258,7 @@ public class SettlerPlugin extends JavaPlugin {
         lTopMats.add(Material.SPRUCE_WOOD_STAIRS);
         lTopMats.add(Material.BIRCH_WOOD_STAIRS);
         lTopMats.add(Material.JUNGLE_WOOD_STAIRS);
-        lDesc.typeName = "Lodge for one settler";
+        lDesc.typeName = "Toollodge for one settler";
         lDesc.handler = aHandler;
         lDesc.iconName = "Settler.Building.Lodge.1";
         lBDesc = lDesc.newBlockDescription("corner1_bottom");
@@ -328,7 +328,7 @@ public class SettlerPlugin extends JavaPlugin {
         lTopMats.add(Material.SPRUCE_WOOD_STAIRS);
         lTopMats.add(Material.BIRCH_WOOD_STAIRS);
         lTopMats.add(Material.JUNGLE_WOOD_STAIRS);
-        lDesc.typeName = "Lodge for one settler";
+        lDesc.typeName = "Furnancelodge for one settler";
         lDesc.handler = aHandler;
         lDesc.iconName = "Settler.Building.Lodge.1";
         lBDesc = lDesc.newBlockDescription("corner1_bottom");
@@ -397,13 +397,13 @@ public class SettlerPlugin extends JavaPlugin {
         lBDesc.detectSensible = true;
         lRel = lBDesc.newRelatedTo(new Vector(1, 0, 0), "shelf1.2");
         lRel = lBDesc.newRelatedTo(new Vector(0, 1, 0), "chest2.1");
-        lRel = lBDesc.newRelatedTo(new Vector(0,-1, 0), "chest1.1");
+        lRel = lBDesc.newRelatedTo(new Vector(0, -1, 0), "chest1.1");
         lBDesc = lDesc.newBlockDescription("shelf1.2");
         lBDesc.materials.add(Material.WOOD_STAIRS);
         lBDesc.materials.add(Material.WOOD_STEP);
         lBDesc.detectSensible = true;
         lRel = lBDesc.newRelatedTo(new Vector(0, 1, 0), "chest2.2");
-        lRel = lBDesc.newRelatedTo(new Vector(0,-1, 0), "chest1.2");
+        lRel = lBDesc.newRelatedTo(new Vector(0, -1, 0), "chest1.2");
         lBDesc = lDesc.newBlockDescription("chest1.1");
         lBDesc.materials.add(Material.CHEST);
         lBDesc = lDesc.newBlockDescription("chest1.2");
@@ -414,7 +414,7 @@ public class SettlerPlugin extends JavaPlugin {
         lBDesc.materials.add(Material.CHEST);
         lDesc.createAndActivateXZ();
     }
-    
+
     private void registerSettlerBuildingLodge2(SettlerBuildingHandler aHandler) {
         BuildingDetector lDetector = Framework.plugin.getBuildingDetector();
         BuildingDescription lDesc;
@@ -487,7 +487,7 @@ public class SettlerPlugin extends JavaPlugin {
     }
 
     public SettlerProfession getProfession(String aName) {
-        for(SettlerProfession lProf : professions) {
+        for (SettlerProfession lProf : professions) {
             if (lProf.name.equals(aName)) {
                 return lProf;
             }
@@ -504,7 +504,7 @@ public class SettlerPlugin extends JavaPlugin {
         if (lNameFile.exists()) {
             try {
                 FileReader lReader = new FileReader(lNameFile);
-                char[] lBuffer = new char[(int)lNameFile.length()];
+                char[] lBuffer = new char[(int) lNameFile.length()];
                 try {
                     lReader.read(lBuffer);
                     String lContent = new String(lBuffer);
@@ -524,20 +524,20 @@ public class SettlerPlugin extends JavaPlugin {
             names.add("Nils");
         }
     }
-    
+
     public String getRandomSettlerName() {
         Random lRnd = new Random();
         return names.get(lRnd.nextInt(names.size()));
     }
 
     public String getText(String aText, Object... aObjects) {
-        return getText((String)null, aText, aObjects);
+        return getText((String) null, aText, aObjects);
     }
-    
+
     public String getText(CommandSender aPlayer, String aText, Object... aObjects) {
         return getText(Framework.plugin.getPlayerLanguage(aPlayer.getName()), aText, aObjects);
     }
-    
+
     public String getText(String aLanguage, String aText, Object... aObjects) {
         return Framework.plugin.getText(this, aLanguage, aText, aObjects);
     }
@@ -546,8 +546,8 @@ public class SettlerPlugin extends JavaPlugin {
         ItemStack lItemStack = new ItemStack(Material.CHAINMAIL_HELMET);
         ShapedRecipe lShapeRecipe = new ShapedRecipe(lItemStack);
         lShapeRecipe.shape("AAA",
-                           "B B",
-                           "   ");
+                "B B",
+                "   ");
         lShapeRecipe.setIngredient('A', Material.IRON_INGOT);
         lShapeRecipe.setIngredient('B', Material.STRING);
         getServer().addRecipe(lShapeRecipe);
@@ -555,8 +555,8 @@ public class SettlerPlugin extends JavaPlugin {
         lItemStack = new ItemStack(Material.CHAINMAIL_CHESTPLATE);
         lShapeRecipe = new ShapedRecipe(lItemStack);
         lShapeRecipe.shape("B B",
-                           "AAA",
-                           "AAA");
+                "AAA",
+                "AAA");
         lShapeRecipe.setIngredient('A', Material.IRON_INGOT);
         lShapeRecipe.setIngredient('B', Material.STRING);
         getServer().addRecipe(lShapeRecipe);
@@ -564,8 +564,8 @@ public class SettlerPlugin extends JavaPlugin {
         lItemStack = new ItemStack(Material.CHAINMAIL_LEGGINGS);
         lShapeRecipe = new ShapedRecipe(lItemStack);
         lShapeRecipe.shape("AAA",
-                           "A A",
-                           "B B");
+                "A A",
+                "B B");
         lShapeRecipe.setIngredient('A', Material.IRON_INGOT);
         lShapeRecipe.setIngredient('B', Material.STRING);
         getServer().addRecipe(lShapeRecipe);
@@ -573,8 +573,8 @@ public class SettlerPlugin extends JavaPlugin {
         lItemStack = new ItemStack(Material.CHAINMAIL_BOOTS);
         lShapeRecipe = new ShapedRecipe(lItemStack);
         lShapeRecipe.shape("   ",
-                           "A A",
-                           "B B");
+                "A A",
+                "B B");
         lShapeRecipe.setIngredient('A', Material.IRON_INGOT);
         lShapeRecipe.setIngredient('B', Material.STRING);
         getServer().addRecipe(lShapeRecipe);

@@ -35,12 +35,20 @@ public class SettlerAccess {
 
     public World world;
     public Random random = new Random();
+    public long timeOffset;
+
     protected boolean finit = false;
     protected final ArrayList<Settler> settlers = new ArrayList<Settler>();
     //protected HashMap<BlockPosition, Settler> settlersByPosition  = new HashMap<BlockPosition, Settler>();
     protected HashMap<Integer, Settler> settlersByEntityId = new HashMap<Integer, Settler>();
     protected HashMap<String, Settler> settlersByKey = new HashMap<String, Settler>();
-    public long timeOffset;
+    final protected HashMap<Integer, EntityState> entitiyStates = new HashMap<Integer, EntityState>();
+    final protected ArrayList<Settler> settlersForEntity = new ArrayList<Settler>();
+    final protected ArrayList<SettlerDamage> settlerDamage = new ArrayList<SettlerDamage>();
+    final protected ArrayList<Settler> diedSettler = new ArrayList<Settler>();
+    final protected ArrayList<Settler> reachedTargetSettler = new ArrayList<Settler>();
+
+    protected boolean fEnabled = true;
 
     public SettlerAccess(World aWorld) {
         world = aWorld;
@@ -143,7 +151,6 @@ public class SettlerAccess {
         }
         return lSettler;
     }
-    final protected HashMap<Integer, EntityState> entitiyStates = new HashMap<Integer, EntityState>();
 
     public EntityState getEntityState(int aId) {
         EntityState get;
@@ -203,7 +210,6 @@ public class SettlerAccess {
         }
         return lRes;
     }
-    final protected ArrayList<Settler> settlersForEntity = new ArrayList<Settler>();
 
     public void addSettlerForEntity(Settler aSettler) {
         synchronized (settlersForEntity) {
@@ -274,11 +280,10 @@ public class SettlerAccess {
         synchronized (reachedTargetSettler) {
             reachedTargetSettler.clear();
         }
-        synchronized (entitiyStates) {
-            entitiyStates.clear();
+        synchronized (settlerDamage) {
+            settlerDamage.clear();
         }
     }
-    final protected ArrayList<Settler> diedSettler = new ArrayList<Settler>();
 
     public void addSettlerDied(Settler aSettler) {
         synchronized (diedSettler) {
@@ -304,7 +309,6 @@ public class SettlerAccess {
         }
         return lSettler;
     }
-    protected ArrayList<Settler> reachedTargetSettler = new ArrayList<Settler>();
 
     public void addEntityReachedTarget(Entity lEntity) {
         Settler lSettler = getSettlerById(lEntity.getEntityId());
@@ -314,7 +318,6 @@ public class SettlerAccess {
             }
         }
     }
-    protected boolean fEnabled = true;
 
     public boolean isEnabled() {
         return fEnabled;
@@ -348,7 +351,6 @@ public class SettlerAccess {
         public EntityDamageEvent.DamageCause cause;
         public BlockPosition entityPos;
     }
-    protected ArrayList<SettlerDamage> settlerDamage = new ArrayList<SettlerDamage>();
 
     public void addSettlerDamage(Settler aSettler, int aDamage, EntityType aType, int aId, EntityDamageEvent.DamageCause aCause, BlockPosition aEntityPos) {
         SettlerDamage lDamage = new SettlerDamage();
@@ -364,7 +366,6 @@ public class SettlerAccess {
     }
 
     public class EntityState {
-
         public int id;
         public EntityType type;
         public BlockPosition pos;
@@ -407,61 +408,6 @@ public class SettlerAccess {
         }
     }
 
-    /*
-     protected static class ChunkLoad {
-
-     public enum Kind {
-
-     Loaded,
-     Unloaded
-     }
-     public int x;
-     public int z;
-     public Kind kind = Kind.Loaded;
-
-     public ChunkLoad(int aX, int aZ, Kind aKind) {
-     x = aX;
-     z = aZ;
-     kind = aKind;
-     }
-     }
-     final protected ArrayList<ChunkLoad> chunkLoads = new ArrayList<ChunkLoad>();
-
-     public void addChunkUnLoad(int aX, int aZ) {
-     //SettlerPlugin.plugin.getLogger().info("chunk unloaded " + aX + " " + aZ);
-     synchronized (chunkLoads) {
-     for (ChunkLoad lLoad : chunkLoads) {
-     if (lLoad.x == aX && lLoad.z == aZ) {
-     lLoad.kind = ChunkLoad.Kind.Unloaded;
-     return;
-     }
-     }
-     chunkLoads.add(new ChunkLoad(aX, aZ, ChunkLoad.Kind.Unloaded));
-     }
-     }
-
-     public void addChunkLoad(int aX, int aZ) {
-     //SettlerPlugin.plugin.getLogger().info("chunk loaded " + aX + " " + aZ);
-     synchronized (chunkLoads) {
-     for (ChunkLoad lLoad : chunkLoads) {
-     if (lLoad.x == aX && lLoad.z == aZ) {
-     lLoad.kind = ChunkLoad.Kind.Loaded;
-     return;
-     }
-     }
-     chunkLoads.add(new ChunkLoad(aX, aZ, ChunkLoad.Kind.Loaded));
-     }
-     }
-
-     public ArrayList<ChunkLoad> retrieveChunkLoads() {
-     ArrayList<ChunkLoad> lLoads = new ArrayList<ChunkLoad>();
-     synchronized (chunkLoads) {
-     lLoads.addAll(chunkLoads);
-     chunkLoads.clear();
-     }
-     return lLoads;
-     }
-     */
     public ArrayList<Settler> retrieveDiedSettlers() {
         ArrayList<Settler> lSettlers = new ArrayList<Settler>();
         synchronized (diedSettler) {
