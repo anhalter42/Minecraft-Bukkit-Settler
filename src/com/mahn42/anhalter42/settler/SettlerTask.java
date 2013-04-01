@@ -55,7 +55,7 @@ public class SettlerTask implements Runnable {
                 if (fAccess == null) {
                     fAccess = SettlerPlugin.plugin.getSettlerAccess(fWorld);
                 }
-                if (fAccess.isEnabled() && fAccess.shouldRun && !getWorld().getPlayers().isEmpty()) {
+                if (fAccess.isEnabled() && fAccess.shouldRun) {
                     long lprofstart = Framework.plugin.getProfiler().beginProfile("settler.task");
                     //fAccess.shouldRun = false;
                     fDiedSettlers = fAccess.retrieveDiedSettlers();
