@@ -43,7 +43,7 @@ import org.bukkit.util.Vector;
  */
 public class SettlerPlugin extends JavaPlugin {
 
-    public int configSettlerTicks = 5;  // first a little bit slower
+    public int configSettlerTicks = 2;  // first a little bit slower
     public float configSettlerSpeed = 0.88f;
     public int configDefaultPathRadius = 12;
     public int configMiddlePathRadius = 8;
@@ -53,7 +53,7 @@ public class SettlerPlugin extends JavaPlugin {
     public int configWideCollectItemRadius = 12;
     public int configDefaultFindEntityRadius = 23;
     public int configSettlersPerRun = 1;
-    public boolean configRunInSync = false;
+    public boolean configRunInSync = true;
     public static SettlerPlugin plugin;
     protected WorldDBList<SettlerDB> settlerDB;
     protected WorldDBList<SettlerBuildingDB> settlerBuildingDB;
@@ -123,6 +123,7 @@ public class SettlerPlugin extends JavaPlugin {
         configDefaultCollectItemRadius = lConfig.getInt("defaultCollectItemRadius", configDefaultCollectItemRadius);
         configWideCollectItemRadius = lConfig.getInt("wideCollectItemRadius", configWideCollectItemRadius);
         configDefaultFindEntityRadius = lConfig.getInt("defaultFindEntityRadius", configDefaultFindEntityRadius);
+        configRunInSync = lConfig.getBoolean("runInSync", configRunInSync);
     }
 
     public SettlerAccess getSettlerAccess(World aWorld) {

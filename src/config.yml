@@ -10,4 +10,5 @@ defaultPathAttempts: 10
 defaultCollectItemRadius: 10
 wideCollectItemRadius: 23
 defaultFindEntityRadius: 42
-    
+runInSync: true
+
