@@ -4,10 +4,12 @@
  */
 package com.mahn42.anhalter42.settler;
 
+import com.mahn42.framework.Base64;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.DBRecordWorld;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import java.io.IOException;
+//import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+//import com.sun.org.apache.xml.internal.security.utils.Base64;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +41,7 @@ public class SettlerDBRecord extends DBRecordWorld {
         aCols.add(homeKey);
         aCols.add(settlerName);
         aCols.add(active);
-        aCols.add(Base64.encode(blob.getBytes(), 0));
+        aCols.add(Base64.encodeBytes(blob.getBytes()));
     }
 
     @Override
@@ -65,8 +67,8 @@ public class SettlerDBRecord extends DBRecordWorld {
         active = Boolean.parseBoolean(aCols.pop());
         try {
             blob = new String(Base64.decode(aCols.pop()));
-        } catch (Base64DecodingException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(SettlerDBRecord.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+   }
 }

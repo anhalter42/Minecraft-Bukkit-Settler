@@ -121,7 +121,7 @@ public class Settler {
     protected ItemStack fItemInHand;
     protected ItemStack[] fInventory = new ItemStack[36];
     protected int fFoodLevel = 20;
-    protected int fHealth = 20;
+    protected double fHealth = 20;
     protected float fSaturation = 20.0f;
     protected String fFather;
     protected String fMother;
@@ -231,11 +231,11 @@ public class Settler {
         fFoodLevel = aValue;
     }
 
-    public int getHealth() {
+    public double getHealth() {
         return fHealth;
     }
 
-    public void setHealth(int aValue) {
+    public void setHealth(double aValue) {
         fHealth = aValue;
     }
 
@@ -372,7 +372,7 @@ public class Settler {
             }
         }
         fFoodLevel = aValues.getInt("foodlevel", fFoodLevel);
-        fHealth = aValues.getInt("health", fHealth);
+        fHealth = aValues.getDouble("health", fHealth);
         fSaturation = (float) aValues.getDouble("saturation", (double) fSaturation);
         fFather = aValues.getString("father");
         fMother = aValues.getString("mother");

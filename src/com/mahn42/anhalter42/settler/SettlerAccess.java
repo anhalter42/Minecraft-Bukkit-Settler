@@ -345,14 +345,14 @@ public class SettlerAccess {
     public static class SettlerDamage {
 
         public Settler settler;
-        public int damage;
+        public double damage;
         public EntityType entityType;
         public int entityId;
         public EntityDamageEvent.DamageCause cause;
         public BlockPosition entityPos;
     }
 
-    public void addSettlerDamage(Settler aSettler, int aDamage, EntityType aType, int aId, EntityDamageEvent.DamageCause aCause, BlockPosition aEntityPos) {
+    public void addSettlerDamage(Settler aSettler, double aDamage, EntityType aType, int aId, EntityDamageEvent.DamageCause aCause, BlockPosition aEntityPos) {
         SettlerDamage lDamage = new SettlerDamage();
         lDamage.settler = aSettler;
         lDamage.damage = aDamage;
@@ -369,7 +369,7 @@ public class SettlerAccess {
         public int id;
         public EntityType type;
         public BlockPosition pos;
-        public int health;
+        public double health;
         public int foodLevel;
         public float saturation;
         public Material material;
