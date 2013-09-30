@@ -515,7 +515,10 @@ public class Settler {
                 SettlerPlugin.plugin.getServer().getScheduler().runTask(SettlerPlugin.plugin, new Runnable() {
                     @Override
                     public void run() {
-                        lPlayer.setHealth(lPlayer.getHealth() + 1);
+                        double lHealth = lPlayer.getHealth() + 1.0;
+                        if (lHealth > 20.0)
+                            lHealth = 20.0;
+                        lPlayer.setHealth(lHealth);
                     }
                 });
             }
