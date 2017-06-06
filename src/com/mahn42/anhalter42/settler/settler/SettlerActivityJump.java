@@ -5,7 +5,6 @@
 package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
-import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
 
 /**

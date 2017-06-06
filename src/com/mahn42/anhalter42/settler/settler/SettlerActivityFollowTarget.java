@@ -6,13 +6,11 @@ package com.mahn42.anhalter42.settler.settler;
 
 import com.mahn42.anhalter42.settler.SettlerAccess;
 import com.mahn42.anhalter42.settler.SettlerAccess.EntityState;
-import com.mahn42.anhalter42.settler.SettlerPlugin;
 import com.mahn42.framework.BlockPosition;
 import com.mahn42.framework.EntityControl;
 import com.mahn42.framework.EntityControlPathItemDestination;
 import com.mahn42.framework.Framework;
 import com.mahn42.framework.npc.entity.NPCEntityPlayer;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 /**
